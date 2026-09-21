@@ -1,280 +1,289 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>منصة سامي للألعاب</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 منصة ألعابي</title>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#101827;color:#fff;font-family:Arial,sans-serif}
-header{background:#17243a;padding:20px;text-align:center;border-bottom:2px solid #27c6a5}
-h1{margin:5px;color:#39dfb8}
-main{max-width:900px;margin:auto;padding:16px}
-.panel{background:#1b2940;padding:18px;border-radius:14px;margin:14px 0}
-input,button,select{width:100%;padding:13px;margin:7px 0;border:0;border-radius:9px;font-size:16px}
-input,select{background:#eef2f7;color:#111}
-button{background:#19b995;color:#fff;font-weight:bold;cursor:pointer}
-button.secondary{background:#40516d}
-button.danger{background:#c43e52}
-button:disabled{opacity:.5}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-.game{background:#253751;padding:16px;border-radius:13px;text-align:center}
-.emoji{font-size:48px}
-small,.muted{color:#b9c7d9}
-.hidden{display:none!important}
-#msg{padding:12px;border-radius:8px;background:#263750;white-space:pre-wrap}
-a{color:#6ee7ce}
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  margin:0;
+  font-family:Arial,Tahoma,sans-serif;
+  background:
+    radial-gradient(circle at top,#243b70 0%,#10172d 42%,#070b18 100%);
+  color:white;
+  min-height:100vh;
+}
+
+header{
+  padding:25px 15px 20px;
+  text-align:center;
+}
+
+.logo{
+  font-size:42px;
+  font-weight:900;
+  margin-bottom:8px;
+  text-shadow:0 4px 15px #000;
+}
+
+.subtitle{
+  font-size:17px;
+  color:#d9e4ff;
+}
+
+.container{
+  width:min(1100px,94%);
+  margin:auto;
+  padding-bottom:40px;
+}
+
+.games{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:22px;
+}
+
+.game{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:25px;
+  overflow:hidden;
+  box-shadow:0 15px 35px rgba(0,0,0,.35);
+  backdrop-filter:blur(10px);
+  transition:.25s;
+}
+
+.game:hover{
+  transform:translateY(-6px);
+}
+
+.cover{
+  height:185px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:85px;
+  position:relative;
+  overflow:hidden;
+}
+
+.cover::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    135deg,
+    rgba(255,255,255,.16),
+    transparent 50%,
+    rgba(0,0,0,.25)
+  );
+}
+
+.cards{
+  background:linear-gradient(135deg,#4b237c,#17143d);
+}
+
+.fish{
+  background:linear-gradient(135deg,#087f9b,#062a5a);
+}
+
+.restaurant{
+  background:linear-gradient(135deg,#b73519,#54200f);
+}
+
+.cover span{
+  position:relative;
+  z-index:2;
+  filter:drop-shadow(0 8px 8px rgba(0,0,0,.5));
+}
+
+.info{
+  padding:20px;
+}
+
+.info h2{
+  margin:0 0 9px;
+  font-size:25px;
+}
+
+.info p{
+  margin:0 0 18px;
+  color:#d8def1;
+  min-height:44px;
+  line-height:1.6;
+}
+
+.play{
+  display:block;
+  width:100%;
+  text-align:center;
+  text-decoration:none;
+  color:white;
+  font-size:19px;
+  font-weight:bold;
+  padding:14px;
+  border-radius:15px;
+  background:linear-gradient(135deg,#ff8a00,#ff3d00);
+  box-shadow:0 7px 18px rgba(255,75,0,.3);
+  transition:.2s;
+}
+
+.play:active{
+  transform:scale(.97);
+}
+
+.cards .play{
+  background:linear-gradient(135deg,#9b59ff,#5431d5);
+}
+
+.fish .play{
+  background:linear-gradient(135deg,#00bcd4,#0877d9);
+}
+
+.restaurant .play{
+  background:linear-gradient(135deg,#ff9f1c,#e63900);
+}
+
+.badge{
+  display:inline-block;
+  background:rgba(255,255,255,.15);
+  padding:5px 10px;
+  border-radius:20px;
+  font-size:13px;
+  margin-bottom:9px;
+}
+
+footer{
+  text-align:center;
+  color:#aeb9d8;
+  padding:20px 10px 30px;
+  font-size:14px;
+}
+
+@media(max-width:600px){
+  .logo{
+    font-size:34px;
+  }
+
+  .games{
+    grid-template-columns:1fr;
+  }
+
+  .cover{
+    height:175px;
+  }
+}
 </style>
 </head>
+
 <body>
+
 <header>
-<h1>🎮 منصة سامي للألعاب</h1>
-<p>ألعابك المفضلة في مكان واحد</p>
+  <div class="logo">🎮 منصة ألعابي</div>
+  <div class="subtitle">اختار لعبتك وابدأ اللعب فورًا</div>
 </header>
 
-<main>
-<div id="msg">جاري تجهيز المنصة...</div>
+<main class="container">
 
-<section id="auth" class="panel">
-<h2>🔐 حسابك</h2>
-<p class="muted">سجّل الدخول أو أنشئ حسابًا جديدًا.</p>
-<input id="email" type="email" placeholder="البريد الإلكتروني">
-<input id="password" type="password" placeholder="كلمة المرور">
-<button onclick="login()">تسجيل الدخول</button>
-<button class="secondary" onclick="signup()">إنشاء حساب جديد</button>
-<button class="secondary" onclick="forgot()">نسيت كلمة المرور؟</button>
-</section>
+  <section class="games">
 
-<section id="recovery" class="panel hidden">
-<h2>🔑 تعيين كلمة مرور جديدة</h2>
-<input id="newpass" type="password" placeholder="اكتب كلمة المرور الجديدة">
-<button onclick="changePassword()">حفظ كلمة المرور الجديدة</button>
-</section>
+    <!-- لعبة العشرة -->
+    <article class="game">
+      <div class="cover cards">
+        <span>🃏</span>
+      </div>
 
-<section id="store" class="hidden">
-<div class="panel">
-<h2>أهلًا بك في منصتك 🎉</h2>
-<p id="who"></p>
-<button class="secondary" onclick="logout()">تسجيل الخروج</button>
-<button class="secondary" onclick="loadStore()">تحديث الألعاب والاشتراكات</button>
-</div>
+      <div class="info">
+        <div class="badge">🎴 كوتشينة</div>
 
-<h2>🕹️ الألعاب</h2>
-<div id="games" class="grid"></div>
+        <h2>العشرة</h2>
 
-<div class="panel">
-<h2>🧾 طلباتي واشتراكاتي</h2>
-<div id="access">جاري تحميل الاشتراكات...</div>
-</div>
+        <p>
+          لعبة العشرة بالكوتشينة
+          • 156 ورقة
+          • جولات وتحديات
+        </p>
 
-<div id="owner" class="panel hidden">
-<h2>👑 لوحة تحكم المالك</h2>
-<button onclick="ownerSummary()">تحديث بيانات المبيعات</button>
-<div id="ownerData"></div>
-</div>
-</section>
+        <a
+          class="play"
+          href="https://samimisk62-byte.github.io/Alashra-Gam/"
+          target="_blank"
+          rel="noopener">
+          ▶ العب الآن
+        </a>
+      </div>
+    </article>
+
+
+    <!-- لعبة صائد السمك -->
+    <article class="game">
+      <div class="cover fish">
+        <span>🎣</span>
+      </div>
+
+      <div class="info">
+        <div class="badge">🌊 صيد ومغامرة</div>
+
+        <h2>صائد السمك</h2>
+
+        <p>
+          اصطد السمك بالخطاف
+          واجمع أكبر عدد من النقاط
+        </p>
+
+        <a
+          class="play"
+          href="https://samimisk62-byte.github.io/saed-Al-samak/"
+          target="_blank"
+          rel="noopener">
+          ▶ العب الآن
+        </a>
+      </div>
+    </article>
+
+
+    <!-- لعبة مطعمي -->
+    <article class="game">
+      <div class="cover restaurant">
+        <span>🍔</span>
+      </div>
+
+      <div class="info">
+        <div class="badge">🍳 طبخ وإدارة مطعم</div>
+
+        <h2>مطعمي</h2>
+
+        <p>
+          تحرك داخل المطعم،
+          اطبخ الطلبات،
+          وخدم الزبائن واجمع المال.
+        </p>
+
+        <a
+          class="play"
+          href="https://samimisk62-byte.github.io/Matamy/"
+          target="_blank"
+          rel="noopener">
+          ▶ العب الآن
+        </a>
+      </div>
+    </article>
+
+  </section>
+
 </main>
 
-<script>
-const SUPABASE_URL="https://auptwgjiivhglxtdjlnd.supabase.co";
-const SUPABASE_KEY="sb_publishable_6dszOZKIdlA57hHf2E3V5Q_VO-ewwtM";
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+<footer>
+  🎮 منصة ألعابي © 2026
+  <br>
+  جميع الألعاب مستقلة عن بعضها
+</footer>
 
-const GAMES={
- mat3amy:{name:"مطعمي",emoji:"🍳",url:"https://samimisk62-byte.github.io/mat3amy/"},
- alashra:{name:"العشرة",emoji:"🎴",url:"https://samimisk62-byte.github.io/Alashra-Gam/"},
- saed_al_samak:{name:"صائد السمك",emoji:"🎣",url:"https://samimisk62-byte.github.io/saed-Al-samak/"}
-};
-
-let currentUser=null;
-let catalog=[];
-
-function say(t){
- document.getElementById("msg").textContent=t;
-}
-function show(id,on=true){
- document.getElementById(id).classList.toggle("hidden",!on);
-}
-function val(id){return document.getElementById(id).value.trim()}
-
-async function signup(){
- const email=val("email"),password=val("password");
- if(!email||password.length<6)return say("اكتب بريدًا صحيحًا وكلمة مرور من 6 أحرف على الأقل.");
- say("جاري إنشاء الحساب...");
- const {data,error}=await sb.auth.signUp({
-  email,password,
-  options:{emailRedirectTo:location.origin+location.pathname}
- });
- if(error)return say(error.message);
- say("تم إرسال طلب إنشاء الحساب. افتح Gmail واضغط رابط تأكيد البريد، ثم ارجع للمنصة وسجّل الدخول بنفس البريد وكلمة المرور.");
-}
-
-async function login(){
- const email=val("email"),password=val("password");
- if(!email||!password)return say("اكتب البريد الإلكتروني وكلمة المرور.");
- say("جاري تسجيل الدخول...");
- const {data,error}=await sb.auth.signInWithPassword({email,password});
- if(error)return say("تعذر الدخول: "+error.message);
- await start(data.user);
-}
-
-async function forgot(){
- const email=val("email");
- if(!email)return say("اكتب بريدك الإلكتروني أولًا في خانة البريد.");
- say("جاري إرسال رابط استعادة كلمة المرور...");
- const {error}=await sb.auth.resetPasswordForEmail(email,{
-  redirectTo:location.origin+location.pathname
- });
- if(error)return say(error.message);
- say("لو البريد مسجل، هتوصلك رسالة استعادة كلمة المرور. افتح Gmail واضغط الرابط، ثم ارجع للمنصة لتعيين كلمة جديدة.");
-}
-
-async function changePassword(){
- const p=val("newpass");
- if(p.length<6)return say("كلمة المرور لازم تكون 6 أحرف على الأقل.");
- const {error}=await sb.auth.updateUser({password:p});
- if(error)return say(error.message);
- show("recovery",false);
- say("تم تغيير كلمة المرور. يمكنك استخدام كلمة المرور الجديدة لتسجيل الدخول.");
-}
-
-async function logout(){
- await sb.auth.signOut();
- currentUser=null;
- show("store",false);show("auth",true);
- say("تم تسجيل الخروج.");
-}
-
-async function start(user){
- currentUser=user;
- show("auth",false);show("store",true);
- document.getElementById("who").textContent="البريد: "+user.email;
- say("تم تسجيل الدخول بنجاح.");
- await loadStore();
- await loadAccess();
-}
-
-async function fn(name,body={}){
- const {data:{session}}=await sb.auth.getSession();
- if(!session)throw Error("سجّل الدخول أولًا.");
- const r=await fetch(SUPABASE_URL+"/functions/v1/"+name,{
-  method:"POST",
-  headers:{
-   "Content-Type":"application/json",
-   "Authorization":"Bearer "+session.access_token,
-   "apikey":SUPABASE_KEY
-  },
-  body:JSON.stringify(body)
- });
- const d=await r.json().catch(()=>({}));
- if(!r.ok)throw Error(d.error||d.message||"حدث خطأ في الاتصال.");
- return d;
-}
-
-async function loadStore(){
- const box=document.getElementById("games");
- box.innerHTML="جاري تحميل الألعاب...";
- try{
-  const d=await fn("store-catalog");
-  catalog=d.catalog||d.games||d.data||[];
-  renderGames();
- }catch(e){
-  box.innerHTML="<p>تعذر تحميل المتجر: "+e.message+"</p>";
- }
-}
-
-function renderGames(){
- const box=document.getElementById("games");
- box.innerHTML="";
- catalog.forEach(g=>{
-  const code=g.game_code;
-  const info=GAMES[code];
-  if(!info)return;
-  const priceEGP=Number(g.price_egp??30);
-  const priceUSD=(Number(g.price_usd_cents??500)/100).toFixed(2);
-  const days=Number(g.subscription_days??30);
-  const el=document.createElement("div");
-  el.className="game";
-  el.innerHTML=`
-   <div class="emoji">${info.emoji}</div>
-   <h3>${info.name}</h3>
-   <p>${priceEGP} جنيه داخل مصر</p>
-   <p>${priceUSD} دولار خارج مصر</p>
-   <p>مدة الاشتراك: ${days} يومًا</p>
-   <button ${g.is_for_sale===false?"disabled":""} onclick="buy('${code}')">طلب اشتراك</button>
-   <button class="secondary" onclick="checkLaunch('${code}')">فتح اللعبة</button>
-   <div id="status-${code}"></div>`;
-  box.appendChild(el);
- });
-}
-
-async function buy(code){
- const country=prompt("اكتب بلدك: EG لمصر أو US لباقي الدول","EG");
- if(!country)return;
- try{
-  const d=await fn("create-game-order",{
-   game_code:code,
-   country:country.toUpperCase()
-  });
-  say("تم إنشاء طلب الشراء. رقم الطلب: "+(d.order?.id||d.id||"تم الإنشاء")+
-  "\nراجع تفاصيل الطلب وطريقة الدفع التي تظهر لك.");
- }catch(e){say("تعذر إنشاء الطلب: "+e.message);}
-}
-
-async function loadAccess(){
- const box=document.getElementById("access");
- try{
-  const d=await fn("account-game-access");
-  const items=d.entitlements||d.access||[];
-  if(!items.length){box.textContent="لا توجد اشتراكات مفعّلة على حسابك حتى الآن.";return;}
-  box.innerHTML="";
-  items.forEach(x=>{
-   const code=x.game_code,info=GAMES[code];
-   if(!info)return;
-   const active=x.active===true;
-   const p=document.createElement("p");
-   p.textContent=info.name+" — "+(active?"اشتراك فعّال":"منتهي أو غير مفعّل")+
-    (x.expires_at?" — ينتهي: "+new Date(x.expires_at).toLocaleDateString("ar-EG"):"");
-   box.appendChild(p);
-  });
- }catch(e){box.textContent="تعذر تحميل الاشتراكات: "+e.message;}
-}
-
-async function checkLaunch(code){
- const status=document.getElementById("status-"+code);
- try{
-  const d=await fn("account-game-access");
-  const items=d.entitlements||d.access||[];
-  const item=items.find(x=>x.game_code===code&&x.active===true);
-  if(!item){status.textContent="لا يوجد اشتراك فعّال لهذه اللعبة على حسابك.";return;}
-  window.open(GAMES[code].url,"_blank");
- }catch(e){status.textContent=e.message;}
-}
-
-async function ownerSummary(){
- const box=document.getElementById("ownerData");
- box.textContent="جاري تحميل البيانات...";
- try{
-  const d=await fn("owner-dashboard",{action:"summary"});
-  box.innerHTML="<pre style='white-space:pre-wrap;overflow-wrap:anywhere'></pre>";
-  box.querySelector("pre").textContent=JSON.stringify(d,null,2);
- }catch(e){box.textContent="لوحة المالك غير متاحة: "+e.message;}
-}
-
-sb.auth.onAuthStateChange(async(event,session)=>{
- if(event==="PASSWORD_RECOVERY"){
-  show("recovery",true);
-  say("اكتب كلمة المرور الجديدة.");
- }
-});
-
-(async()=>{
- const {data:{session}}=await sb.auth.getSession();
- if(session)await start(session.user);
- else say("أهلًا بك! سجّل الدخول أو أنشئ حسابًا.");
-})();
-</script>
 </body>
 </html>
