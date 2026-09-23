@@ -12,11 +12,9 @@ body{
  margin:0;
  font-family:Arial,Tahoma,sans-serif;
  background:linear-gradient(135deg,#07152e,#123d67);
- color:white;
+ color:#fff;
  min-height:100vh;
 }
-
-body[aria-busy="true"]{cursor:progress}
 
 .wrap{
  max-width:1100px;
@@ -24,7 +22,7 @@ body[aria-busy="true"]{cursor:progress}
  padding:18px;
 }
 
-.hero,.card,.panel{
+.hero,.panel,.card{
  background:rgba(255,255,255,.09);
  border:1px solid rgba(255,255,255,.15);
  border-radius:22px;
@@ -32,7 +30,7 @@ body[aria-busy="true"]{cursor:progress}
 }
 
 .hero{
- padding:24px;
+ padding:25px;
  text-align:center;
  margin-bottom:16px;
 }
@@ -43,7 +41,7 @@ body[aria-busy="true"]{cursor:progress}
 }
 
 .hero p{
- margin:6px 0;
+ margin:7px 0;
  color:#dbeafe;
 }
 
@@ -89,9 +87,8 @@ button{
  font-weight:bold;
  cursor:pointer;
  margin:4px;
- background:white;
+ background:#fff;
  color:#09203d;
- transition:opacity .2s,transform .2s;
 }
 
 button:hover:not(:disabled){
@@ -99,13 +96,18 @@ button:hover:not(:disabled){
 }
 
 button:disabled{
+ opacity:.6;
  cursor:not-allowed;
- opacity:.65;
 }
 
 button.primary{
  background:#ffd54a;
  color:#251d00;
+}
+
+button.green{
+ background:#86efac;
+ color:#052e16;
 }
 
 button.danger{
@@ -122,7 +124,7 @@ button.danger{
 }
 
 .msg{
- padding:10px;
+ padding:11px;
  border-radius:10px;
  background:rgba(0,0,0,.2);
  margin-top:10px;
@@ -146,12 +148,12 @@ button.danger{
 }
 
 .card{
- padding:18px;
+ padding:20px;
  text-align:center;
 }
 
 .icon{
- font-size:54px;
+ font-size:55px;
 }
 
 .card h3{
@@ -159,7 +161,7 @@ button.danger{
 }
 
 .price{
- font-size:20px;
+ font-size:19px;
  font-weight:bold;
  margin:8px;
 }
@@ -224,7 +226,7 @@ footer{
  gap:8px;
 }
 
-.loading::before{
+.loading:before{
  content:"";
  width:16px;
  height:16px;
@@ -241,7 +243,7 @@ footer{
 .modal-backdrop{
  position:fixed;
  inset:0;
- background:rgba(0,0,0,.65);
+ background:rgba(0,0,0,.7);
  display:flex;
  align-items:center;
  justify-content:center;
@@ -250,7 +252,9 @@ footer{
 }
 
 .modal{
- width:min(100%,480px);
+ width:min(100%,500px);
+ max-height:90vh;
+ overflow:auto;
  background:#102b4b;
  border:1px solid rgba(255,255,255,.2);
  border-radius:20px;
@@ -267,7 +271,23 @@ footer{
  gap:8px;
  justify-content:flex-start;
  flex-wrap:wrap;
- margin-top:14px;
+ margin-top:15px;
+}
+
+.info-box{
+ background:rgba(255,213,74,.12);
+ border:1px solid rgba(255,213,74,.35);
+ padding:13px;
+ border-radius:13px;
+ margin:10px 0;
+}
+
+.share-box{
+ text-align:center;
+ padding:15px;
+ background:rgba(255,255,255,.06);
+ border-radius:15px;
+ margin-top:12px;
 }
 
 @media(max-width:760px){
@@ -303,27 +323,45 @@ footer{
 
 <h1>🎮 منصة ألعابي</h1>
 
-<p>
-🍳 مطعمي • 🎴 العشرة • 🎣 صائد السمك
-</p>
+<p>🍳 مطعمي • 🎴 العشرة • 🎣 صائد السمك</p>
 
 <p class="muted">
-حساب واحد — الهاتف والكمبيوتر — اشتراك حسب المدة
+حساب واحد لتشغيل ألعابك واشتراك لمدة 30 يومًا
 </p>
+
+<div class="share-box">
+
+<b>📲 شارك المنصة مع أصدقائك</b>
+
+<br>
+
+<button
+ class="primary"
+ type="button"
+ onclick="sharePlatform()">
+
+📲 مشاركة المنصة
+
+</button>
+
+</div>
 
 </section>
 
 
 <!-- تسجيل الدخول -->
 
-<section id="authPanel" class="panel" aria-labelledby="authTitle">
+<section id="authPanel" class="panel">
 
-<h2 id="authTitle">🔐 تسجيل الدخول / إنشاء حساب</h2>
+<h2>🔐 تسجيل الدخول / إنشاء حساب</h2>
 
 <div class="auth">
 
 <div class="field">
-<label for="email">البريد الإلكتروني</label>
+
+<label for="email">
+البريد الإلكتروني
+</label>
 
 <input
  id="email"
@@ -335,13 +373,15 @@ footer{
 
 <div class="field">
 
-<label for="password">كلمة المرور</label>
+<label for="password">
+كلمة المرور
+</label>
 
 <input
  id="password"
  type="password"
  autocomplete="current-password"
- placeholder="كلمة المرور">
+ placeholder="8 أحرف على الأقل">
 
 </div>
 
@@ -368,6 +408,14 @@ footer{
 
 </button>
 
+<button
+ type="button"
+ onclick="forgotPassword()">
+
+🔑 نسيت كلمة المرور؟
+
+</button>
+
 </div>
 
 <div
@@ -383,11 +431,9 @@ footer{
 </section>
 
 
-
 <!-- المنصة -->
 
 <section id="appPanel" class="hidden">
-
 
 <section class="panel">
 
@@ -415,45 +461,35 @@ footer{
 </section>
 
 
-
 <!-- الألعاب -->
 
-<section
- class="panel"
- aria-labelledby="gamesTitle">
+<section class="panel">
 
-<h2 id="gamesTitle">🎮 ألعابي</h2>
+<h2>🎮 ألعابي</h2>
 
 <div id="games"></div>
 
 <div
  id="gamesMsg"
  class="msg hidden"
- role="status"
- aria-live="polite">
+ role="status">
 </div>
 
 </section>
 
 
-
 <!-- الطلبات -->
 
-<section
- class="panel"
- aria-labelledby="ordersTitle">
+<section class="panel">
 
-<h2 id="ordersTitle">🧾 طلباتي</h2>
+<h2>🧾 طلباتي</h2>
 
 <div
  id="orders"
- class="scroll"
- aria-live="polite">
+ class="scroll">
 
 <p class="muted loading">
-
 جارٍ تحميل طلباتك...
-
 </p>
 
 </div>
@@ -461,20 +497,16 @@ footer{
 </section>
 
 
-
 <!-- لوحة المالك -->
 
 <section
  id="ownerPanel"
- class="panel hidden"
- aria-labelledby="ownerTitle">
+ class="panel hidden">
 
-<h2 id="ownerTitle">👑 لوحة المالك</h2>
+<h2>👑 لوحة المالك</h2>
 
 <p class="muted">
-
-من هنا تستطيع إدارة الأسعار والمدة والطلبات.
-
+إدارة الأسعار والاشتراكات والطلبات.
 </p>
 
 <div id="ownerCatalog"></div>
@@ -483,16 +515,14 @@ footer{
 
 <div
  id="ownerOrders"
- class="scroll"
- aria-live="polite">
+ class="scroll">
 </div>
 
 <h3>🎟️ الاشتراكات</h3>
 
 <div
  id="ownerEntitlements"
- class="scroll"
- aria-live="polite">
+ class="scroll">
 </div>
 
 </section>
@@ -506,11 +536,14 @@ footer{
 © منصة ألعابي
 </footer>
 
-<div id="modalRoot" class="hidden"></div>
+
+<div
+ id="modalRoot"
+ class="hidden">
+</div>
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 
 <script>
 
@@ -535,7 +568,7 @@ supabase.createClient(
    روابط الألعاب
 ========================= */
 
-const GAME_LINKS = {
+const GAME_LINKS={
 
  mat3amy:
  "https://samimisk62-byte.github.io/Matamy/",
@@ -550,10 +583,10 @@ const GAME_LINKS = {
 
 
 /* =========================
-   معلومات الألعاب
+   أسماء الألعاب
 ========================= */
 
-const GAME_INFO = {
+const GAME_INFO={
 
  mat3amy:{
   name:"مطعمي",
@@ -574,15 +607,10 @@ const GAME_INFO = {
 
 
 let catalog=[];
-
 let access=[];
-
-let activeRequests=0;
-
 let booting=false;
-
+let activeRequests=0;
 let modalCloseHandler=null;
-
 const pendingActions=new Set();
 
 
@@ -592,7 +620,7 @@ const pendingActions=new Set();
 
 function esc(s){
 
- return String(s ?? "")
+ return String(s??"")
  .replace(/[&<>"']/g,m=>({
 
   "&":"&amp;",
@@ -606,20 +634,27 @@ function esc(s){
 }
 
 
-function egp(n){
+/* سعر قاعدة البيانات = جنيه كامل */
 
- return (
-  Number(n||0)/100
- ).toFixed(2)+" جنيه";
+function egpPrice(n){
+
+ return Number(n||0).toFixed(2)+" جنيه";
 
 }
 
 
-function usd(c){
+/* مبلغ الطلب مخزن بالقروش */
 
- return (
-  Number(c||0)/100
- ).toFixed(2)+" دولار";
+function egpMinor(n){
+
+ return (Number(n||0)/100).toFixed(2)+" جنيه";
+
+}
+
+
+function usd(n){
+
+ return (Number(n||0)/100).toFixed(2)+" دولار";
 
 }
 
@@ -627,8 +662,8 @@ function usd(c){
 function translateAuthError(error){
 
  const text=
-  String(error?.message || error || "")
-  .toLowerCase();
+ String(error?.message||error||"")
+ .toLowerCase();
 
  if(text.includes("invalid login credentials"))
 
@@ -636,15 +671,15 @@ function translateAuthError(error){
 
  if(text.includes("email not confirmed"))
 
-  return "يرجى تأكيد بريدك الإلكتروني من الرسالة المرسلة إليك أولًا.";
+  return "يرجى تأكيد البريد الإلكتروني من الرسالة التي وصلت إليك.";
 
  if(text.includes("user already registered"))
 
-  return "هذا البريد مسجل بالفعل. جرّب تسجيل الدخول بدلًا من إنشاء حساب جديد.";
+  return "هذا البريد مسجل بالفعل. استخدم زر دخول.";
 
  if(text.includes("password should be at least"))
 
-  return "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.";
+  return "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.";
 
  if(text.includes("invalid email"))
 
@@ -652,10 +687,14 @@ function translateAuthError(error){
 
  if(text.includes("rate limit"))
 
-  return "تم تجاوز عدد المحاولات المسموح. انتظر قليلًا ثم حاول مرة أخرى.";
+  return "تم تجاوز عدد المحاولات. انتظر قليلًا ثم حاول مرة أخرى.";
+
+ if(text.includes("redirect"))
+
+  return "إعداد رابط استرجاع كلمة المرور يحتاج إلى إضافة رابط المنصة في إعدادات Supabase.";
 
  return error?.message ||
-  "تعذر إتمام العملية. حاول مرة أخرى.";
+ "تعذر إتمام العملية. حاول مرة أخرى.";
 
 }
 
@@ -676,50 +715,29 @@ function translateStatus(status){
 
  };
 
- return labels[status] ||
-        status ||
-        "غير معروف";
+ return labels[status]||status||"غير معروف";
 
 }
 
 
-function msg(
- id,
- t,
- hide=false,
- type=""
-){
+function msg(id,text,hide=false,type=""){
 
- const e=
-  document.getElementById(id);
+ const e=document.getElementById(id);
 
  if(!e)return;
 
- e.textContent=t;
+ e.textContent=text;
 
- e.classList.toggle(
-  "hidden",
-  hide
- );
+ e.classList.toggle("hidden",hide);
 
- e.classList.toggle(
-  "success",
-  type==="success"
- );
+ e.classList.toggle("success",type==="success");
 
- e.classList.toggle(
-  "error",
-  type==="error"
- );
+ e.classList.toggle("error",type==="error");
 
 }
 
 
-function setButtonLoading(
- button,
- loading,
- text="جارٍ التنفيذ..."
-){
+function setButtonLoading(button,loading,text="جارٍ التنفيذ..."){
 
  if(!button)return;
 
@@ -727,20 +745,19 @@ function setButtonLoading(
 
   if(!button.dataset.originalText)
 
-   button.dataset.originalText=
-    button.textContent;
+   button.dataset.originalText=button.textContent;
 
   button.disabled=true;
 
   button.innerHTML=
-   `<span class="loading">${text}</span>`;
+  `<span class="loading">${esc(text)}</span>`;
 
  }else{
 
   button.disabled=false;
 
   button.textContent=
-   button.dataset.originalText ||
+   button.dataset.originalText||
    button.textContent;
 
   delete button.dataset.originalText;
@@ -754,33 +771,68 @@ function beginRequest(){
 
  activeRequests++;
 
- if(activeRequests===1){
-
-  document.body.setAttribute(
-   "aria-busy",
-   "true"
-  );
-
- }
-
 }
 
 
 function endRequest(){
 
- activeRequests=
- Math.max(
+ activeRequests=Math.max(
   0,
   activeRequests-1
  );
 
- if(!activeRequests){
+}
 
-  document.body.removeAttribute(
-   "aria-busy"
-  );
+
+/* =========================
+   مشاركة المنصة
+========================= */
+
+async function sharePlatform(){
+
+ const url=
+ window.location.href;
+
+ const text=
+ "🎮 منصة ألعابي\n"+
+ "🍳 مطعمي • 🎴 العشرة • 🎣 صائد السمك\n"+
+ "ادخل المنصة من هنا:\n"+
+ url;
+
+ try{
+
+  if(navigator.share){
+
+   await navigator.share({
+
+    title:"🎮 منصة ألعابي",
+
+    text:"🎮 العب ألعابنا من منصة ألعابي",
+
+    url:url
+
+   });
+
+   return;
+
+  }
+
+ }catch(e){
+
+  if(e?.name==="AbortError")
+
+   return;
 
  }
+
+ const whatsapp=
+ "https://wa.me/?text="+
+ encodeURIComponent(text);
+
+ window.open(
+  whatsapp,
+  "_blank"
+ );
 
 }
 
@@ -788,6 +840,20 @@ function endRequest(){
 /* =========================
    النوافذ
 ========================= */
+
+function closeModal(){
+
+ const root=
+ document.getElementById("modalRoot");
+
+ root.classList.add("hidden");
+
+ root.innerHTML="";
+
+ modalCloseHandler=null;
+
+}
+
 
 function showModal({
 
@@ -810,55 +876,43 @@ function showModal({
  closeModal();
 
  const root=
-  document.getElementById(
-   "modalRoot"
-  );
+ document.getElementById("modalRoot");
 
  root.innerHTML=`
 
- <div
-  class="modal-backdrop"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="modalTitle"
-  aria-describedby="modalMessage">
+ <div class="modal-backdrop">
 
   <div class="modal">
 
-   <h3 id="modalTitle">
-    ${esc(title)}
-   </h3>
+   <h3>${esc(title)}</h3>
 
-   <p
-    id="modalMessage"
-    aria-live="polite">
-    ${esc(message)}
-   </p>
+   <p>${esc(message)}</p>
 
    <div class="modal-actions">
 
-    ${
-     showCancel
-     ?
-     `<button
-       id="modalCancelBtn"
-       type="button">
-
-       ${esc(cancelText)}
-
-      </button>`
-     :
-     ""
-    }
-
+   ${
+    showCancel
+    ?
+    `
     <button
-     id="modalConfirmBtn"
-     type="button"
-     class="${danger ? "danger" : "primary"}">
+     id="modalCancel"
+     type="button">
 
-     ${esc(confirmText)}
+     ${esc(cancelText)}
 
     </button>
+    `
+    :""
+   }
+
+   <button
+    id="modalConfirm"
+    type="button"
+    class="${danger?"danger":"primary"}">
+
+    ${esc(confirmText)}
+
+   </button>
 
    </div>
 
@@ -871,43 +925,36 @@ function showModal({
  root.classList.remove("hidden");
 
  const backdrop=
-  root.querySelector(
-   ".modal-backdrop"
-  );
+ root.querySelector(".modal-backdrop");
 
- const close=()=>{
-
-  root.classList.add("hidden");
-
-  root.innerHTML="";
-
-  if(modalCloseHandler===close)
-
-   modalCloseHandler=null;
-
- };
+ const close=()=>closeModal();
 
  modalCloseHandler=close;
 
- backdrop.onclick=event=>{
+ backdrop.onclick=e=>{
 
-  if(event.target===backdrop)
+  if(e.target===backdrop)
 
    close();
 
  };
 
- const confirmBtn=
-  document.getElementById(
-   "modalConfirmBtn"
-  );
+ const cancel=
+ document.getElementById("modalCancel");
 
- confirmBtn.onclick=async()=>{
+ if(cancel)
 
-  if(confirmBtn.disabled)return;
+  cancel.onclick=close;
+
+ const confirm=
+ document.getElementById("modalConfirm");
+
+ confirm.onclick=async()=>{
+
+  if(confirm.disabled)return;
 
   setButtonLoading(
-   confirmBtn,
+   confirm,
    true,
    "جارٍ التنفيذ..."
   );
@@ -922,21 +969,16 @@ function showModal({
 
   }catch(e){
 
-   setButtonLoading(
-    confirmBtn,
-    false
-   );
+   close();
 
    showModal({
 
-    title:
-     "تعذر تنفيذ العملية",
+    title:"تعذر تنفيذ العملية",
 
     message:
-     translateAuthError(e),
+    translateAuthError(e),
 
-    confirmText:
-     "حسنًا",
+    confirmText:"حسنًا",
 
     danger:true
 
@@ -946,75 +988,113 @@ function showModal({
 
  };
 
- const cancelBtn=
-  document.getElementById(
-   "modalCancelBtn"
-  );
-
- if(cancelBtn)
-
-  cancelBtn.onclick=close;
-
- confirmBtn.focus();
+ confirm.focus();
 
 }
 
 
-function askText({
+/* =========================
+   نافذة الشراء
+========================= */
 
- title,
+function purchaseModal(code){
 
- message,
+ const info=
+ GAME_INFO[code]||
+ {name:code};
 
- placeholder="",
+ const game=
+ catalog.find(
+  x=>x.game_code===code
+ );
 
- confirmText="متابعة",
-
- onConfirm
-
-}){
+ if(!game)return;
 
  closeModal();
 
  const root=
-  document.getElementById(
-   "modalRoot"
-  );
+ document.getElementById("modalRoot");
 
  root.innerHTML=`
 
- <div
-  class="modal-backdrop"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="modalTitle"
-  aria-describedby="modalMessage">
+ <div class="modal-backdrop">
 
   <div class="modal">
 
-   <h3 id="modalTitle">
-    ${esc(title)}
-   </h3>
+   <h3>🛒 شراء ${esc(info.name)}</h3>
 
-   <p id="modalMessage">
-    ${esc(message)}
-   </p>
+   <div class="info-box">
 
-   <label for="modalTextInput">
+    <b>🇪🇬 داخل مصر:</b>
+    ${esc(egpPrice(game.price_egp))}
 
-    رقم مرجع التحويل
+    <br><br>
+
+    <b>🌍 خارج مصر:</b>
+    ${esc(usd(game.price_usd_cents))}
+
+    <br><br>
+
+    <b>⏳ مدة الاشتراك:</b>
+    ${esc(game.subscription_days)} يوم
+
+   </div>
+
+   <label for="purchaseCountry">
+   الدولة
+   </label>
+
+   <select id="purchaseCountry">
+
+    <option value="EG">
+     🇪🇬 مصر — Vodafone Cash
+    </option>
+
+    <option value="OTHER">
+     🌍 خارج مصر
+    </option>
+
+   </select>
+
+   <div
+    id="vodafoneBox"
+    class="info-box">
+
+    📱 للتحويل من داخل مصر:
+
+    <br><br>
+
+    <b>01099083048</b>
+
+    <br><br>
+
+    حوّل قيمة الاشتراك إلى الرقم أعلاه،
+    ثم اكتب رقم مرجع التحويل.
+
+   </div>
+
+   <label for="paymentReference">
+
+   رقم مرجع التحويل
 
    </label>
 
    <input
-    id="modalTextInput"
+    id="paymentReference"
     type="text"
-    placeholder="${esc(placeholder)}">
+    placeholder="رقم المرجع">
+
+   <p class="muted">
+
+   بعد إنشاء الطلب سيظهر لك رقم الطلب،
+   ثم تتم مراجعة الدفع وتفعيل اللعبة.
+
+   </p>
 
    <div class="modal-actions">
 
     <button
-     id="modalCancelBtn"
+     id="purchaseCancel"
      type="button">
 
      إلغاء
@@ -1022,11 +1102,11 @@ function askText({
     </button>
 
     <button
-     id="modalConfirmBtn"
-     type="button"
-     class="primary">
+     id="purchaseConfirm"
+     class="primary"
+     type="button">
 
-     ${esc(confirmText)}
+     إنشاء الطلب
 
     </button>
 
@@ -1040,84 +1120,123 @@ function askText({
 
  root.classList.remove("hidden");
 
- const input=
-  document.getElementById(
-   "modalTextInput"
+ const country=
+ document.getElementById(
+  "purchaseCountry"
+ );
+
+ const vodafone=
+ document.getElementById(
+  "vodafoneBox"
+ );
+
+ country.onchange=()=>{
+
+  vodafone.classList.toggle(
+   "hidden",
+   country.value!=="EG"
   );
-
- const backdrop=
-  root.querySelector(
-   ".modal-backdrop"
-  );
-
- const close=()=>{
-
-  root.classList.add("hidden");
-
-  root.innerHTML="";
-
-  if(modalCloseHandler===close)
-
-   modalCloseHandler=null;
 
  };
 
- modalCloseHandler=close;
+ document.getElementById(
+  "purchaseCancel"
+ ).onclick=closeModal;
 
- backdrop.onclick=event=>{
+ document.getElementById(
+  "purchaseConfirm"
+ ).onclick=async()=>{
 
-  if(event.target===backdrop)
-
-   close();
-
- };
-
- document
- .getElementById(
-  "modalCancelBtn"
- )
- .onclick=close;
-
- const confirmBtn=
+  const button=
   document.getElementById(
-   "modalConfirmBtn"
+   "purchaseConfirm"
   );
 
- const submit=async()=>{
+  const reference=
+  document.getElementById(
+   "paymentReference"
+  ).value.trim();
 
-  if(confirmBtn.disabled)return;
+  const selectedCountry=
+  country.value;
 
   setButtonLoading(
-   confirmBtn,
+   button,
    true,
-   "جارٍ التنفيذ..."
+   "جارٍ إنشاء الطلب..."
   );
 
   try{
 
-   await onConfirm(
-    input.value.trim()
+   const d=
+   await fn(
+    "create-game-order",
+    {
+
+     game_code:code,
+
+     country:
+      selectedCountry==="EG"
+      ?"EG"
+      :"OTHER",
+
+     payment_reference:
+      reference||null
+
+    }
    );
 
-   close();
+   closeModal();
+
+   const amount=
+   d.order.currency==="EGP"
+   ?
+   egpMinor(d.order.amount_minor)
+   :
+   usd(d.order.amount_minor);
+
+   showModal({
+
+    title:"✅ تم إنشاء الطلب",
+
+    message:
+    "اللعبة: "+info.name+
+    "\nرقم الطلب: "+d.order.id+
+    "\nالمبلغ: "+amount+
+    "\nالحالة: قيد المراجعة."+
+    (
+     d.payment?.receiver
+     ?
+     "\nVodafone Cash: "+
+     d.payment.receiver
+     :
+     ""
+    ),
+
+    confirmText:"حسنًا",
+
+    onConfirm:
+    async()=>{
+     await loadOrders();
+    }
+
+   });
 
   }catch(e){
 
    setButtonLoading(
-    confirmBtn,
+    button,
     false
    );
 
    showModal({
 
-    title:
-     "تعذر تنفيذ العملية",
+    title:"تعذر إنشاء الطلب",
 
     message:
-     translateAuthError(e),
+    translateAuthError(e),
 
-    confirmText:
-     "حسنًا",
+    confirmText:"حسنًا",
 
     danger:true
 
@@ -1127,53 +1246,7 @@ function askText({
 
  };
 
- confirmBtn.onclick=submit;
-
- input.onkeydown=event=>{
-
-  if(event.key==="Enter")
-
-   submit();
-
- };
-
- input.focus();
-
 }
-
-
-function closeModal(){
-
- if(modalCloseHandler)
-
-  modalCloseHandler();
-
- else{
-
-  const root=
-   document.getElementById(
-    "modalRoot"
-   );
-
-  root.classList.add("hidden");
-
-  root.innerHTML="";
-
- }
-
-}
-
-
-document.addEventListener(
- "keydown",
- event=>{
-
-  if(event.key==="Escape")
-
-   closeModal();
-
- }
-);
 
 
 /* =========================
@@ -1183,30 +1256,24 @@ document.addEventListener(
 async function signup(){
 
  const button=
-  document.getElementById(
-   "signupBtn"
-  );
-
- if(button.disabled)return;
+ document.getElementById("signupBtn");
 
  const email=
-  document.getElementById(
-   "email"
-  ).value.trim();
+ document.getElementById("email")
+ .value.trim();
 
  const password=
-  document.getElementById(
-   "password"
-  ).value;
+ document.getElementById("password")
+ .value;
 
  if(
-  !email ||
-  password.length<6
+  !email||
+  password.length<8
  ){
 
   msg(
    "authMsg",
-   "اكتب بريدًا إلكترونيًا صحيحًا وكلمة مرور من 6 أحرف على الأقل.",
+   "اكتب بريدًا صحيحًا وكلمة مرور من 8 أحرف على الأقل.",
    false,
    "error"
   );
@@ -1225,10 +1292,7 @@ async function signup(){
 
  try{
 
-  const {
-   data,
-   error
-  }=
+  const {data,error}=
   await sb.auth.signUp({
 
    email,
@@ -1236,17 +1300,9 @@ async function signup(){
 
   });
 
-  if(error)
-
-   throw error;
+  if(error)throw error;
 
   if(data.session){
-
-   msg(
-    "authMsg",
-    "تم إنشاء الحساب وتسجيل الدخول بنجاح.",
-    true
-   );
 
    await boot();
 
@@ -1254,7 +1310,7 @@ async function signup(){
 
    msg(
     "authMsg",
-    "تم إنشاء الحساب. افتح رسالة تأكيد البريد الإلكتروني ثم عد إلى المنصة لتسجيل الدخول.",
+    "تم إنشاء الحساب. افتح رسالة تأكيد البريد الإلكتروني ثم ارجع إلى المنصة.",
     false,
     "success"
    );
@@ -1285,32 +1341,23 @@ async function signup(){
 
 
 /* =========================
-   الدخول
+   تسجيل الدخول
 ========================= */
 
 async function login(){
 
  const button=
-  document.getElementById(
-   "loginBtn"
-  );
-
- if(button.disabled)return;
+ document.getElementById("loginBtn");
 
  const email=
-  document.getElementById(
-   "email"
-  ).value.trim();
+ document.getElementById("email")
+ .value.trim();
 
  const password=
-  document.getElementById(
-   "password"
-  ).value;
+ document.getElementById("password")
+ .value;
 
- if(
-  !email ||
-  !password
- ){
+ if(!email||!password){
 
   msg(
    "authMsg",
@@ -1326,16 +1373,14 @@ async function login(){
  setButtonLoading(
   button,
   true,
-  "جارٍ التحقق من بيانات الدخول..."
+  "جارٍ تسجيل الدخول..."
  );
 
  beginRequest();
 
  try{
 
-  const {
-   error
-  }=
+  const {error}=
   await sb.auth.signInWithPassword({
 
    email,
@@ -1343,16 +1388,7 @@ async function login(){
 
   });
 
-  if(error)
-
-   throw error;
-
-  msg(
-   "authMsg",
-   "تم تسجيل الدخول بنجاح. جارٍ تحميل حسابك...",
-   false,
-   "success"
-  );
+  if(error)throw error;
 
   await boot();
 
@@ -1380,64 +1416,59 @@ async function login(){
 
 
 /* =========================
-   الخروج
+   نسيت كلمة المرور
 ========================= */
 
-async function logout(){
+async function forgotPassword(){
 
- const button=
-  document.getElementById(
-   "logoutBtn"
+ const email=
+ document.getElementById("email")
+ .value.trim();
+
+ if(!email){
+
+  msg(
+   "authMsg",
+   "اكتب البريد الإلكتروني أولًا ثم اضغط «نسيت كلمة المرور».",
+   false,
+   "error"
   );
 
- if(button.disabled)return;
+  return;
 
- setButtonLoading(
-  button,
-  true,
-  "جارٍ تسجيل الخروج..."
- );
-
- beginRequest();
+ }
 
  try{
 
-  const {
-   error
-  }=
-  await sb.auth.signOut();
+  const redirectTo=
+   window.location.origin+
+   window.location.pathname;
 
-  if(error)
+  const {error}=
+  await sb.auth.resetPasswordForEmail(
+   email,
+   {
+    redirectTo
+   }
+  );
 
-   throw error;
+  if(error)throw error;
 
-  location.reload();
+  msg(
+   "authMsg",
+   "تم إرسال رابط استرجاع كلمة المرور إلى بريدك الإلكتروني. افتح الرابط ثم اختر كلمة مرور جديدة.",
+   false,
+   "success"
+  );
 
  }catch(e){
 
-  setButtonLoading(
-   button,
-   false
+  msg(
+   "authMsg",
+   translateAuthError(e),
+   false,
+   "error"
   );
-
-  showModal({
-
-   title:
-    "تعذر تسجيل الخروج",
-
-   message:
-    translateAuthError(e),
-
-   confirmText:
-    "حسنًا",
-
-   danger:true
-
-  });
-
- }finally{
-
-  endRequest();
 
  }
 
@@ -1445,7 +1476,168 @@ async function logout(){
 
 
 /* =========================
-   تشغيل المنصة
+   تغيير كلمة المرور بعد الاسترجاع
+========================= */
+
+async function finishPasswordRecovery(){
+
+ const newPassword=
+ prompt(
+  "اكتب كلمة المرور الجديدة — 8 أحرف على الأقل:"
+ );
+
+ if(newPassword===null)return;
+
+ if(newPassword.length<8){
+
+  alert(
+   "كلمة المرور يجب أن تكون 8 أحرف على الأقل."
+  );
+
+  return;
+
+ }
+
+ try{
+
+  const {error}=
+  await sb.auth.updateUser({
+
+   password:newPassword
+
+  });
+
+  if(error)throw error;
+
+  alert(
+   "✅ تم تغيير كلمة المرور بنجاح."
+  );
+
+  history.replaceState(
+   null,
+   "",
+   window.location.pathname
+  );
+
+  await boot();
+
+ }catch(e){
+
+  alert(
+   translateAuthError(e)
+  );
+
+ }
+
+}
+
+
+/* =========================
+   الخروج
+========================= */
+
+async function logout(){
+
+ try{
+
+  const {error}=
+  await sb.auth.signOut();
+
+  if(error)throw error;
+
+  location.reload();
+
+ }catch(e){
+
+  showModal({
+
+   title:"تعذر تسجيل الخروج",
+
+   message:
+   translateAuthError(e),
+
+   confirmText:"حسنًا",
+
+   danger:true
+
+  });
+
+ }
+
+}
+
+
+/* =========================
+   Edge Functions
+========================= */
+
+async function fn(name,body={}){
+
+ const {
+  data:{session}
+ }=
+ await sb.auth.getSession();
+
+ if(!session)
+
+  throw new Error(
+   "انتهت الجلسة. سجّل الدخول مرة أخرى."
+  );
+
+ const response=
+ await fetch(
+  SUPABASE_URL+
+  "/functions/v1/"+
+  name,
+  {
+
+   method:"POST",
+
+   headers:{
+
+    "Content-Type":
+    "application/json",
+
+    "Authorization":
+    "Bearer "+
+    session.access_token,
+
+    "apikey":
+    SUPABASE_KEY
+
+   },
+
+   body:
+   JSON.stringify(body)
+
+  }
+ );
+
+ let data={};
+
+ try{
+
+  data=await response.json();
+
+ }catch(e){}
+
+ if(!response.ok){
+
+  throw new Error(
+   data.error||
+   data.message||
+   "تعذر تنفيذ الطلب."
+  );
+
+ }
+
+ return data;
+
+}
+
+
+/* =========================
+   تحميل المنصة
 ========================= */
 
 async function boot(){
@@ -1464,47 +1656,29 @@ async function boot(){
   if(!user){
 
    document
-    .getElementById(
-     "authPanel"
-    )
-    .classList.remove(
-     "hidden"
-    );
+   .getElementById("authPanel")
+   .classList.remove("hidden");
 
    document
-    .getElementById(
-     "appPanel"
-    )
-    .classList.add(
-     "hidden"
-    );
+   .getElementById("appPanel")
+   .classList.add("hidden");
 
    return;
 
   }
 
   document
-   .getElementById(
-    "authPanel"
-   )
-   .classList.add(
-    "hidden"
-   );
+  .getElementById("authPanel")
+  .classList.add("hidden");
 
   document
-   .getElementById(
-    "appPanel"
-   )
-   .classList.remove(
-    "hidden"
-   );
+  .getElementById("appPanel")
+  .classList.remove("hidden");
 
   document
-   .getElementById(
-    "userEmail"
-   )
-   .textContent=
-   user.email || "";
+  .getElementById("userEmail")
+  .textContent=
+  user.email||"";
 
   await Promise.all([
 
@@ -1522,7 +1696,7 @@ async function boot(){
 
   msg(
    "authMsg",
-   "تعذر تحميل بيانات الحساب. حدّث الصفحة وحاول مرة أخرى.",
+   "تعذر تحميل بيانات المنصة. حدّث الصفحة وحاول مرة أخرى.",
    false,
    "error"
   );
@@ -1537,92 +1711,7 @@ async function boot(){
 
 
 /* =========================
-   استدعاء Edge Function
-========================= */
-
-async function fn(
- name,
- body={}
-){
-
- const {
-  data:{session}
- }=
- await sb.auth.getSession();
-
- if(!session){
-
-  throw new Error(
-   "انتهت الجلسة. سجّل الدخول مرة أخرى."
-  );
-
- }
-
- const response=
-  await fetch(
-
-   SUPABASE_URL+
-   "/functions/v1/"+
-   name,
-
-   {
-
-    method:"POST",
-
-    headers:{
-
-     "Content-Type":
-      "application/json",
-
-     "Authorization":
-      "Bearer "+
-      session.access_token,
-
-     "apikey":
-      SUPABASE_KEY
-
-    },
-
-    body:
-     JSON.stringify(body)
-
-   }
-
-  );
-
- let data={};
-
- try{
-
-  data=
-   await response.json();
-
- }catch(e){}
-
- if(!response.ok){
-
-  throw new Error(
-
-   data.error ||
-
-   data.message ||
-
-   (
-    "تعذر تنفيذ الطلب. رمز الخطأ: "+
-    response.status
-   )
-
-  );
-
- }
-
- return data;
-
-}
-
-
-/* =========================
-   تحميل الألعاب والأسعار
+   الألعاب
 ========================= */
 
 async function loadCatalog(){
@@ -1630,26 +1719,17 @@ async function loadCatalog(){
  try{
 
   const d=
-   await fn(
-    "store-catalog"
-   );
+  await fn("store-catalog");
 
-  catalog=
-   d.catalog || [];
+  catalog=d.catalog||[];
 
   renderGames();
-
-  msg(
-   "gamesMsg",
-   "",
-   true
-  );
 
  }catch(e){
 
   msg(
    "gamesMsg",
-   "تعذر تحميل الألعاب والأسعار. حاول تحديث الصفحة.\n"+
+   "تعذر تحميل الألعاب والأسعار.\n"+
    translateAuthError(e),
    false,
    "error"
@@ -1660,21 +1740,14 @@ async function loadCatalog(){
 }
 
 
-/* =========================
-   تحميل الاشتراكات
-========================= */
-
 async function loadAccess(){
 
  try{
 
   const d=
-   await fn(
-    "account-game-access"
-   );
+  await fn("account-game-access");
 
-  access=
-   d.access || [];
+  access=d.access||[];
 
   renderGames();
 
@@ -1682,7 +1755,7 @@ async function loadAccess(){
 
   msg(
    "gamesMsg",
-   "تعذر قراءة اشتراكاتك حاليًا. حاول مرة أخرى لاحقًا.",
+   "تعذر قراءة اشتراكاتك حاليًا.",
    false,
    "error"
   );
@@ -1692,18 +1765,12 @@ async function loadAccess(){
 }
 
 
-/* =========================
-   البحث عن اشتراك اللعبة
-========================= */
-
 function accessFor(code){
 
  return access.find(
-
-  x =>
-   x.game_code===code &&
+  x=>
+   x.game_code===code&&
    x.active
-
  );
 
 }
@@ -1716,101 +1783,80 @@ function accessFor(code){
 function renderGames(){
 
  const box=
-  document.getElementById(
-   "games"
-  );
+ document.getElementById("games");
 
  if(!catalog.length){
 
   box.innerHTML=
-   "<p class='muted'>لا توجد ألعاب متاحة حاليًا.</p>";
+  "<p class='muted'>لا توجد ألعاب متاحة حاليًا.</p>";
 
   return;
 
  }
 
  box.innerHTML=
-
  catalog
-
  .filter(g=>g.is_for_sale)
-
  .map(g=>{
 
   const info=
-   GAME_INFO[g.game_code] ||
-   {
-    name:g.game_code,
-    icon:"🎮"
-   };
+  GAME_INFO[g.game_code]||
+  {
+   name:g.game_code,
+   icon:"🎮"
+  };
 
   const a=
-   accessFor(
-    g.game_code
-   );
-
-  let until="";
-
-  if(a && a.expires_at){
-
-   const date=
-    new Date(
-     a.expires_at
-    );
-
-   if(!isNaN(date.getTime())){
-
-    until=
-     date.toLocaleString(
-      "ar-EG"
-     );
-
-   }
-
-  }
-
+  accessFor(g.game_code);
 
   if(a){
+
+   let until="";
+
+   if(a.expires_at){
+
+    const d=
+    new Date(a.expires_at);
+
+    if(!isNaN(d.getTime()))
+
+     until=
+     d.toLocaleString("ar-EG");
+
+   }
 
    return `
 
    <article class="card">
 
     <div class="icon">
-
      ${info.icon}
-
     </div>
 
     <h3>
-
      ${esc(info.name)}
-
     </h3>
+
+    <p class="status-paid">
+
+     ✅ اللعبة مفعلة
+
+    </p>
 
     ${
      until
      ?
      `
-     <p class="status-paid">
-
-      ✅ متاحة حتى
+     <p class="muted">
+      متاحة حتى:
       ${esc(until)}
-
      </p>
      `
-     :
-     `
-     <p class="status-paid">
-
-      ✅ اللعبة مفعلة لحسابك
-
-     </p>
-     `
+     :""
     }
 
     <button
-     class="primary"
+     class="green"
      type="button"
      onclick="openGame('${esc(g.game_code)}')">
 
@@ -1824,41 +1870,35 @@ function renderGames(){
 
   }
 
-
   return `
 
   <article class="card">
 
    <div class="icon">
-
     ${info.icon}
-
    </div>
 
    <h3>
-
     ${esc(info.name)}
-
    </h3>
 
    <div class="price">
 
-    ${egp(g.price_egp)}
-    داخل مصر
+    🇪🇬
+    ${esc(egpPrice(g.price_egp))}
 
    </div>
 
    <div class="price">
 
-    ${usd(g.price_usd_cents)}
-    خارج مصر
+    🌍
+    ${esc(usd(g.price_usd_cents))}
 
    </div>
 
    <div class="muted">
 
-    مدة الاشتراك:
-    ${g.subscription_days}
+    ⏳ ${esc(g.subscription_days)}
     يوم
 
    </div>
@@ -1866,7 +1906,7 @@ function renderGames(){
    <button
     class="primary"
     type="button"
-    onclick="buy('${esc(g.game_code)}')">
+    onclick="purchaseModal('${esc(g.game_code)}')">
 
     🛒 شراء / تفعيل
 
@@ -1877,161 +1917,7 @@ function renderGames(){
   `;
 
  })
-
  .join("");
-
-}
-
-
-/* =========================
-   إنشاء طلب شراء
-========================= */
-
-function buy(code){
-
- if(
-  pendingActions.has(
-   "buy:"+code
-  )
- )
-  return;
-
- const info=
-  GAME_INFO[code] ||
-  {name:code};
-
- askText({
-
-  title:
-   "إنشاء طلب شراء",
-
-  message:
-   "اكتب رقم مرجع تحويل Vodafone Cash إن كان متاحًا، أو اترك الحقل فارغًا للمتابعة.",
-
-  placeholder:
-   "رقم مرجع التحويل",
-
-  confirmText:
-   "إنشاء الطلب",
-
-  onConfirm:
-  async(ref)=>{
-
-   const actionKey=
-    "buy:"+code;
-
-   if(
-    pendingActions.has(
-     actionKey
-    )
-   )
-    return;
-
-   pendingActions.add(
-    actionKey
-   );
-
-   const buttons=
-    document.querySelectorAll(
-     `button[onclick="buy('${code}')"]`
-    );
-
-   buttons.forEach(button=>{
-
-    setButtonLoading(
-     button,
-     true,
-     "جارٍ إنشاء الطلب..."
-    );
-
-   });
-
-   beginRequest();
-
-   try{
-
-    const d=
-     await fn(
-      "create-game-order",
-      {
-
-       game_code:
-        code,
-
-       payment_reference:
-        ref || null
-
-      }
-     );
-
-    const amount=
-     d.order.currency==="EGP"
-
-     ?
-
-     egp(
-      d.order.amount_minor
-     )
-
-     :
-
-     usd(
-      d.order.amount_minor
-     );
-
-    showModal({
-
-     title:
-      "✅ تم إنشاء الطلب بنجاح",
-
-     message:
-
-      "اللعبة: "+
-      info.name+
-
-      "\nرقم الطلب: "+
-      d.order.id+
-
-      "\nالمبلغ: "+
-      amount+
-
-      "\nالحالة: قيد المراجعة."+
-      "\nسيتم تحديث حالة الطلب بعد مراجعته.",
-
-     confirmText:
-      "حسنًا",
-
-     onConfirm:
-      async()=>{
-
-       await loadOrders();
-
-      }
-
-    });
-
-   }finally{
-
-    buttons.forEach(button=>{
-
-     setButtonLoading(
-      button,
-      false
-     );
-
-    });
-
-    pendingActions.delete(
-     actionKey
-    );
-
-    endRequest();
-
-   }
-
-  }
-
- });
 
 }
 
@@ -2043,20 +1929,18 @@ function buy(code){
 function openGame(code){
 
  const a=
-  accessFor(code);
+ accessFor(code);
 
  if(!a){
 
   showModal({
 
-   title:
-    "اللعبة غير مفعلة",
+   title:"اللعبة غير مفعلة",
 
    message:
-    "هذه اللعبة غير مفعلة لحسابك. أنشئ طلب شراء من بطاقة اللعبة، ثم انتظر مراجعة الطلب.",
+   "هذه اللعبة غير مفعلة لحسابك. قم بالشراء وانتظر مراجعة الطلب.",
 
-   confirmText:
-    "حسنًا",
+   confirmText:"حسنًا",
 
    danger:true
 
@@ -2066,22 +1950,19 @@ function openGame(code){
 
  }
 
-
  const url=
-  GAME_LINKS[code];
+ GAME_LINKS[code];
 
  if(!url){
 
   showModal({
 
-   title:
-    "الرابط غير متاح",
+   title:"الرابط غير متاح",
 
    message:
-    "تعذر العثور على رابط هذه اللعبة حاليًا.",
+   "تعذر العثور على رابط اللعبة.",
 
-   confirmText:
-    "حسنًا",
+   confirmText:"حسنًا",
 
    danger:true
 
@@ -2091,178 +1972,131 @@ function openGame(code){
 
  }
 
-
- window.location.href=
-  url;
+ window.location.href=url;
 
 }
 
 
 /* =========================
-   طلبات المستخدم
+   الطلبات
 ========================= */
 
 async function loadOrders(){
 
  const box=
-  document.getElementById(
-   "orders"
-  );
+ document.getElementById("orders");
 
  box.innerHTML=
-
  `
- <p
-  class="muted loading"
-  role="status"
-  aria-live="polite">
-
-  جارٍ تحميل طلباتك...
-
+ <p class="muted loading">
+ جارٍ تحميل طلباتك...
  </p>
  `;
 
  try{
 
   const d=
-   await fn(
-    "my-game-orders"
-   );
+  await fn("my-game-orders");
 
   const rows=
-   d.orders || [];
+  d.orders||[];
 
   if(!rows.length){
 
    box.innerHTML=
-    "<p class='muted'>لا توجد طلبات حتى الآن. يمكنك شراء لعبة من قسم ألعابي.</p>";
+   "<p class='muted'>لا توجد طلبات حتى الآن.</p>";
 
    return;
 
   }
 
-  box.innerHTML=
+  box.innerHTML=`
 
-  `
   <table>
 
-  <thead>
+   <thead>
 
-  <tr>
+    <tr>
 
-   <th scope="col">
-    رقم الطلب
-   </th>
+     <th>رقم الطلب</th>
+     <th>اللعبة</th>
+     <th>المبلغ</th>
+     <th>المرجع</th>
+     <th>الحالة</th>
+     <th>التاريخ</th>
 
-   <th scope="col">
-    اللعبة
-   </th>
+    </tr>
 
-   <th scope="col">
-    المبلغ
-   </th>
+   </thead>
 
-   <th scope="col">
-    المرجع
-   </th>
+   <tbody>
 
-   <th scope="col">
-    الحالة
-   </th>
+   ${
+    rows.map(o=>`
 
-   <th scope="col">
-    التاريخ
-   </th>
+    <tr>
 
-  </tr>
+     <td>
+      ${esc(o.id)}
+     </td>
 
-  </thead>
-
-  <tbody>
-
-  ${
-   rows.map(o=>`
-
-   <tr>
-
-    <td>
-     ${esc(o.id)}
-    </td>
-
-    <td>
-     ${
-      esc(
-       GAME_INFO[
+     <td>
+      ${
+       esc(
+        GAME_INFO[o.game_code]?.name||
         o.game_code
-       ]?.name ||
-       o.game_code
-      )
-     }
-    </td>
+       )
+      }
+     </td>
 
-    <td>
-     ${
-      o.currency==="EGP"
-      ?
-      egp(o.amount_minor)
-      :
-      usd(o.amount_minor)
-     }
-    </td>
+     <td>
+      ${
+       o.currency==="EGP"
+       ?
+       egpMinor(o.amount_minor)
+       :
+       usd(o.amount_minor)
+      }
+     </td>
 
-    <td>
-     ${esc(
-      o.payment_reference ||
-      "—"
-     )}
-    </td>
+     <td>
+      ${esc(o.payment_reference||"—")}
+     </td>
 
-    <td
-     class="status-${esc(o.status)}">
+     <td
+      class="status-${esc(o.status)}">
 
-     ${esc(
-      translateStatus(
-       o.status
-      )
-     )}
+      ${esc(
+       translateStatus(o.status)
+      )}
 
-    </td>
+     </td>
 
-    <td>
+     <td>
+      ${
+       new Date(o.created_at)
+       .toLocaleString("ar-EG")
+      }
+     </td>
 
-     ${
-      new Date(
-       o.created_at
-      ).toLocaleString(
-       "ar-EG"
-      )
-     }
+    </tr>
 
-    </td>
+    `).join("")
+   }
 
-   </tr>
-
-   `).join("")
-  }
-
-  </tbody>
+   </tbody>
 
   </table>
+
   `;
 
  }catch(e){
 
   box.innerHTML=
-
   `
-  <p
-   class="msg error"
-   role="alert">
-
-   تعذر تحميل طلباتك حاليًا.
-   حاول تحديث الصفحة لاحقًا.
-
-  </p>
+  <div class="msg error">
+   تعذر تحميل الطلبات حاليًا.
+  </div>
   `;
 
  }
@@ -2271,7 +2105,7 @@ async function loadOrders(){
 
 
 /* =========================
-   لوحة المالك
+   المالك
 ========================= */
 
 async function loadOwner(){
@@ -2279,47 +2113,35 @@ async function loadOwner(){
  try{
 
   const d=
-   await fn(
-    "owner-dashboard",
-    {
-     action:"summary"
-    }
-   );
+  await fn(
+   "owner-dashboard",
+   {
+    action:"summary"
+   }
+  );
 
   document
-   .getElementById(
-    "ownerPanel"
-   )
-   .classList.remove(
-    "hidden"
-   );
+  .getElementById("ownerPanel")
+  .classList.remove("hidden");
 
   renderOwner(d);
 
  }catch(e){
 
-  /*
-   المستخدم العادي لا تظهر له اللوحة.
-  */
+  /* المستخدم العادي لا يرى لوحة المالك */
 
  }
 
 }
 
 
-/* =========================
-   عرض لوحة المالك
-========================= */
-
 function renderOwner(d){
 
  const c=
-  d.catalog || [];
+ d.catalog||[];
 
  document
- .getElementById(
-  "ownerCatalog"
- )
+ .getElementById("ownerCatalog")
  .innerHTML=
 
  c.map(g=>`
@@ -2330,9 +2152,7 @@ function renderOwner(d){
 
    ${
     esc(
-     GAME_INFO[
-      g.game_code
-     ]?.name ||
+     GAME_INFO[g.game_code]?.name||
      g.game_code
     )
    }
@@ -2343,78 +2163,57 @@ function renderOwner(d){
 
    <div class="field">
 
-    <label
-     for="egp_${g.game_code}">
-
+    <label>
      السعر بالجنيه
-
     </label>
 
     <input
-     id="egp_${g.game_code}"
+     id="egp_${esc(g.game_code)}"
      type="number"
      value="${Number(g.price_egp)}"
-     placeholder="السعر بالجنيه">
+     step=".01">
 
    </div>
 
-
    <div class="field">
 
-    <label
-     for="usd_${g.game_code}">
-
+    <label>
      السعر بالدولار
-
     </label>
 
     <input
-     id="usd_${g.game_code}"
+     id="usd_${esc(g.game_code)}"
      type="number"
      value="${
       Number(g.price_usd_cents)/100
      }"
-     step=".01"
-     placeholder="السعر بالدولار">
+     step=".01">
 
    </div>
-
 
    <div class="field">
 
-    <label
-     for="days_${g.game_code}">
-
-     عدد أيام الاشتراك
-
+    <label>
+     مدة الاشتراك
     </label>
 
     <input
-     id="days_${g.game_code}"
+     id="days_${esc(g.game_code)}"
      type="number"
-     value="${Number(g.subscription_days)}"
-     placeholder="عدد الأيام">
+     value="${Number(g.subscription_days)}">
 
    </div>
-
 
    <label>
 
     <input
-     id="sale_${g.game_code}"
+     id="sale_${esc(g.game_code)}"
      type="checkbox"
-     ${
-      g.is_for_sale
-      ?
-      "checked"
-      :
-      ""
-     }>
+     ${g.is_for_sale?"checked":""}>
 
     متاحة للبيع
 
    </label>
-
 
    <button
     class="primary"
@@ -2431,40 +2230,28 @@ function renderOwner(d){
 
  `).join("");
 
+ document
+ .getElementById("ownerOrders")
+ .innerHTML=
+ tableOrders(d.orders||[]);
 
  document
- .getElementById(
-  "ownerOrders"
- )
+ .getElementById("ownerEntitlements")
  .innerHTML=
-  tableOrders(
-   d.orders || []
-  );
-
-
- document
- .getElementById(
-  "ownerEntitlements"
- )
- .innerHTML=
-  tableEnt(
-   d.entitlements || []
-  );
+ tableEnt(d.entitlements||[]);
 
 }
 
 
 /* =========================
-   جدول الطلبات
+   جدول طلبات المالك
 ========================= */
 
 function tableOrders(rows){
 
- if(!rows.length){
+ if(!rows.length)
 
   return "<p class='muted'>لا توجد طلبات.</p>";
-
- }
 
  return `
 
@@ -2474,19 +2261,13 @@ function tableOrders(rows){
 
  <tr>
 
-  <th scope="col">الطلب</th>
-
-  <th scope="col">المستخدم</th>
-
-  <th scope="col">اللعبة</th>
-
-  <th scope="col">المبلغ</th>
-
-  <th scope="col">المرجع</th>
-
-  <th scope="col">الحالة</th>
-
-  <th scope="col">إجراء</th>
+  <th>الطلب</th>
+  <th>المستخدم</th>
+  <th>اللعبة</th>
+  <th>المبلغ</th>
+  <th>المرجع</th>
+  <th>الحالة</th>
+  <th>إجراء</th>
 
  </tr>
 
@@ -2510,76 +2291,64 @@ function tableOrders(rows){
    <td>
     ${
      esc(
-      GAME_INFO[
-       o.game_code
-      ]?.name ||
+      GAME_INFO[o.game_code]?.name||
       o.game_code
      )
     }
    </td>
 
    <td>
-
     ${
      o.currency==="EGP"
      ?
-     egp(o.amount_minor)
+     egpMinor(o.amount_minor)
      :
      usd(o.amount_minor)
     }
-
    </td>
 
    <td>
-
-    ${esc(
-     o.payment_reference ||
-     "—"
-    )}
-
+    ${esc(o.payment_reference||"—")}
    </td>
 
    <td
     class="status-${esc(o.status)}">
 
     ${esc(
-     translateStatus(
-      o.status
-     )
+     translateStatus(o.status)
     )}
 
    </td>
 
    <td>
 
-    ${
-     o.status==="pending"
-     ?
+   ${
+    o.status==="pending"
+    ?
+    `
 
-     `
-     <button
-      type="button"
-      onclick="setOrder('${esc(o.id)}','paid')">
+    <button
+     class="green"
+     type="button"
+     onclick="setOrder('${esc(o.id)}','paid')">
 
-      ✅ تفعيل
+     ✅ تفعيل
 
-     </button>
+    </button>
 
-     <button
-      class="danger"
-      type="button"
-      onclick="setOrder('${esc(o.id)}','rejected')">
+    <button
+     class="danger"
+     type="button"
+     onclick="setOrder('${esc(o.id)}','rejected')">
 
-      ❌ رفض
+     ❌ رفض
 
-     </button>
-     `
+    </button>
 
-     :
-
-     "تمت معالجة الطلب"
-
-    }
+    `
+    :
+    "تمت المعالجة"
+   }
 
    </td>
 
@@ -2598,16 +2367,14 @@ function tableOrders(rows){
 
 
 /* =========================
-   جدول الاشتراكات
+   الاشتراكات
 ========================= */
 
 function tableEnt(rows){
 
- if(!rows.length){
+ if(!rows.length)
 
   return "<p class='muted'>لا توجد اشتراكات.</p>";
-
- }
 
  return `
 
@@ -2617,15 +2384,11 @@ function tableEnt(rows){
 
  <tr>
 
-  <th scope="col">المستخدم</th>
-
-  <th scope="col">اللعبة</th>
-
-  <th scope="col">البداية</th>
-
-  <th scope="col">النهاية</th>
-
-  <th scope="col">الحالة</th>
+  <th>المستخدم</th>
+  <th>اللعبة</th>
+  <th>البداية</th>
+  <th>النهاية</th>
+  <th>الحالة</th>
 
  </tr>
 
@@ -2643,50 +2406,32 @@ function tableEnt(rows){
    </td>
 
    <td>
-
     ${
      esc(
-      GAME_INFO[
-       x.game_code
-      ]?.name ||
+      GAME_INFO[x.game_code]?.name||
       x.game_code
      )
     }
-
    </td>
 
    <td>
-
     ${
-     new Date(
-      x.starts_at
-     ).toLocaleString(
-      "ar-EG"
-     )
+     new Date(x.starts_at)
+     .toLocaleString("ar-EG")
     }
-
    </td>
 
    <td>
-
     ${
-     new Date(
-      x.expires_at
-     ).toLocaleString(
-      "ar-EG"
-     )
+     new Date(x.expires_at)
+     .toLocaleString("ar-EG")
     }
-
    </td>
 
    <td>
-
     ${esc(
-     translateStatus(
-      x.status
-     )
+     translateStatus(x.status)
     )}
-
    </td>
 
   </tr>
@@ -2704,113 +2449,94 @@ function tableEnt(rows){
 
 
 /* =========================
-   حفظ بيانات اللعبة
+   حفظ الأسعار
 ========================= */
 
 async function saveCatalog(code){
 
- const actionKey=
-  "catalog:"+code;
+ const key="catalog:"+code;
 
- if(
-  pendingActions.has(
-   actionKey
-  )
- )
+ if(pendingActions.has(key))
   return;
 
- pendingActions.add(
-  actionKey
- );
+ pendingActions.add(key);
 
  const button=
-  document.querySelector(
-   `button[onclick="saveCatalog('${code}')"]`
-  );
+ document.querySelector(
+  `button[onclick="saveCatalog('${code}')"]`
+ );
 
  setButtonLoading(
   button,
   true,
-  "جارٍ حفظ التغييرات..."
+  "جارٍ الحفظ..."
  );
-
- beginRequest();
 
  try{
 
   await fn(
-
    "owner-dashboard",
-
    {
 
-    action:
-     "update_catalog",
+    action:"update_catalog",
 
-    game_code:
-     code,
+    game_code:code,
 
     price_egp:
-     Number(
-      document.getElementById(
-       "egp_"+code
-      ).value
-     ),
+    Number(
+     document.getElementById(
+      "egp_"+code
+     ).value
+    ),
 
     price_usd_cents:
-     Math.round(
-      Number(
-       document.getElementById(
-        "usd_"+code
-       ).value
-      )*100
-     ),
-
-    subscription_days:
+    Math.round(
      Number(
       document.getElementById(
-       "days_"+code
+       "usd_"+code
       ).value
-     ),
+     )*100
+    ),
+
+    subscription_days:
+    Number(
+     document.getElementById(
+      "days_"+code
+     ).value
+    ),
 
     is_for_sale:
-     document.getElementById(
-      "sale_"+code
-     ).checked
+    document.getElementById(
+     "sale_"+code
+    ).checked
 
    }
-
   );
 
   showModal({
 
-   title:
-    "✅ تم الحفظ بنجاح",
+   title:"✅ تم الحفظ",
 
    message:
-    "تم حفظ بيانات اللعبة وتحديث الأسعار والمدة بنجاح.",
+   "تم تحديث السعر ومدة الاشتراك بنجاح.",
 
-   confirmText:
-    "حسنًا"
+   confirmText:"حسنًا"
 
   });
 
   await loadCatalog();
-
   await loadOwner();
 
  }catch(e){
 
   showModal({
 
-   title:
-    "تعذر حفظ البيانات",
+   title:"تعذر الحفظ",
 
    message:
-    translateAuthError(e),
+   translateAuthError(e),
 
-   confirmText:
-    "حسنًا",
+   confirmText:"حسنًا",
 
    danger:true
 
@@ -2823,11 +2549,7 @@ async function saveCatalog(code){
    false
   );
 
-  pendingActions.delete(
-   actionKey
-  );
-
-  endRequest();
+  pendingActions.delete(key);
 
  }
 
@@ -2835,148 +2557,80 @@ async function saveCatalog(code){
 
 
 /* =========================
-   تفعيل / رفض الطلب
+   تفعيل الطلب
 ========================= */
 
-function setOrder(
- id,
- status
-){
+function setOrder(id,status){
 
- const actionKey=
-  "order:"+id;
+ const key="order:"+id;
 
- if(
-  pendingActions.has(
-   actionKey
-  )
- )
+ if(pendingActions.has(key))
   return;
 
- const question=
-  status==="paid"
-
-  ?
-
-  "هل تريد تفعيل هذا الطلب؟ سيتم منح المستخدم صلاحية اللعبة."
-
-  :
-
-  "هل تريد رفض هذا الطلب؟";
-
+ const text=
+ status==="paid"
+ ?
+ "هل تريد تفعيل الطلب ومنح المستخدم صلاحية اللعبة؟"
+ :
+ "هل تريد رفض هذا الطلب؟";
 
  showModal({
 
   title:
+  status==="paid"
+  ?
+  "تأكيد التفعيل"
+  :
+  "تأكيد الرفض",
 
-   status==="paid"
-
-   ?
-
-   "تأكيد تفعيل الطلب"
-
-   :
-
-   "تأكيد رفض الطلب",
-
-  message:
-   question,
+  message:text,
 
   confirmText:
+  status==="paid"
+  ?
+  "تفعيل"
+  :
+  "رفض",
 
-   status==="paid"
+  cancelText:"إلغاء",
 
-   ?
-
-   "تفعيل الطلب"
-
-   :
-
-   "رفض الطلب",
-
-  cancelText:
-   "إلغاء",
-
-  showCancel:
-   true,
+  showCancel:true,
 
   danger:
-   status!=="paid",
+  status!=="paid",
 
   onConfirm:
-   async()=>{
+  async()=>{
 
-    if(
-     pendingActions.has(
-      actionKey
-     )
-    )
-     return;
+   pendingActions.add(key);
 
-    pendingActions.add(
-     actionKey
+   try{
+
+    await fn(
+     "owner-dashboard",
+     {
+
+      action:
+      "set_order_status",
+
+      order_id:id,
+
+      status:status
+
+     }
     );
 
-    beginRequest();
+    await loadOwner();
+    await loadAccess();
+    await loadOrders();
 
-    try{
+   }finally{
 
-     await fn(
-
-      "owner-dashboard",
-
-      {
-
-       action:
-        "set_order_status",
-
-       order_id:
-        id,
-
-       status:
-        status
-
-      }
-
-     );
-
-     await loadOwner();
-
-     await loadAccess();
-
-     showModal({
-
-      title:
-       "✅ تمت معالجة الطلب",
-
-      message:
-
-       status==="paid"
-
-       ?
-
-       "تم تفعيل الطلب ومنح المستخدم صلاحية اللعبة."
-
-       :
-
-       "تم رفض الطلب بنجاح.",
-
-      confirmText:
-       "حسنًا"
-
-     });
-
-    }finally{
-
-     pendingActions.delete(
-      actionKey
-     );
-
-     endRequest();
-
-    }
+    pendingActions.delete(key);
 
    }
+
+  }
 
  });
 
@@ -2984,11 +2638,21 @@ function setOrder(
 
 
 /* =========================
-   مراقبة الجلسة
+   استرجاع كلمة المرور
 ========================= */
 
 sb.auth.onAuthStateChange(
  (event,session)=>{
+
+  if(
+   event==="PASSWORD_RECOVERY"
+  ){
+
+   finishPasswordRecovery();
+
+   return;
+
+  }
 
   if(session){
 
@@ -3001,7 +2665,7 @@ sb.auth.onAuthStateChange(
 
 
 /* =========================
-   بداية المنصة
+   بداية التشغيل
 ========================= */
 
 boot();
