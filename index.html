@@ -8,22 +8,17 @@
 <style>
 *{box-sizing:border-box}
 
-html{
- scroll-behavior:smooth;
-}
+html{scroll-behavior:smooth}
 
 body{
  margin:0;
  font-family:Arial,Tahoma,sans-serif;
- background:
- linear-gradient(135deg,#07152e,#123d67);
+ background:linear-gradient(135deg,#07152e,#123d67);
  color:#fff;
  min-height:100vh;
 }
 
-button,input,select{
- font-family:inherit;
-}
+button,input,select{font-family:inherit}
 
 .wrap{
  max-width:1100px;
@@ -71,9 +66,7 @@ button,input,select{
  gap:6px;
 }
 
-label{
- font-weight:bold;
-}
+label{font-weight:bold}
 
 input,select{
  width:100%;
@@ -363,6 +356,44 @@ footer{
  color:#cbd5e1;
 }
 
+.launching{
+ position:fixed;
+ inset:0;
+ background:rgba(3,12,28,.96);
+ z-index:100;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ text-align:center;
+ padding:20px;
+}
+
+.launching-box{
+ background:#102b4b;
+ border-radius:22px;
+ padding:30px;
+ width:min(92%,420px);
+ box-shadow:0 15px 50px rgba(0,0,0,.5);
+}
+
+.launching-icon{
+ font-size:65px;
+}
+
+.launching h2{
+ margin:10px 0;
+}
+
+.spinner{
+ width:45px;
+ height:45px;
+ border:4px solid rgba(255,255,255,.25);
+ border-top-color:#ffd54a;
+ border-radius:50%;
+ animation:spin .8s linear infinite;
+ margin:20px auto;
+}
+
 @media(max-width:760px){
 
  .games{
@@ -420,17 +451,12 @@ footer{
  class="primary"
  type="button"
  onclick="sharePlatform()">
-
 📲 مشاركة المنصة
-
 </button>
 
 </div>
 
 </section>
-
-
-<!-- تسجيل الدخول -->
 
 <section id="authPanel" class="panel">
 
@@ -440,9 +466,7 @@ footer{
 
 <div class="field">
 
-<label for="email">
-البريد الإلكتروني
-</label>
+<label for="email">البريد الإلكتروني</label>
 
 <input
  id="email"
@@ -454,9 +478,7 @@ footer{
 
 <div class="field">
 
-<label for="password">
-كلمة المرور
-</label>
+<label for="password">كلمة المرور</label>
 
 <input
  id="password"
@@ -475,26 +497,20 @@ footer{
  class="primary"
  type="button"
  onclick="signup()">
-
 إنشاء حساب
-
 </button>
 
 <button
  id="loginBtn"
  type="button"
  onclick="login()">
-
 دخول
-
 </button>
 
 <button
  type="button"
  onclick="forgotPassword()">
-
 🔑 نسيت كلمة المرور؟
-
 </button>
 
 </div>
@@ -504,15 +520,10 @@ footer{
  class="msg"
  role="status"
  aria-live="polite">
-
 أنشئ حسابًا أو ادخل بحسابك.
-
 </div>
 
 </section>
-
-
-<!-- المنصة -->
 
 <section id="appPanel" class="hidden">
 
@@ -521,28 +532,20 @@ footer{
 <div class="row between">
 
 <div>
-
 <b>👤 الحساب:</b>
-
 <span id="userEmail"></span>
-
 </div>
 
 <button
  id="logoutBtn"
  type="button"
  onclick="logout()">
-
 خروج
-
 </button>
 
 </div>
 
 </section>
-
-
-<!-- الألعاب -->
 
 <section class="panel">
 
@@ -562,16 +565,11 @@ footer{
 
 </section>
 
-
-<!-- الطلبات -->
-
 <section class="panel">
 
 <h2>🧾 طلباتي</h2>
 
-<div
- id="orders"
- class="scroll">
+<div id="orders" class="scroll">
 
 <p class="muted loading">
 جارٍ تحميل طلباتك...
@@ -580,9 +578,6 @@ footer{
 </div>
 
 </section>
-
-
-<!-- لوحة المالك -->
 
 <section
  id="ownerPanel"
@@ -598,35 +593,45 @@ footer{
 
 <h3>📦 آخر الطلبات</h3>
 
-<div
- id="ownerOrders"
- class="scroll">
-</div>
+<div id="ownerOrders" class="scroll"></div>
 
 <h3>🎟️ الاشتراكات</h3>
 
-<div
- id="ownerEntitlements"
- class="scroll">
-</div>
+<div id="ownerEntitlements" class="scroll"></div>
 
 </section>
 
 </section>
 
 </div>
-
 
 <footer>
 © منصة ألعابي
 </footer>
 
+<div id="modalRoot" class="hidden"></div>
 
-<div
- id="modalRoot"
- class="hidden">
+<div id="launching" class="launching hidden">
+
+<div class="launching-box">
+
+<div id="launchingIcon" class="launching-icon">
+🎮
 </div>
 
+<h2 id="launchingTitle">
+جارٍ تشغيل اللعبة...
+</h2>
+
+<div class="spinner"></div>
+
+<p id="launchingText">
+لحظة واحدة...
+</p>
+
+</div>
+
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -643,7 +648,7 @@ const SUPABASE_KEY =
 "sb_publishable_6dszOZKIdlA57hHf2E3V5Q_VO-ewwtM";
 
 const sb =
-supabase.createClient(
+window.supabase.createClient(
  SUPABASE_URL,
  SUPABASE_KEY
 );
@@ -767,9 +772,6 @@ function translateAuthError(error){
  if(text.includes("rate limit"))
   return "تم تجاوز عدد المحاولات. انتظر قليلًا ثم حاول مرة أخرى.";
 
- if(text.includes("redirect"))
-  return "إعداد رابط استرجاع كلمة المرور يحتاج إلى إضافة رابط المنصة في إعدادات Supabase.";
-
  return error?.message ||
  "تعذر إتمام العملية. حاول مرة أخرى.";
 
@@ -781,13 +783,9 @@ function translateStatus(status){
  const labels={
 
   pending:"قيد المراجعة",
-
   paid:"تم التفعيل",
-
   rejected:"مرفوض",
-
   refunded:"مسترد",
-
   cancelled:"ملغى"
 
  };
@@ -867,13 +865,12 @@ function endRequest(){
 
 
 /* =====================================================
-   مشاركة المنصة
+   مشاركة
 ===================================================== */
 
 async function sharePlatform(){
 
- const url=
- window.location.href;
+ const url=window.location.href;
 
  const text=
  "🎮 منصة ألعابي\n"+
@@ -886,14 +883,9 @@ async function sharePlatform(){
   if(navigator.share){
 
    await navigator.share({
-
     title:"🎮 منصة ألعابي",
-
-    text:
-    "🎮 العب ألعابنا من منصة ألعابي",
-
+    text:"🎮 العب ألعابنا من منصة ألعابي",
     url:url
-
    });
 
    return;
@@ -911,10 +903,7 @@ async function sharePlatform(){
  "https://wa.me/?text="+
  encodeURIComponent(text);
 
- window.open(
-  whatsapp,
-  "_blank"
- );
+ window.open(whatsapp,"_blank");
 
 }
 
@@ -940,17 +929,11 @@ function closeModal(){
 function showModal({
 
  title="تنبيه",
-
  message="",
-
  confirmText="حسنًا",
-
  cancelText="إغلاق",
-
  showCancel=false,
-
  danger=false,
-
  onConfirm=null
 
 }){
@@ -979,9 +962,7 @@ function showModal({
     <button
      id="modalCancel"
      type="button">
-
      ${esc(cancelText)}
-
     </button>
     `
     :
@@ -992,9 +973,7 @@ function showModal({
     id="modalConfirm"
     type="button"
     class="${danger?"danger":"primary"}">
-
     ${esc(confirmText)}
-
    </button>
 
    </div>
@@ -1015,10 +994,8 @@ function showModal({
  modalCloseHandler=close;
 
  backdrop.onclick=e=>{
-
   if(e.target===backdrop)
    close();
-
  };
 
  const cancel=
@@ -1052,16 +1029,10 @@ function showModal({
    close();
 
    showModal({
-
     title:"تعذر تنفيذ العملية",
-
-    message:
-    translateAuthError(e),
-
+    message:translateAuthError(e),
     confirmText:"حسنًا",
-
     danger:true
-
    });
 
   }
@@ -1074,7 +1045,7 @@ function showModal({
 
 
 /* =====================================================
-   نافذة الشراء
+   الشراء
 ===================================================== */
 
 function purchaseModal(code){
@@ -1091,20 +1062,14 @@ function purchaseModal(code){
  if(!game){
 
   showModal({
-
    title:"السعر غير متاح",
-
    message:
    "تعذر تحميل بيانات هذه اللعبة حاليًا. حدّث الصفحة وحاول مرة أخرى.",
-
    confirmText:"حسنًا",
-
    danger:true
-
   });
 
   return;
-
  }
 
  closeModal();
@@ -1175,9 +1140,7 @@ function purchaseModal(code){
    </div>
 
    <label for="paymentReference">
-
    رقم مرجع التحويل
-
    </label>
 
    <input
@@ -1186,10 +1149,8 @@ function purchaseModal(code){
     placeholder="رقم المرجع">
 
    <p class="muted">
-
    بعد إنشاء الطلب سيظهر رقم الطلب،
    ثم تتم مراجعة الدفع وتفعيل اللعبة.
-
    </p>
 
    <div class="modal-actions">
@@ -1197,18 +1158,14 @@ function purchaseModal(code){
     <button
      id="purchaseCancel"
      type="button">
-
      إلغاء
-
     </button>
 
     <button
      id="purchaseConfirm"
      class="primary"
      type="button">
-
      🛒 إنشاء الطلب
-
     </button>
 
    </div>
@@ -1222,14 +1179,10 @@ function purchaseModal(code){
  root.classList.remove("hidden");
 
  const country=
- document.getElementById(
-  "purchaseCountry"
- );
+ document.getElementById("purchaseCountry");
 
  const vodafone=
- document.getElementById(
-  "vodafoneBox"
- );
+ document.getElementById("vodafoneBox");
 
  country.onchange=()=>{
 
@@ -1267,16 +1220,11 @@ function purchaseModal(code){
   ){
 
    showModal({
-
     title:"⚠️ رقم المرجع مطلوب",
-
     message:
     "بعد تحويل المبلغ عبر Vodafone Cash اكتب رقم مرجع التحويل ثم أنشئ الطلب.",
-
     confirmText:"حسنًا",
-
     danger:true
-
    });
 
    return;
@@ -1295,19 +1243,13 @@ function purchaseModal(code){
    await fn(
     "create-game-order",
     {
-
      game_code:code,
-
      country:
       selectedCountry==="EG"
-      ?
-      "EG"
-      :
-      "OTHER",
-
+      ?"EG"
+      :"OTHER",
      payment_reference:
       reference||null
-
     }
    );
 
@@ -1357,16 +1299,10 @@ function purchaseModal(code){
    );
 
    showModal({
-
     title:"تعذر إنشاء الطلب",
-
-    message:
-    translateAuthError(e),
-
+    message:translateAuthError(e),
     confirmText:"حسنًا",
-
     danger:true
-
    });
 
   }
@@ -1393,10 +1329,7 @@ async function signup(){
  document.getElementById("password")
  .value;
 
- if(
-  !email||
-  password.length<8
- ){
+ if(!email||password.length<8){
 
   msg(
    "authMsg",
@@ -1406,7 +1339,6 @@ async function signup(){
   );
 
   return;
-
  }
 
  setButtonLoading(
@@ -1421,10 +1353,8 @@ async function signup(){
 
   const {data,error}=
   await sb.auth.signUp({
-
    email,
    password
-
   });
 
   if(error)throw error;
@@ -1494,7 +1424,6 @@ async function login(){
   );
 
   return;
-
  }
 
  setButtonLoading(
@@ -1509,10 +1438,8 @@ async function login(){
 
   const {error}=
   await sb.auth.signInWithPassword({
-
    email,
    password
-
   });
 
   if(error)throw error;
@@ -1562,7 +1489,6 @@ async function forgotPassword(){
   );
 
   return;
-
  }
 
  try{
@@ -1574,16 +1500,14 @@ async function forgotPassword(){
   const {error}=
   await sb.auth.resetPasswordForEmail(
    email,
-   {
-    redirectTo
-   }
+   {redirectTo}
   );
 
   if(error)throw error;
 
   msg(
    "authMsg",
-   "تم إرسال رابط استرجاع كلمة المرور إلى بريدك الإلكتروني. افتح الرابط ثم اختر كلمة مرور جديدة.",
+   "تم إرسال رابط استرجاع كلمة المرور إلى بريدك الإلكتروني.",
    false,
    "success"
   );
@@ -1603,7 +1527,7 @@ async function forgotPassword(){
 
 
 /* =====================================================
-   تغيير كلمة المرور بعد الاسترجاع
+   تغيير كلمة المرور
 ===================================================== */
 
 async function finishPasswordRecovery(){
@@ -1622,16 +1546,13 @@ async function finishPasswordRecovery(){
   );
 
   return;
-
  }
 
  try{
 
   const {error}=
   await sb.auth.updateUser({
-
    password:newPassword
-
   });
 
   if(error)throw error;
@@ -1677,16 +1598,10 @@ async function logout(){
  }catch(e){
 
   showModal({
-
    title:"تعذر تسجيل الخروج",
-
-   message:
-   translateAuthError(e),
-
+   message:translateAuthError(e),
    confirmText:"حسنًا",
-
    danger:true
-
   });
 
  }
@@ -1721,21 +1636,13 @@ async function fn(name,body={}){
    method:"POST",
 
    headers:{
-
-    "Content-Type":
-    "application/json",
-
+    "Content-Type":"application/json",
     "Authorization":
-    "Bearer "+
-    session.access_token,
-
-    "apikey":
-    SUPABASE_KEY
-
+     "Bearer "+session.access_token,
+    "apikey":SUPABASE_KEY
    },
 
-   body:
-   JSON.stringify(body)
+   body:JSON.stringify(body)
 
   }
  );
@@ -1743,9 +1650,7 @@ async function fn(name,body={}){
  let data={};
 
  try{
-
   data=await response.json();
-
  }catch(e){}
 
  if(!response.ok){
@@ -1759,6 +1664,94 @@ async function fn(name,body={}){
  }
 
  return data;
+
+}
+
+
+/* =====================================================
+   تشغيل اللعبة - النسخة الجديدة
+===================================================== */
+
+function openGame(code){
+
+ const a=accessFor(code);
+
+ if(!a){
+
+  purchaseModal(code);
+  return;
+
+ }
+
+ const url=GAME_LINKS[code];
+
+ if(!url){
+
+  showModal({
+   title:"الرابط غير متاح",
+   message:
+   "تعذر العثور على رابط هذه اللعبة.",
+   confirmText:"حسنًا",
+   danger:true
+  });
+
+  return;
+ }
+
+ const info=
+ GAME_INFO[code]||
+ {
+  name:"اللعبة",
+  icon:"🎮"
+ };
+
+ const launching=
+ document.getElementById("launching");
+
+ document.getElementById(
+  "launchingIcon"
+ ).textContent=info.icon;
+
+ document.getElementById(
+  "launchingTitle"
+ ).textContent=
+ "جارٍ تشغيل "+info.name+"...";
+
+ document.getElementById(
+  "launchingText"
+ ).textContent=
+ "سيتم فتح اللعبة الآن.";
+
+ launching.classList.remove("hidden");
+
+ /*
+  مهم:
+  location.assign يفتح الرابط مباشرة
+  في نفس صفحة المتصفح، وهو أفضل للهاتف
+  من الاعتماد على زر أو نافذة منبثقة.
+ */
+
+ setTimeout(()=>{
+
+  try{
+
+   window.location.assign(url);
+
+  }catch(error){
+
+   launching.classList.add("hidden");
+
+   showModal({
+    title:"تعذر تشغيل اللعبة",
+    message:
+    "تعذر فتح اللعبة. حاول الضغط على تشغيل اللعبة مرة أخرى.",
+    confirmText:"حسنًا",
+    danger:true
+   });
+
+  }
+
+ },150);
 
 }
 
@@ -1791,7 +1784,6 @@ async function boot(){
    .classList.add("hidden");
 
    return;
-
   }
 
   document
@@ -1808,15 +1800,10 @@ async function boot(){
   user.email||"";
 
   await Promise.all([
-
    loadCatalog(),
-
    loadAccess(),
-
    loadOrders(),
-
    loadOwner()
-
   ]);
 
  }catch(e){
@@ -1902,7 +1889,10 @@ function accessFor(code){
  return access.find(
   x=>
    x.game_code===code&&
-   x.active
+   (
+    x.active===true||
+    x.owner===true
+   )
  );
 
 }
@@ -1925,7 +1915,6 @@ function renderGames(){
   "<p class='muted'>جارٍ تحميل الألعاب والأسعار...</p>";
 
   return;
-
  }
 
  const available=
@@ -1939,12 +1928,10 @@ function renderGames(){
   "<p class='muted'>لا توجد ألعاب متاحة حاليًا.</p>";
 
   return;
-
  }
 
  box.innerHTML=
- available
- .map(g=>{
+ available.map(g=>{
 
   const info=
   GAME_INFO[g.game_code]||
@@ -1983,9 +1970,7 @@ function renderGames(){
      ${info.icon}
     </div>
 
-    <h3>
-     ${esc(info.name)}
-    </h3>
+    <h3>${esc(info.name)}</h3>
 
     <p class="game-note">
      ${esc(info.description)}
@@ -2008,8 +1993,7 @@ function renderGames(){
       <b>${esc(until)}</b>
      </p>
      `
-     :
-     ""
+     :""
     }
 
     <div class="price">
@@ -2029,7 +2013,7 @@ function renderGames(){
      <button
       class="green"
       type="button"
-      onclick="openGame('${esc(g.game_code)}')">
+      onclick="openGame('${g.game_code}')">
 
       ▶️ تشغيل اللعبة
 
@@ -2038,7 +2022,7 @@ function renderGames(){
      <button
       class="primary"
       type="button"
-      onclick="purchaseModal('${esc(g.game_code)}')">
+      onclick="purchaseModal('${g.game_code}')">
 
       🔄 تجديد / شراء
 
@@ -2060,9 +2044,7 @@ function renderGames(){
     ${info.icon}
    </div>
 
-   <h3>
-    ${esc(info.name)}
-   </h3>
+   <h3>${esc(info.name)}</h3>
 
    <p class="game-note">
     ${esc(info.description)}
@@ -2089,7 +2071,7 @@ function renderGames(){
     <button
      class="primary"
      type="button"
-     onclick="purchaseModal('${esc(g.game_code)}')">
+     onclick="purchaseModal('${g.game_code}')">
 
      🛒 شراء / تفعيل
 
@@ -2101,52 +2083,7 @@ function renderGames(){
 
   `;
 
- })
- .join("");
-
-}
-
-
-/* =====================================================
-   تشغيل اللعبة
-===================================================== */
-
-function openGame(code){
-
- const a=
- accessFor(code);
-
- if(!a){
-
-  purchaseModal(code);
-
-  return;
-
- }
-
- const url=
- GAME_LINKS[code];
-
- if(!url){
-
-  showModal({
-
-   title:"الرابط غير متاح",
-
-   message:
-   "تعذر العثور على رابط اللعبة.",
-
-   confirmText:"حسنًا",
-
-   danger:true
-
-  });
-
-  return;
-
- }
-
- window.location.href=url;
+ }).join("");
 
 }
 
@@ -2183,7 +2120,6 @@ async function loadOrders(){
    "<p class='muted'>لا توجد طلبات حتى الآن.</p>";
 
    return;
-
   }
 
   box.innerHTML=`
@@ -2191,18 +2127,14 @@ async function loadOrders(){
   <table>
 
    <thead>
-
     <tr>
-
      <th>رقم الطلب</th>
      <th>اللعبة</th>
      <th>المبلغ</th>
      <th>المرجع</th>
      <th>الحالة</th>
      <th>التاريخ</th>
-
     </tr>
-
    </thead>
 
    <tbody>
@@ -2212,9 +2144,7 @@ async function loadOrders(){
 
     <tr>
 
-     <td>
-      ${esc(o.id)}
-     </td>
+     <td>${esc(o.id)}</td>
 
      <td>
       ${
@@ -2239,13 +2169,8 @@ async function loadOrders(){
       ${esc(o.payment_reference||"—")}
      </td>
 
-     <td
-      class="status-${esc(o.status)}">
-
-      ${esc(
-       translateStatus(o.status)
-      )}
-
+     <td class="status-${esc(o.status)}">
+      ${esc(translateStatus(o.status))}
      </td>
 
      <td>
@@ -2291,9 +2216,7 @@ async function loadOwner(){
   const d=
   await fn(
    "owner-dashboard",
-   {
-    action:"summary"
-   }
+   {action:"summary"}
   );
 
   document
@@ -2315,8 +2238,7 @@ async function loadOwner(){
 
 function renderOwner(d){
 
- const c=
- d.catalog||[];
+ const c=d.catalog||[];
 
  document
  .getElementById("ownerCatalog")
@@ -2327,23 +2249,19 @@ function renderOwner(d){
  <div class="panel">
 
   <b>
-
    ${
     esc(
      GAME_INFO[g.game_code]?.name||
      g.game_code
     )
    }
-
   </b>
 
   <div class="row">
 
    <div class="field">
 
-    <label>
-     السعر بالجنيه
-    </label>
+    <label>السعر بالجنيه</label>
 
     <input
      id="egp_${esc(g.game_code)}"
@@ -2355,25 +2273,19 @@ function renderOwner(d){
 
    <div class="field">
 
-    <label>
-     السعر بالدولار
-    </label>
+    <label>السعر بالدولار</label>
 
     <input
      id="usd_${esc(g.game_code)}"
      type="number"
-     value="${
-      Number(g.price_usd_cents)/100
-     }"
+     value="${Number(g.price_usd_cents)/100}"
      step=".01">
 
    </div>
 
    <div class="field">
 
-    <label>
-     مدة الاشتراك
-    </label>
+    <label>مدة الاشتراك</label>
 
     <input
      id="days_${esc(g.game_code)}"
@@ -2396,7 +2308,7 @@ function renderOwner(d){
    <button
     class="primary"
     type="button"
-    onclick="saveCatalog('${esc(g.game_code)}')">
+    onclick="saveCatalog('${g.game_code}')">
 
     💾 حفظ
 
@@ -2421,14 +2333,9 @@ function renderOwner(d){
 }
 
 
-/* =====================================================
-   جدول طلبات المالك
-===================================================== */
-
 function tableOrders(rows){
 
  if(!rows.length)
-
   return "<p class='muted'>لا توجد طلبات.</p>";
 
  return `
@@ -2438,7 +2345,6 @@ function tableOrders(rows){
  <thead>
 
  <tr>
-
   <th>الطلب</th>
   <th>المستخدم</th>
   <th>اللعبة</th>
@@ -2446,7 +2352,6 @@ function tableOrders(rows){
   <th>المرجع</th>
   <th>الحالة</th>
   <th>إجراء</th>
-
  </tr>
 
  </thead>
@@ -2458,13 +2363,9 @@ function tableOrders(rows){
 
   <tr>
 
-   <td>
-    ${esc(o.id)}
-   </td>
+   <td>${esc(o.id)}</td>
 
-   <td>
-    ${esc(o.user_id)}
-   </td>
+   <td>${esc(o.user_id)}</td>
 
    <td>
     ${
@@ -2485,17 +2386,10 @@ function tableOrders(rows){
     }
    </td>
 
-   <td>
-    ${esc(o.payment_reference||"—")}
-   </td>
+   <td>${esc(o.payment_reference||"—")}</td>
 
-   <td
-    class="status-${esc(o.status)}">
-
-    ${esc(
-     translateStatus(o.status)
-    )}
-
+   <td class="status-${esc(o.status)}">
+    ${esc(translateStatus(o.status))}
    </td>
 
    <td>
@@ -2508,7 +2402,7 @@ function tableOrders(rows){
     <button
      class="green"
      type="button"
-     onclick="setOrder('${esc(o.id)}','paid')">
+     onclick="setOrder('${o.id}','paid')">
 
      ✅ تفعيل
 
@@ -2517,7 +2411,7 @@ function tableOrders(rows){
     <button
      class="danger"
      type="button"
-     onclick="setOrder('${esc(o.id)}','rejected')">
+     onclick="setOrder('${o.id}','rejected')">
 
      ❌ رفض
 
@@ -2544,14 +2438,9 @@ function tableOrders(rows){
 }
 
 
-/* =====================================================
-   الاشتراكات
-===================================================== */
-
 function tableEnt(rows){
 
  if(!rows.length)
-
   return "<p class='muted'>لا توجد اشتراكات.</p>";
 
  return `
@@ -2561,13 +2450,11 @@ function tableEnt(rows){
  <thead>
 
  <tr>
-
   <th>المستخدم</th>
   <th>اللعبة</th>
   <th>البداية</th>
   <th>النهاية</th>
   <th>الحالة</th>
-
  </tr>
 
  </thead>
@@ -2579,9 +2466,7 @@ function tableEnt(rows){
 
   <tr>
 
-   <td>
-    ${esc(x.user_id)}
-   </td>
+   <td>${esc(x.user_id)}</td>
 
    <td>
     ${
@@ -2607,9 +2492,7 @@ function tableEnt(rows){
    </td>
 
    <td>
-    ${esc(
-     translateStatus(x.status)
-    )}
+    ${esc(translateStatus(x.status))}
    </td>
 
   </tr>
@@ -2632,8 +2515,7 @@ function tableEnt(rows){
 
 async function saveCatalog(code){
 
- const key=
- "catalog:"+code;
+ const key="catalog:"+code;
 
  if(pendingActions.has(key))
   return;
@@ -2693,14 +2575,10 @@ async function saveCatalog(code){
   );
 
   showModal({
-
    title:"✅ تم الحفظ",
-
    message:
    "تم تحديث السعر ومدة الاشتراك بنجاح.",
-
    confirmText:"حسنًا"
-
   });
 
   await loadCatalog();
@@ -2709,16 +2587,10 @@ async function saveCatalog(code){
  }catch(e){
 
   showModal({
-
    title:"تعذر الحفظ",
-
-   message:
-   translateAuthError(e),
-
+   message:translateAuthError(e),
    confirmText:"حسنًا",
-
    danger:true
-
   });
 
  }finally{
@@ -2741,8 +2613,7 @@ async function saveCatalog(code){
 
 function setOrder(id,status){
 
- const key=
- "order:"+id;
+ const key="order:"+id;
 
  if(pendingActions.has(key))
   return;
@@ -2776,11 +2647,9 @@ function setOrder(id,status){
 
   showCancel:true,
 
-  danger:
-  status!=="paid",
+  danger:status!=="paid",
 
-  onConfirm:
-  async()=>{
+  onConfirm:async()=>{
 
    pendingActions.add(key);
 
@@ -2789,14 +2658,9 @@ function setOrder(id,status){
     await fn(
      "owner-dashboard",
      {
-
-      action:
-      "set_order_status",
-
+      action:"set_order_status",
       order_id:id,
-
       status:status
-
      }
     );
 
@@ -2818,26 +2682,21 @@ function setOrder(id,status){
 
 
 /* =====================================================
-   استرجاع كلمة المرور
+   مراقبة تسجيل الدخول
 ===================================================== */
 
 sb.auth.onAuthStateChange(
  (event,session)=>{
 
-  if(
-   event==="PASSWORD_RECOVERY"
-  ){
+  if(event==="PASSWORD_RECOVERY"){
 
    finishPasswordRecovery();
-
    return;
 
   }
 
   if(session){
-
    boot();
-
   }
 
  }
