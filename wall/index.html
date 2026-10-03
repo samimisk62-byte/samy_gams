@@ -1,562 +1,2709 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+
 <meta name="theme-color" content="#101820">
+
 <title>🎾 الحائط الصعب</title>
 
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+*{
+ box-sizing:border-box;
+ -webkit-tap-highlight-color:transparent;
+}
+
 html,body{
-margin:0;width:100%;height:100%;overflow:hidden;
-font-family:Arial,sans-serif;background:#101820;color:white;
-overscroll-behavior:none;
+ margin:0;
+ padding:0;
+ width:100%;
+ min-height:100%;
+ font-family:Arial,Tahoma,sans-serif;
+ background:#101820;
+ color:#fff;
+ overflow-x:hidden;
 }
+
+button,
+input,
+select{
+ font-family:inherit;
+}
+
 button{
-border:0;border-radius:9px;padding:9px 11px;margin:3px;
-font-size:14px;font-weight:bold;color:white;background:#1976d2;
-touch-action:manipulation;cursor:pointer;
+ border:0;
+ border-radius:12px;
+ padding:11px 15px;
+ font-size:16px;
+ font-weight:bold;
+ cursor:pointer;
+ background:#fff;
+ color:#102030;
 }
-button:active{transform:scale(.95)}
-.active{background:#079653!important}
+
+button:active{
+ transform:scale(.97);
+}
+
+.hidden{
+ display:none!important;
+}
+
+/* =========================
+   القائمة
+========================= */
 
 #menu{
-position:fixed;inset:0;overflow-y:auto;
-padding:12px 10px 30px;
-padding-top:max(12px,env(safe-area-inset-top));
-padding-bottom:max(25px,env(safe-area-inset-bottom));
-background:linear-gradient(#24485b,#0d151b);z-index:100;
+ position:fixed;
+ inset:0;
+ z-index:50;
+ overflow:auto;
+ background:
+ linear-gradient(135deg,#071b2b,#123b55 55%,#071820);
+ padding:18px;
 }
+
 .menuBox{
-width:100%;max-width:700px;margin:auto;padding:16px 12px 25px;
-background:#172b36;border-radius:18px;text-align:center;
-box-shadow:0 5px 25px #0008;
+ width:min(720px,100%);
+ margin:auto;
+ background:rgba(255,255,255,.09);
+ border:1px solid rgba(255,255,255,.15);
+ border-radius:24px;
+ padding:20px;
+ box-shadow:0 15px 50px rgba(0,0,0,.35);
 }
-h1{font-size:27px;margin:5px 0 8px}
-.desc{color:#c4dce7;margin-bottom:12px}
-.section{background:#203c4b;padding:9px;margin:8px 0;border-radius:12px}
-.sectionTitle{color:#ffe082;font-weight:bold;margin-bottom:5px}
-.row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center}
-input[type=text]{
-width:43%;min-width:110px;margin:4px;padding:10px;
-border:2px solid #496a7a;border-radius:9px;
-background:#0c171d;color:white;text-align:center;font-size:16px;
+
+h1{
+ text-align:center;
+ margin:5px 0 8px;
+ font-size:34px;
 }
-input[type=range]{width:90%}
-#startBtn{width:94%;background:#079653;font-size:19px;padding:13px;margin-top:8px}
-.homeLink{display:inline-block;color:#ffe082;margin:12px;text-decoration:none;font-weight:bold}
+
+.subtitle{
+ text-align:center;
+ color:#d7e9f5;
+ margin:0 0 18px;
+}
+
+.section{
+ background:rgba(0,0,0,.16);
+ border-radius:16px;
+ padding:14px;
+ margin:12px 0;
+}
+
+.sectionTitle{
+ font-size:18px;
+ font-weight:bold;
+ margin-bottom:10px;
+}
+
+.field{
+ margin:9px 0;
+}
+
+.field label{
+ display:block;
+ font-weight:bold;
+ margin-bottom:6px;
+}
+
+input[type="text"],
+select{
+ width:100%;
+ padding:12px;
+ border:0;
+ border-radius:11px;
+ font-size:16px;
+ background:#fff;
+ color:#102030;
+}
+
+.options{
+ display:flex;
+ gap:7px;
+ flex-wrap:wrap;
+}
+
+.option{
+ flex:1;
+ min-width:100px;
+ background:#e7edf2;
+}
+
+.option.selected{
+ background:#ffd54a;
+ color:#201800;
+}
+
+#easy.selected{
+ background:#86efac;
+}
+
+#medium.selected{
+ background:#fde68a;
+}
+
+#hard.selected{
+ background:#fff;
+ color:#111;
+}
+
+.rangeLine{
+ display:flex;
+ align-items:center;
+ gap:10px;
+}
+
+.rangeLine input{
+ flex:1;
+}
+
+.rangeValue{
+ min-width:45px;
+ text-align:center;
+ font-weight:bold;
+}
+
+.startBtn{
+ width:100%;
+ margin-top:8px;
+ padding:15px;
+ font-size:19px;
+ background:#ffd54a;
+ color:#241d00;
+}
+
+.secondary{
+ background:#93c5fd;
+}
+
+.infoButtons{
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+ margin-top:8px;
+}
+
+.homeLink{
+ display:block;
+ text-align:center;
+ margin-top:14px;
+ color:#fff;
+ text-decoration:none;
+ background:rgba(255,255,255,.12);
+ padding:12px;
+ border-radius:12px;
+}
+
+/* =========================
+   اللعبة
+========================= */
 
 #game{
-display:none;position:fixed;inset:0;
-width:100%;height:100%;height:100dvh;
-background:#0a1116;z-index:200;
-flex-direction:column;
-padding-top:env(safe-area-inset-top);
-padding-bottom:env(safe-area-inset-bottom);
+ display:none;
+ min-height:100vh;
+ padding:8px;
+ background:
+ radial-gradient(circle at center,#18394d,#07121a);
 }
-#hud{
-flex:0 0 53px;min-height:45px;
-display:flex;align-items:center;justify-content:space-between;
-background:#101c24;padding:3px;
-}
-.playerHud{
-width:30%;padding:4px;border-radius:8px;
-text-align:center;font-size:clamp(10px,2.5vw,14px);font-weight:bold;
-}
-.redHud{background:#912626}
-.blueHud{background:#175d99}
-.centerHud{width:38%;text-align:center;font-size:clamp(10px,2.5vw,13px)}
 
-#controls{
-flex:0 0 auto;min-height:43px;
-display:flex;justify-content:center;align-items:center;
-flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;
-background:#0f1920;padding:2px;
+.hud{
+ width:min(1000px,100%);
+ margin:auto;
+ display:flex;
+ flex-wrap:wrap;
+ align-items:center;
+ justify-content:center;
+ gap:6px;
 }
-#controls button{font-size:clamp(10px,2.5vw,13px);padding:7px 8px;margin:2px;flex-shrink:0}
+
+.hudBox{
+ background:rgba(255,255,255,.10);
+ border:1px solid rgba(255,255,255,.14);
+ border-radius:11px;
+ padding:8px 11px;
+ font-weight:bold;
+}
+
+.redText{
+ color:#ff6b6b;
+}
+
+.blueText{
+ color:#62a8ff;
+}
+
+.controlsTop{
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+ gap:5px;
+ margin:5px auto;
+}
+
+.controlsTop button{
+ padding:8px 11px;
+ font-size:14px;
+}
 
 #field{
-position:relative;flex:1 1 auto;min-height:0;width:100%;
-overflow:hidden;touch-action:none;
-background:
-linear-gradient(90deg,#ffffff0a 1px,transparent 1px),
-linear-gradient(0deg,#ffffff0a 1px,transparent 1px),
-#19753e;
-background-size:45px 45px;
+ position:relative;
+ width:min(1100px,100%);
+ height:min(72vh,620px);
+ min-height:380px;
+ margin:7px auto 0;
+ overflow:hidden;
+ border-radius:20px;
+ border:3px solid rgba(255,255,255,.3);
+ background:
+ linear-gradient(
+   to bottom,
+   #315c70 0%,
+   #21495b 47%,
+   #193f50 48%,
+   #244d5d 100%
+ );
+ box-shadow:
+ 0 15px 45px rgba(0,0,0,.45),
+ inset 0 0 40px rgba(0,0,0,.22);
+ touch-action:none;
 }
+
+/* الأرض */
+
+.floorLine{
+ position:absolute;
+ left:0;
+ right:0;
+ top:50%;
+ height:2px;
+ background:rgba(255,255,255,.18);
+}
+
+/* الحائط */
+
 #wall{
-position:absolute;top:5px;left:0;width:100%;height:clamp(27px,7vh,40px);
-background:#7c8488;border:3px solid #d7dcde;
-box-shadow:0 4px 10px #000;z-index:2;
+ position:absolute;
+ top:8px;
+ left:2%;
+ width:96%;
+ height:52px;
+ border-radius:7px;
+ background:
+ linear-gradient(#dce3e7,#9ba8af);
+ border:3px solid #f3f6f7;
+ box-shadow:
+ 0 7px 12px rgba(0,0,0,.35),
+ inset 0 4px 8px rgba(255,255,255,.65);
+ z-index:4;
 }
-#wallText{height:100%;display:flex;align-items:center;justify-content:center;color:#182126;font-weight:bold;font-size:13px}
-.centerLine{position:absolute;left:50%;top:45px;bottom:0;width:2px;background:#ffffff20}
+
+.wallMark{
+ position:absolute;
+ left:50%;
+ top:0;
+ transform:translateX(-50%);
+ width:5px;
+ height:100%;
+ background:#333;
+ opacity:.7;
+}
+
+/* الشبكات */
+
 .net{
-position:absolute;bottom:0;width:clamp(70px,20vw,115px);
-height:clamp(55px,17vh,75px);border-top:5px solid white;
-background:
-repeating-linear-gradient(0deg,#ffffff3b 0 2px,transparent 2px 9px),
-repeating-linear-gradient(90deg,#ffffff3b 0 2px,transparent 2px 9px);
-z-index:3;
+ position:absolute;
+ top:15%;
+ width:75px;
+ height:70%;
+ border-radius:12px;
+ z-index:2;
+ box-shadow:0 8px 20px rgba(0,0,0,.3);
 }
-.redNet{left:0;border-right:6px solid #d52a2a}
-.blueNet{right:0;border-left:6px solid #2877d5}
-.netText{position:absolute;top:18px;width:100%;text-align:center;font-size:12px;font-weight:bold;text-shadow:0 2px 3px #000}
+
+.net.red{
+ right:2%;
+ background:
+ repeating-linear-gradient(
+  0deg,
+  rgba(255,255,255,.22) 0 2px,
+  transparent 2px 10px
+ ),
+ repeating-linear-gradient(
+  90deg,
+  rgba(255,255,255,.22) 0 2px,
+  transparent 2px 10px
+ ),
+ rgba(220,30,50,.55);
+ border:4px solid #ff4757;
+}
+
+.net.blue{
+ left:2%;
+ background:
+ repeating-linear-gradient(
+  0deg,
+  rgba(255,255,255,.22) 0 2px,
+  transparent 2px 10px
+ ),
+ repeating-linear-gradient(
+  90deg,
+  rgba(255,255,255,.22) 0 2px,
+  transparent 2px 10px
+ ),
+ rgba(35,100,220,.55);
+ border:4px solid #4287ff;
+}
+
+/* اللاعبون */
+
+.player{
+ position:absolute;
+ width:56px;
+ height:86px;
+ z-index:8;
+ border-radius:30px;
+ box-shadow:0 7px 14px rgba(0,0,0,.35);
+}
+
+.player.red{
+ background:linear-gradient(#ff5757,#b91628);
+}
+
+.player.blue{
+ background:linear-gradient(#529bff,#174da7);
+}
+
+.player .head{
+ position:absolute;
+ width:29px;
+ height:29px;
+ border-radius:50%;
+ background:#f2c39b;
+ top:-25px;
+ left:50%;
+ transform:translateX(-50%);
+ border:2px solid rgba(0,0,0,.25);
+}
+
+.player .body{
+ position:absolute;
+ left:10px;
+ right:10px;
+ top:20px;
+ bottom:12px;
+ border-radius:17px;
+ background:rgba(255,255,255,.12);
+}
+
+.playerName{
+ position:absolute;
+ bottom:-27px;
+ left:50%;
+ transform:translateX(-50%);
+ white-space:nowrap;
+ font-size:13px;
+ font-weight:bold;
+ background:rgba(0,0,0,.55);
+ padding:4px 8px;
+ border-radius:8px;
+}
+
+/* المضارب */
 
 .paddle{
-position:absolute;width:54px;height:82px;z-index:8;pointer-events:none;
+ position:absolute;
+ width:18px;
+ height:55px;
+ border-radius:50% 50% 42% 42%;
+ z-index:10;
+ box-shadow:0 5px 10px rgba(0,0,0,.35);
+ transform-origin:bottom center;
 }
-.face{
-position:absolute;left:2px;top:0;width:50px;height:50px;
-border-radius:50%;border:4px solid white;box-shadow:0 4px 10px #000;
-}
-.handle{
-position:absolute;left:18px;top:44px;width:18px;height:35px;
-border-radius:5px 5px 9px 9px;background:#c69253;
-border:3px solid #292929;box-shadow:0 3px 7px #000;
-}
-.redPaddle .face{background:#d92727}
-.bluePaddle .face{background:#2676d4}
-#ball{
-position:absolute;width:23px;height:23px;border-radius:50%;
-background:#fff;border:2px solid #dce8ed;
-box-shadow:0 0 10px #fff,0 4px 9px #000;
-z-index:10;pointer-events:none;
-}
-#message{
-display:none;position:absolute;left:50%;top:50%;
-transform:translate(-50%,-50%);width:min(82%,350px);
-padding:15px;text-align:center;background:#000e;
-border:1px solid #ffffff44;border-radius:15px;z-index:50;
-}
-#message h2{margin:0 0 8px;font-size:20px}
-#message button{background:#079653}
 
-@media(orientation:landscape) and (max-height:500px){
-#hud{flex-basis:42px}
-#controls{min-height:38px}
-#controls button{padding:5px 7px}
-.paddle{transform:scale(.82);transform-origin:top left}
+.paddle:after{
+ content:"";
+ position:absolute;
+ width:7px;
+ height:27px;
+ background:#7b4b2a;
+ bottom:-22px;
+ left:50%;
+ transform:translateX(-50%);
+ border-radius:5px;
 }
+
+.paddle.red{
+ background:#ef3340;
+ border:3px solid #fff;
+}
+
+.paddle.blue{
+ background:#2775e8;
+ border:3px solid #fff;
+}
+
+/* الكرة */
+
+#ball{
+ position:absolute;
+ width:22px;
+ height:22px;
+ border-radius:50%;
+ background:
+ radial-gradient(circle at 30% 25%,#fff,#f6f6f6 40%,#c8c8c8);
+ border:2px solid #fff;
+ box-shadow:
+ 0 0 12px rgba(255,255,255,.8),
+ 0 5px 10px rgba(0,0,0,.45);
+ z-index:20;
+ pointer-events:none;
+}
+
+/* تأثير الكرة */
+
+#ballTrail{
+ position:absolute;
+ width:12px;
+ height:12px;
+ border-radius:50%;
+ background:rgba(255,255,255,.25);
+ pointer-events:none;
+ z-index:19;
+}
+
+/* رسالة */
+
+#message{
+ position:absolute;
+ left:50%;
+ top:50%;
+ transform:translate(-50%,-50%);
+ z-index:30;
+ background:rgba(0,0,0,.72);
+ border:1px solid rgba(255,255,255,.25);
+ border-radius:18px;
+ padding:18px 24px;
+ text-align:center;
+ font-size:20px;
+ font-weight:bold;
+ min-width:220px;
+}
+
+/* أزرار اللعب */
+
+.gameButtons{
+ width:min(1000px,100%);
+ margin:8px auto 0;
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+ gap:5px;
+}
+
+.gameButtons button{
+ min-width:105px;
+}
+
+.hitBtn{
+ background:#86efac;
+ color:#052e16;
+}
+
+.strongBtn{
+ background:#ffd54a;
+ color:#241d00;
+}
+
+.pauseBtn{
+ background:#fca5a5;
+ color:#450a0a;
+}
+
+/* شاشة النهاية */
+
+#result{
+ position:absolute;
+ inset:0;
+ z-index:40;
+ display:none;
+ align-items:center;
+ justify-content:center;
+ background:rgba(0,0,0,.58);
+ padding:15px;
+}
+
+.resultBox{
+ width:min(430px,94%);
+ background:#102b40;
+ border:2px solid rgba(255,255,255,.25);
+ border-radius:20px;
+ padding:20px;
+ text-align:center;
+ box-shadow:0 15px 40px rgba(0,0,0,.5);
+}
+
+.resultBox h2{
+ margin-top:0;
+}
+
+.resultButtons{
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+ gap:6px;
+}
+
+/* =========================
+   الهاتف
+========================= */
+
+@media(max-width:600px){
+
+ #menu{
+  padding:10px;
+ }
+
+ .menuBox{
+  padding:14px;
+  border-radius:18px;
+ }
+
+ h1{
+  font-size:27px;
+ }
+
+ .subtitle{
+  font-size:14px;
+ }
+
+ .section{
+  padding:11px;
+ }
+
+ .option{
+  min-width:80px;
+  font-size:14px;
+  padding:10px 8px;
+ }
+
+ #field{
+  height:65vh;
+  min-height:360px;
+  border-radius:14px;
+ }
+
+ .net{
+  width:54px;
+ }
+
+ .player{
+  width:46px;
+  height:70px;
+ }
+
+ .paddle{
+  width:16px;
+  height:47px;
+ }
+
+ #ball{
+  width:20px;
+  height:20px;
+ }
+
+ .hudBox{
+  font-size:13px;
+  padding:6px 8px;
+ }
+
+ .gameButtons button{
+  min-width:85px;
+  padding:9px 10px;
+  font-size:14px;
+ }
+
+}
+
+/* لا يوجد أي إجبار على الوضع الأفقي */
+
+@media(orientation:portrait){
+
+ #field{
+  height:64vh;
+  min-height:350px;
+ }
+
+}
+
 </style>
 </head>
 
 <body>
 
+<!-- =========================
+     القائمة الرئيسية
+========================= -->
+
 <div id="menu">
-<div class="menuBox">
-<h1>🎾 الحائط الصعب</h1>
-<div class="desc">اضرب الكرة في الحائط ودافع عن شبكتك</div>
 
-<div class="section">
-<div class="sectionTitle">👥 طريقة اللعب</div>
-<div class="row">
-<button id="modePvp" class="active" onclick="setMode('pvp')">👥 لاعبان</button>
-<button id="modeCpu" onclick="setMode('cpu')">🤖 ضد الكمبيوتر</button>
-</div>
+ <div class="menuBox">
+
+  <h1>🎾 الحائط الصعب</h1>
+
+  <p class="subtitle">
+   اضرب الكرة في الحائط ودافع عن شبكتك
+  </p>
+
+  <div class="section">
+
+   <div class="sectionTitle">
+    ⚙️ إعداد المباراة
+   </div>
+
+   <div class="field">
+
+    <label>
+     اسم اللاعب الأحمر
+    </label>
+
+    <input
+     id="redName"
+     type="text"
+     value="أحمد"
+     maxlength="15">
+
+   </div>
+
+   <div class="field">
+
+    <label>
+     اسم اللاعب الأزرق
+    </label>
+
+    <input
+     id="blueName"
+     type="text"
+     value="محمد"
+     maxlength="15">
+
+   </div>
+
+  </div>
+
+
+  <div class="section">
+
+   <div class="sectionTitle">
+    نوع اللعب
+   </div>
+
+   <div class="options">
+
+    <button
+     id="pvp"
+     class="option selected"
+     type="button">
+     👥 لاعبان
+    </button>
+
+    <button
+     id="cpu"
+     class="option"
+     type="button">
+     🤖 ضد الكمبيوتر
+    </button>
+
+   </div>
+
+  </div>
+
+
+  <div class="section">
+
+   <div class="sectionTitle">
+    المدة
+   </div>
+
+   <div class="options">
+
+    <button
+     class="option timeOption selected"
+     data-time="60"
+     type="button">
+     60 ثانية
+    </button>
+
+    <button
+     class="option timeOption"
+     data-time="90"
+     type="button">
+     90 ثانية
+    </button>
+
+    <button
+     class="option timeOption"
+     data-time="120"
+     type="button">
+     120 ثانية
+    </button>
+
+   </div>
+
+  </div>
+
+
+  <div class="section">
+
+   <div class="sectionTitle">
+    الصعوبة
+   </div>
+
+   <div class="options">
+
+    <button
+     id="easy"
+     class="option selected"
+     type="button">
+     🟢 سهل
+    </button>
+
+    <button
+     id="medium"
+     class="option"
+     type="button">
+     🟡 متوسط
+    </button>
+
+    <button
+     id="hard"
+     class="option"
+     type="button">
+     ⚪ صعب
+    </button>
+
+   </div>
+
+  </div>
+
+
+  <div class="section">
+
+   <div class="sectionTitle">
+    🏓 سرعة المضرب
+   </div>
+
+   <div class="rangeLine">
+
+    <input
+     id="paddleSpeed"
+     type="range"
+     min="4"
+     max="12"
+     value="7">
+
+    <span
+     id="paddleSpeedValue"
+     class="rangeValue">
+     7
+    </span>
+
+   </div>
+
+  </div>
+
+
+  <div class="section">
+
+   <div class="sectionTitle">
+    ⚡ سرعة الكرة
+   </div>
+
+   <div class="rangeLine">
+
+    <input
+     id="ballSpeed"
+     type="range"
+     min="3"
+     max="9"
+     value="5">
+
+    <span
+     id="ballSpeedValue"
+     class="rangeValue">
+     5
+    </span>
+
+   </div>
+
+  </div>
+
+
+  <button
+   id="startBtn"
+   class="startBtn"
+   type="button">
+   ▶️ ابدأ اللعب
+  </button>
+
+
+  <div class="infoButtons">
+
+   <button
+    id="rulesBtn"
+    class="secondary"
+    type="button">
+    📖 القواعد
+   </button>
+
+   <button
+    id="soundBtn"
+    type="button">
+    🔊 الصوت: تشغيل
+   </button>
+
+   <button
+    id="aboutBtn"
+    type="button">
+    ℹ️ عن اللعبة
+   </button>
+
+  </div>
+
+
+  <a
+   class="homeLink"
+   href="../">
+   🏠 العودة إلى منصة سامي للألعاب
+  </a>
+
+ </div>
+
 </div>
 
-<div class="section">
-<div class="sectionTitle">🏷️ أسماء اللاعبين</div>
-<div class="row">
-<input id="redName" type="text" value="أحمد" maxlength="12">
-<input id="blueName" type="text" value="محمد" maxlength="12">
-</div>
-</div>
 
-<div class="section">
-<div class="sectionTitle">⏱️ مدة الجولة</div>
-<div class="row">
-<button id="time60" class="active" onclick="setTime(60)">60 ثانية</button>
-<button id="time90" onclick="setTime(90)">90 ثانية</button>
-<button id="time120" onclick="setTime(120)">120 ثانية</button>
-</div>
-</div>
-
-<div class="section">
-<div class="sectionTitle">🎚️ مستوى الكمبيوتر</div>
-<div class="row">
-<button id="easy" class="active" onclick="setDifficulty('easy')">سهل</button>
-<button id="medium" onclick="setDifficulty('medium')">متوسط</button>
-<button id="hard" onclick="setDifficulty('hard')">صعب</button>
-</div>
-</div>
-
-<div class="section">
-<div class="sectionTitle">⚡ سرعة الكرة</div>
-<input id="ballSpeed" type="range" min="3" max="9" value="5" oninput="changeBallSpeed()">
-<div>السرعة: <span id="ballSpeedText">5</span></div>
-</div>
-
-<div class="section">
-<div class="sectionTitle">🏓 سرعة المضرب</div>
-<input id="paddleSpeed" type="range" min="4" max="12" value="7" oninput="changePaddleSpeed()">
-<div>السرعة: <span id="paddleSpeedText">7</span></div>
-</div>
-
-<button id="startBtn" onclick="startGame()">▶️ ابدأ اللعب</button>
-
-<div class="row">
-<button onclick="showRules()">📖 القواعد</button>
-<button onclick="showShop()">🛒 المتجر</button>
-<button id="menuSound" onclick="toggleSound()">🔊 الصوت</button>
-<button onclick="showInfo()">ℹ️ معلومات</button>
-</div>
-
-<a class="homeLink" href="../">🏠 العودة إلى منصة سامي للألعاب</a>
-</div>
-</div>
+<!-- =========================
+     شاشة اللعبة
+========================= -->
 
 <div id="game">
-<div id="hud">
-<div class="playerHud redHud">🔴 <span id="redHudName">أحمد</span><br>🏆 <span id="redScore">0</span></div>
-<div class="centerHud">المرحلة <span id="stage">1</span> | الجولة <span id="round">1</span><br>⏱️ <span id="time">60</span></div>
-<div class="playerHud blueHud">🔵 <span id="blueHudName">محمد</span><br>🏆 <span id="blueScore">0</span></div>
+
+ <div class="hud">
+
+  <div class="hudBox redText">
+   🔴 <span id="redHud">أحمد</span>:
+   <span id="redScore">0</span>
+  </div>
+
+  <div class="hudBox">
+   🏆 المرحلة:
+   <span id="stageHud">1</span>
+  </div>
+
+  <div class="hudBox">
+   الجولة:
+   <span id="roundHud">1</span>/3
+  </div>
+
+  <div class="hudBox">
+   ⏱️ <span id="timeHud">60</span>
+  </div>
+
+  <div class="hudBox blueText">
+   🔵 <span id="blueHud">محمد</span>:
+   <span id="blueScore">0</span>
+  </div>
+
+ </div>
+
+
+ <div class="controlsTop">
+
+  <button
+   id="pauseBtn"
+   class="pauseBtn"
+   type="button">
+   ⏸️ إيقاف
+  </button>
+
+  <button
+   id="restartBtn"
+   type="button">
+   🔄 إعادة
+  </button>
+
+  <button
+   id="gameSoundBtn"
+   type="button">
+   🔊 الصوت
+  </button>
+
+  <button
+   id="gameRulesBtn"
+   type="button">
+   📖 القواعد
+  </button>
+
+  <button
+   id="gameHomeBtn"
+   type="button">
+   🏠 القائمة
+  </button>
+
+ </div>
+
+
+ <div id="field">
+
+  <div id="wall">
+   <div class="wallMark"></div>
+  </div>
+
+  <div class="floorLine"></div>
+
+  <div class="net red"></div>
+
+  <div class="net blue"></div>
+
+
+  <div
+   id="redPlayer"
+   class="player red">
+
+   <div class="head"></div>
+   <div class="body"></div>
+
+   <div
+    id="redPlayerName"
+    class="playerName">
+    أحمد
+   </div>
+
+  </div>
+
+
+  <div
+   id="bluePlayer"
+   class="player blue">
+
+   <div class="head"></div>
+   <div class="body"></div>
+
+   <div
+    id="bluePlayerName"
+    class="playerName">
+    محمد
+   </div>
+
+  </div>
+
+
+  <div
+   id="redPaddle"
+   class="paddle red">
+  </div>
+
+  <div
+   id="bluePaddle"
+   class="paddle blue">
+  </div>
+
+
+  <div id="ball"></div>
+
+  <div id="ballTrail"></div>
+
+
+  <div id="message">
+   اضغط ▶️ ابدأ
+  </div>
+
+
+  <div id="result">
+
+   <div class="resultBox">
+
+    <h2 id="resultTitle">
+     🏆 النتيجة
+    </h2>
+
+    <p id="resultText"></p>
+
+    <div class="resultButtons">
+
+     <button
+      id="nextRoundBtn"
+      class="startBtn"
+      type="button">
+      ▶️ الجولة التالية
+     </button>
+
+     <button
+      id="resultRestartBtn"
+      type="button">
+      🔄 إعادة المرحلة
+     </button>
+
+     <button
+      id="resultMenuBtn"
+      type="button">
+      🏠 القائمة
+     </button>
+
+    </div>
+
+   </div>
+
+  </div>
+
+ </div>
+
+
+ <div class="gameButtons">
+
+  <button
+   id="hitBtn"
+   class="hitBtn"
+   type="button">
+   🏓 اضرب
+  </button>
+
+  <button
+   id="strongBtn"
+   class="strongBtn"
+   type="button">
+   💥 ضربة قوية
+  </button>
+
+ </div>
+
 </div>
 
-<div id="controls">
-<button onclick="pauseGame()" id="pauseButton">⏸️</button>
-<button onclick="restartGame()">🔄</button>
-<button onclick="backMenu()">🏠</button>
-<button onclick="normalHit()">🎾 اضرب</button>
-<button onclick="strongHit()">💥 قوية</button>
-<button onclick="toggleSound()" id="gameSound">🔊</button>
-<button onclick="showRules()">📖</button>
-</div>
-
-<div id="field">
-<div id="wall"><div id="wallText">الحائط</div></div>
-<div class="centerLine"></div>
-<div class="net redNet"><div class="netText">شبكة 🔴</div></div>
-<div class="net blueNet"><div class="netText">شبكة 🔵</div></div>
-
-<div id="redPaddle" class="paddle redPaddle">
-<div class="face"></div><div class="handle"></div>
-</div>
-<div id="bluePaddle" class="paddle bluePaddle">
-<div class="face"></div><div class="handle"></div>
-</div>
-<div id="ball"></div>
-
-<div id="message">
-<h2 id="messageTitle">⏸️ اللعبة متوقفة</h2>
-<div id="messageText">اضغط متابعة للرجوع للعب</div>
-<button onclick="messageAction()" id="messageButton">▶️ متابعة</button>
-</div>
-</div>
-</div>
 
 <script>
-"use strict";
 
-var mode="pvp",selectedTime=60,difficulty="easy";
-var ballSpeed=5,paddleSpeed=7,soundOn=true;
-var running=false,paused=false;
-var redScoreValue=0,blueScoreValue=0,stageValue=1,roundValue=1,timeLeft=60;
-var timer=null,animation=null,W=0,H=0;
-var paddleW=54,paddleH=82,ballSize=23;
-var redX=0,redY=0,redTX=0,redTY=0;
-var blueX=0,blueY=0,blueTX=0,blueTY=0;
-var ballX=0,ballY=0,vx=0,vy=0;
-var touchOwners={};
+/* =========================
+   المتغيرات
+========================= */
 
-var field=document.getElementById("field");
-var ball=document.getElementById("ball");
-var redPaddle=document.getElementById("redPaddle");
-var bluePaddle=document.getElementById("bluePaddle");
+let mode="pvp";
 
-function setMode(v){
-mode=v;
-document.getElementById("modePvp").classList.toggle("active",v==="pvp");
-document.getElementById("modeCpu").classList.toggle("active",v==="cpu");
-document.getElementById("blueName").value=v==="cpu"?"الكمبيوتر":"محمد";
-}
-function setTime(v){
-selectedTime=v;
-[60,90,120].forEach(n=>document.getElementById("time"+n).classList.toggle("active",n===v));
-}
-function setDifficulty(v){
-difficulty=v;
-["easy","medium","hard"].forEach(n=>document.getElementById(n).classList.toggle("active",n===v));
-}
-function changeBallSpeed(){
-ballSpeed=Number(document.getElementById("ballSpeed").value);
-document.getElementById("ballSpeedText").textContent=ballSpeed;
-}
-function changePaddleSpeed(){
-paddleSpeed=Number(document.getElementById("paddleSpeed").value);
-document.getElementById("paddleSpeedText").textContent=paddleSpeed;
+let matchTime=60;
+
+let difficulty="easy";
+
+let paddleSpeed=7;
+
+let baseBallSpeed=5;
+
+let soundOn=true;
+
+let running=false;
+
+let paused=false;
+
+let round=1;
+
+let stage=1;
+
+let redScore=0;
+
+let blueScore=0;
+
+let roundRed=0;
+
+let roundBlue=0;
+
+let timeLeft=60;
+
+let timer=null;
+
+let animation=0;
+
+let lastTime=0;
+
+let ballMoving=false;
+
+let ballVX=0;
+
+let ballVY=0;
+
+let strongHit=false;
+
+let serveSide="red";
+
+let redPointer=null;
+
+let bluePointer=null;
+
+let audioContext=null;
+
+
+/* =========================
+   عناصر
+========================= */
+
+const menu=
+ document.getElementById("menu");
+
+const game=
+ document.getElementById("game");
+
+const field=
+ document.getElementById("field");
+
+const ball=
+ document.getElementById("ball");
+
+const trail=
+ document.getElementById("ballTrail");
+
+const redPlayer=
+ document.getElementById("redPlayer");
+
+const bluePlayer=
+ document.getElementById("bluePlayer");
+
+const redPaddle=
+ document.getElementById("redPaddle");
+
+const bluePaddle=
+ document.getElementById("bluePaddle");
+
+const message=
+ document.getElementById("message");
+
+const result=
+ document.getElementById("result");
+
+
+/* =========================
+   اختيار الإعدادات
+========================= */
+
+document.getElementById("pvp").onclick=()=>{
+ mode="pvp";
+
+ document.getElementById("pvp")
+  .classList.add("selected");
+
+ document.getElementById("cpu")
+  .classList.remove("selected");
+
+ document.getElementById("blueName").disabled=false;
+};
+
+document.getElementById("cpu").onclick=()=>{
+ mode="cpu";
+
+ document.getElementById("cpu")
+  .classList.add("selected");
+
+ document.getElementById("pvp")
+  .classList.remove("selected");
+
+ document.getElementById("blueName").value="الكمبيوتر";
+ document.getElementById("blueName").disabled=true;
+};
+
+
+document.querySelectorAll(".timeOption")
+.forEach(btn=>{
+
+ btn.onclick=()=>{
+
+  document.querySelectorAll(".timeOption")
+   .forEach(x=>x.classList.remove("selected"));
+
+  btn.classList.add("selected");
+
+  matchTime=
+   Number(btn.dataset.time);
+
+ };
+
+});
+
+
+document.getElementById("easy").onclick=()=>{
+ difficulty="easy";
+
+ selectDifficulty("easy");
+};
+
+document.getElementById("medium").onclick=()=>{
+ difficulty="medium";
+
+ selectDifficulty("medium");
+};
+
+document.getElementById("hard").onclick=()=>{
+ difficulty="hard";
+
+ selectDifficulty("hard");
+};
+
+
+function selectDifficulty(id){
+
+ ["easy","medium","hard"].forEach(x=>{
+  document.getElementById(x)
+   .classList.remove("selected");
+ });
+
+ document.getElementById(id)
+  .classList.add("selected");
 }
 
-function beep(freq,duration){
-if(!soundOn)return;
-try{
-var AC=window.AudioContext||window.webkitAudioContext;
-if(!window.audioContext)window.audioContext=new AC();
-if(window.audioContext.state==="suspended")window.audioContext.resume();
-var o=window.audioContext.createOscillator();
-var g=window.audioContext.createGain();
-o.type="sine";o.frequency.value=freq;g.gain.value=.07;
-o.connect(g);g.connect(window.audioContext.destination);
-o.start();g.gain.setTargetAtTime(0,window.audioContext.currentTime+duration/1000,.03);
-o.stop(window.audioContext.currentTime+duration/1000+.08);
-}catch(e){}
+
+document.getElementById("paddleSpeed")
+.oninput=e=>{
+
+ paddleSpeed=
+  Number(e.target.value);
+
+ document.getElementById(
+  "paddleSpeedValue"
+ ).textContent=
+  paddleSpeed;
+
+};
+
+
+document.getElementById("ballSpeed")
+.oninput=e=>{
+
+ baseBallSpeed=
+  Number(e.target.value);
+
+ document.getElementById(
+  "ballSpeedValue"
+ ).textContent=
+  baseBallSpeed;
+
+};
+
+
+/* =========================
+   الصوت
+========================= */
+
+function initAudio(){
+
+ if(!soundOn)return;
+
+ try{
+
+  if(!audioContext){
+
+   audioContext=
+    new (window.AudioContext||
+         window.webkitAudioContext)();
+
+  }
+
+  if(audioContext.state==="suspended")
+   audioContext.resume();
+
+ }catch(e){}
+
 }
+
+
+function beep(
+ frequency=440,
+ duration=.08,
+ type="sine"
+){
+
+ if(!soundOn)return;
+
+ initAudio();
+
+ if(!audioContext)return;
+
+ try{
+
+  const osc=
+   audioContext.createOscillator();
+
+  const gain=
+   audioContext.createGain();
+
+  osc.type=type;
+
+  osc.frequency.value=frequency;
+
+  gain.gain.setValueAtTime(
+   .0001,
+   audioContext.currentTime
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+   .12,
+   audioContext.currentTime+.01
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+   .0001,
+   audioContext.currentTime+duration
+  );
+
+  osc.connect(gain);
+  gain.connect(audioContext.destination);
+
+  osc.start();
+
+  osc.stop(
+   audioContext.currentTime+duration+.02
+  );
+
+ }catch(e){}
+
+}
+
+
 function toggleSound(){
-soundOn=!soundOn;
-document.getElementById("menuSound").textContent=soundOn?"🔊 الصوت":"🔇 الصوت";
-document.getElementById("gameSound").textContent=soundOn?"🔊":"🔇";
+
+ soundOn=!soundOn;
+
+ const text=
+  soundOn
+  ?
+  "🔊 الصوت: تشغيل"
+  :
+  "🔇 الصوت: إيقاف";
+
+ document.getElementById(
+  "soundBtn"
+ ).textContent=text;
+
+ document.getElementById(
+  "gameSoundBtn"
+ ).textContent=text;
+
+ if(soundOn)
+  beep(650,.08);
+
 }
+
+
+/* =========================
+   القواعد
+========================= */
+
 function showRules(){
-alert("📖 قواعد الحائط الصعب\n\n🔴 الأحمر يدافع عن الشبكة اليسرى.\n🔵 الأزرق يدافع عن الشبكة اليمنى.\n\nحرّك المضرب باللمس. في وضع لاعبين يمكن استخدام إصبعين.\nاضرب الكرة في الحائط، ودخولها شبكة الخصم يمنحك نقطة.\nكل مرحلة تتكون من 3 جولات.");
-}
-function showShop(){
-alert("🛒 المتجر\nمضارب وكرات وكؤوس وتطوير السرعة وتخصيص الملعب.");
-}
-function showInfo(){
-alert("🎾 الحائط الصعب\nتعمل باللمس على الهاتف في الوضع الرأسي والأفقي.");
-}
-function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
 
-function resizeField(){
-W=field.clientWidth;
-H=field.clientHeight;
-if(W<1||H<1)return;
-redX=clamp(redX,5,Math.max(5,W*.47-paddleW));
-blueX=clamp(blueX,W*.53,Math.max(W*.53,W-paddleW-5));
-redY=clamp(redY,40,Math.max(40,H-paddleH-5));
-blueY=clamp(blueY,40,Math.max(40,H-paddleH-5));
-redTX=clamp(redTX,5,Math.max(5,W*.47-paddleW));
-blueTX=clamp(blueTX,W*.53,Math.max(W*.53,W-paddleW-5));
-redTY=clamp(redTY,40,Math.max(40,H-paddleH-5));
-blueTY=clamp(blueTY,40,Math.max(40,H-paddleH-5));
-ballX=clamp(ballX,0,Math.max(0,W-ballSize));
-ballY=clamp(ballY,35,Math.max(35,H-ballSize));
-draw();
-}
-function resetPositions(){
-resizeField();
-redX=W*.13;redY=H*.55;redTX=redX;redTY=redY;
-blueX=W*.87-paddleW;blueY=H*.55;blueTX=blueX;blueTY=blueY;
-draw();
-}
-function draw(){
-redPaddle.style.left=redX+"px";redPaddle.style.top=redY+"px";
-bluePaddle.style.left=blueX+"px";bluePaddle.style.top=blueY+"px";
-ball.style.left=ballX+"px";ball.style.top=ballY+"px";
-}
-function moveRed(x,y){
-redTX=clamp(x-paddleW/2,5,Math.max(5,W*.47-paddleW));
-redTY=clamp(y-paddleH/2,40,Math.max(40,H-paddleH-5));
-}
-function moveBlue(x,y){
-blueTX=clamp(x-paddleW/2,W*.53,Math.max(W*.53,W-paddleW-5));
-blueTY=clamp(y-paddleH/2,40,Math.max(40,H-paddleH-5));
-}
-function updatePaddles(){
-var s=.18+paddleSpeed*.012;
-redX+=(redTX-redX)*s;redY+=(redTY-redY)*s;
-blueX+=(blueTX-blueX)*s;blueY+=(blueTY-blueY)*s;
-}
-function computerMove(){
-if(mode!=="cpu")return;
-var f=difficulty==="easy"?.045:difficulty==="medium"?.09:.15;
-if(ballX>W*.25){
-blueTY+=(ballY+ballSize/2-(blueTY+paddleH/2))*f;
-blueTX+=(ballX-blueTX)*f;
-}
-blueTX=clamp(blueTX,W*.53,Math.max(W*.53,W-paddleW-5));
-blueTY=clamp(blueTY,40,Math.max(40,H-paddleH-5));
-}
-function serveBall(){
-resizeField();
-ballX=W/2-ballSize/2;ballY=H*.42;
-vx=(Math.random()<.5?1:-1)*ballSpeed;
-vy=(Math.random()-.5)*ballSpeed*.65;
-draw();
-}
-function paddleCollision(px,py){
-return ballX<px+paddleW+8&&ballX+ballSize>px-8&&
-ballY<py+paddleH+8&&ballY+ballSize>py-8;
-}
-function hitRed(){
-var off=clamp((ballY+ballSize/2-(redY+paddleH/2))/(paddleH/2),-1,1);
-var sp=Math.max(ballSpeed,Math.hypot(vx,vy));
-vx=Math.abs(sp);vy=off*sp*.75;
-ballX=redX+paddleW+2;beep(600,70);
-}
-function hitBlue(){
-var off=clamp((ballY+ballSize/2-(blueY+paddleH/2))/(paddleH/2),-1,1);
-var sp=Math.max(ballSpeed,Math.hypot(vx,vy));
-vx=-Math.abs(sp);vy=off*sp*.75;
-ballX=blueX-ballSize-2;beep(600,70);
-}
-function updateBall(){
-if(!running||paused||W<1||H<1)return;
-ballX+=vx;ballY+=vy;
+ alert(
+`🎯 هدف اللعبة
 
-if(ballY<=42){ballY=42;vy=Math.abs(vy);beep(250,35);}
-if(ballY+ballSize>=H){ballY=H-ballSize;vy=-Math.abs(vy);}
+اضرب الكرة في الحائط ثم ارجع للدفاع عن شبكتك.
 
-if(ballX+ballSize>=W){
-if(ballY+ballSize>=H-75){
-redScoreValue++;
-document.getElementById("redScore").textContent=redScoreValue;
-beep(900,140);serveBall();return;
-}else{ballX=W-ballSize;vx=-Math.abs(vx);beep(300,35);}
+🔴 اللاعب الأحمر يدافع عن الشبكة الحمراء.
+
+🔵 اللاعب الأزرق يدافع عن الشبكة الزرقاء.
+
+🏓 اسحب اللاعب والمضرب على الشاشة.
+
+💥 الضربة القوية تزيد سرعة الكرة.
+
+⏱️ المباراة تتكون من 3 جولات.
+
+🏆 بعد انتهاء الجولات تتقدم للمرحلة التالية.
+
+🤖 في وضع الكمبيوتر يتولى الكمبيوتر اللاعب الأزرق.
+
+📱 اللعبة تعمل بالطولي والأفقي ولا تجبر الهاتف على الدوران.`
+ );
+
 }
-if(ballX<=0){
-if(ballY+ballSize>=H-75){
-blueScoreValue++;
-document.getElementById("blueScore").textContent=blueScoreValue;
-beep(450,140);serveBall();return;
-}else{ballX=0;vx=Math.abs(vx);beep(300,35);}
+
+
+function showAbout(){
+
+ alert(
+`🎾 الحائط الصعب
+
+لعبة مهارة وسرعة.
+
+اضرب الكرة في الحائط،
+ثم دافع عن شبكتك.
+
+👥 لاعبان
+🤖 ضد الكمبيوتر
+
+المراحل تستمر بلا نهاية.`
+ );
+
 }
-if(vx<0&&paddleCollision(redX,redY))hitRed();
-if(vx>0&&paddleCollision(blueX,blueY))hitBlue();
-draw();
+
+
+/* =========================
+   مواضع العناصر
+========================= */
+
+function fieldSize(){
+
+ return {
+  w:field.clientWidth,
+  h:field.clientHeight
+ };
+
 }
-function gameLoop(){
-if(!running)return;
-if(!paused){computerMove();updatePaddles();updateBall();}
-animation=requestAnimationFrame(gameLoop);
+
+
+let redX=0;
+let redY=0;
+
+let blueX=0;
+let blueY=0;
+
+let ballX=0;
+let ballY=0;
+
+
+function placePlayers(){
+
+ const {w,h}=fieldSize();
+
+ redX=
+  Math.max(
+   20,
+   w*.23
+  );
+
+ redY=
+  h*.68;
+
+ blueX=
+  Math.min(
+   w-75,
+   w*.70
+  );
+
+ blueY=
+  h*.68;
+
+ setPlayerPosition();
+
 }
+
+
+function setPlayerPosition(){
+
+ redPlayer.style.left=
+  (redX-28)+"px";
+
+ redPlayer.style.top=
+  (redY-43)+"px";
+
+ bluePlayer.style.left=
+  (blueX-28)+"px";
+
+ bluePlayer.style.top=
+  (blueY-43)+"px";
+
+
+ redPaddle.style.left=
+  (redX+25)+"px";
+
+ redPaddle.style.top=
+  (redY-35)+"px";
+
+
+ bluePaddle.style.left=
+  (blueX-43)+"px";
+
+ bluePaddle.style.top=
+  (blueY-35)+"px";
+
+}
+
+
+/* =========================
+   الكرة
+========================= */
+
+function resetBall(){
+
+ const {w,h}=fieldSize();
+
+ ballX=
+  serveSide==="red"
+  ?
+  w*.31
+  :
+  w*.69;
+
+ ballY=
+  h*.52;
+
+ ballVX=
+  serveSide==="red"
+  ?
+  baseBallSpeed
+  :
+  -baseBallSpeed;
+
+ ballVY=
+  (Math.random()-.5)*
+  baseBallSpeed;
+
+ ballMoving=true;
+
+ strongHit=false;
+
+ setBall();
+
+}
+
+
+function setBall(){
+
+ ball.style.left=
+  (ballX-11)+"px";
+
+ ball.style.top=
+  (ballY-11)+"px";
+
+ trail.style.left=
+  (ballX-6)+"px";
+
+ trail.style.top=
+  (ballY-6)+"px";
+
+}
+
+
+/* =========================
+   بداية المباراة
+========================= */
+
 function startGame(){
-var rn=document.getElementById("redName").value.trim()||"أحمد";
-var bn=document.getElementById("blueName").value.trim()||(mode==="cpu"?"الكمبيوتر":"محمد");
-document.getElementById("redHudName").textContent=rn;
-document.getElementById("blueHudName").textContent=bn;
-redScoreValue=0;blueScoreValue=0;stageValue=1;roundValue=1;timeLeft=selectedTime;
-document.getElementById("redScore").textContent="0";
-document.getElementById("blueScore").textContent="0";
-document.getElementById("stage").textContent="1";
-document.getElementById("round").textContent="1";
-document.getElementById("time").textContent=timeLeft;
-document.getElementById("menu").style.display="none";
-document.getElementById("game").style.display="flex";
-running=true;paused=false;
-setTimeout(()=>{
-resizeField();resetPositions();serveBall();
-clearInterval(timer);startTimer();
-cancelAnimationFrame(animation);gameLoop();
-},80);
+
+ initAudio();
+
+ const redName=
+  document.getElementById(
+   "redName"
+  ).value.trim()||"أحمد";
+
+ const blueName=
+  mode==="cpu"
+  ?
+  "الكمبيوتر"
+  :
+  document.getElementById(
+   "blueName"
+  ).value.trim()||"محمد";
+
+
+ document.getElementById(
+  "redHud"
+ ).textContent=redName;
+
+ document.getElementById(
+  "blueHud"
+ ).textContent=blueName;
+
+ document.getElementById(
+  "redPlayerName"
+ ).textContent=redName;
+
+ document.getElementById(
+  "bluePlayerName"
+ ).textContent=blueName;
+
+
+ stage=1;
+ round=1;
+
+ redScore=0;
+ blueScore=0;
+
+ roundRed=0;
+ roundBlue=0;
+
+ matchTime=
+  Number(
+   document.querySelector(
+    ".timeOption.selected"
+   )?.dataset.time||60
+  );
+
+ difficulty=
+  document.querySelector(
+   "#hard.selected"
+  )
+  ?
+  "hard"
+  :
+  document.querySelector(
+   "#medium.selected"
+  )
+  ?
+  "medium"
+  :
+  "easy";
+
+
+ updateHud();
+
+
+ menu.style.display="none";
+ game.style.display="block";
+
+ result.style.display="none";
+
+ running=true;
+ paused=false;
+
+ timeLeft=matchTime;
+
+ placePlayers();
+
+ serveSide=
+  round%2===1
+  ?
+  "red"
+  :
+  "blue";
+
+ resetBall();
+
+ message.textContent=
+  "🎾 ابدأ اللعب!";
+
+ setTimeout(()=>{
+  if(running)
+   message.style.display="none";
+ },900);
+
+ startTimer();
+
+ cancelAnimationFrame(animation);
+
+ lastTime=performance.now();
+
+ animation=
+  requestAnimationFrame(loop);
+
 }
+
+
+/* =========================
+   المؤقت
+========================= */
+
 function startTimer(){
-clearInterval(timer);
-timer=setInterval(()=>{
-if(!running||paused)return;
-timeLeft--;
-document.getElementById("time").textContent=timeLeft;
-if(timeLeft<=0)endRound();
-},1000);
+
+ clearInterval(timer);
+
+ timer=
+ setInterval(()=>{
+
+  if(!running||paused)return;
+
+  timeLeft--;
+
+  if(timeLeft<0)
+   timeLeft=0;
+
+  document.getElementById(
+   "timeHud"
+  ).textContent=timeLeft;
+
+  if(timeLeft<=0){
+
+   clearInterval(timer);
+
+   endRound();
+
+  }
+
+ },1000);
+
 }
+
+
+/* =========================
+   الحلقة
+========================= */
+
+function loop(now){
+
+ if(!running){
+
+  return;
+
+ }
+
+ animation=
+  requestAnimationFrame(loop);
+
+ if(paused)
+  return;
+
+ const dt=
+  Math.min(
+   2,
+   (now-lastTime)/16.67
+  );
+
+ lastTime=now;
+
+ updateBall(dt);
+
+ updateCPU(dt);
+
+ setPlayerPosition();
+
+}
+
+
+/* =========================
+   حركة الكرة
+========================= */
+
+function updateBall(dt){
+
+ if(!ballMoving)return;
+
+ const {w,h}=fieldSize();
+
+ ballX+=ballVX*dt;
+ ballY+=ballVY*dt;
+
+
+ /* أعلى الشاشة */
+
+ if(ballY<75){
+
+  ballY=75;
+
+  ballVY=Math.abs(ballVY);
+
+  beep(500,.05);
+
+ }
+
+
+ /* أسفل الشاشة */
+
+ if(ballY>h-20){
+
+  ballY=h-20;
+
+  ballVY=-Math.abs(ballVY);
+
+  beep(350,.05);
+
+ }
+
+
+ /* جوانب */
+
+ if(ballX<12){
+
+  ballX=12;
+
+  ballVX=Math.abs(ballVX);
+
+ }
+
+ if(ballX>w-12){
+
+  ballX=w-12;
+
+  ballVX=-Math.abs(ballVX);
+
+ }
+
+
+ /* الحائط */
+
+ const wallTop=8;
+ const wallBottom=60;
+
+ if(
+  ballY>=wallTop &&
+  ballY<=wallBottom &&
+  ballX>w*.02 &&
+  ballX<w*.98 &&
+  Math.abs(ballVY)<20
+ ){
+
+  ballVY=
+   Math.abs(ballVY)+
+   .4;
+
+  beep(700,.07,"square");
+
+ }
+
+
+ /* مضرب أحمر */
+
+ if(
+  ballVX<0 &&
+  Math.abs(ballX-(redX+30))<28 &&
+  Math.abs(ballY-redY)<55
+ ){
+
+  hitBall("red");
+
+ }
+
+
+ /* مضرب أزرق */
+
+ if(
+  ballVX>0 &&
+  Math.abs(ballX-(blueX-30))<28 &&
+  Math.abs(ballY-blueY)<55
+ ){
+
+  hitBall("blue");
+
+ }
+
+
+ /* دخول الشبكة الحمراء */
+
+ if(
+  ballX>w*.90 &&
+  ballY>h*.16 &&
+  ballY<h*.86
+ ){
+
+  scorePoint("blue");
+
+  return;
+
+ }
+
+
+ /* دخول الشبكة الزرقاء */
+
+ if(
+  ballX<w*.10 &&
+  ballY>h*.16 &&
+  ballY<h*.86
+ ){
+
+  scorePoint("red");
+
+  return;
+
+ }
+
+
+ setBall();
+
+}
+
+
+/* =========================
+   ضرب الكرة
+========================= */
+
+function hitBall(side,force=false){
+
+ if(
+  side==="red" &&
+  ballVX>=0
+ )return;
+
+ if(
+  side==="blue" &&
+  ballVX<=0
+ )return;
+
+ const speed=
+  Math.max(
+   3,
+   Math.sqrt(
+    ballVX*ballVX+
+    ballVY*ballVY
+   )
+  );
+
+ const boost=
+  force||strongHit
+  ?
+  1.65
+  :
+  1.12;
+
+ const newSpeed=
+  Math.min(
+   18,
+   speed*boost
+  );
+
+ ballVX=
+  side==="red"
+  ?
+  Math.abs(ballVX)*boost
+  :
+  -Math.abs(ballVX)*boost;
+
+ ballVY+=
+  (Math.random()-.5)*2.5;
+
+ const current=
+  Math.sqrt(
+   ballVX*ballVX+
+   ballVY*ballVY
+  );
+
+ if(current>newSpeed){
+
+  const ratio=
+   newSpeed/current;
+
+  ballVX*=ratio;
+  ballVY*=ratio;
+
+ }
+
+ ballVX=
+  side==="red"
+  ?
+  Math.abs(ballVX)
+  :
+  -Math.abs(ballVX);
+
+ strongHit=false;
+
+ beep(
+  force?950:620,
+  force?.13:.07,
+  force?"sawtooth":"square"
+ );
+
+}
+
+
+/* =========================
+   زر الضرب
+========================= */
+
+function manualHit(force=false){
+
+ if(!running||paused)
+  return;
+
+ const side=
+  ballX<field.clientWidth/2
+  ?
+  "red"
+  :
+  "blue";
+
+ if(
+  side==="red" &&
+  ballVX<0 &&
+  Math.abs(ballX-(redX+30))<80 &&
+  Math.abs(ballY-redY)<85
+ ){
+
+  hitBall("red",force);
+  return;
+
+ }
+
+ if(
+  side==="blue" &&
+  ballVX>0 &&
+  Math.abs(ballX-(blueX-30))<80 &&
+  Math.abs(ballY-blueY)<85
+ ){
+
+  hitBall("blue",force);
+  return;
+
+ }
+
+}
+
+
+/* =========================
+   الكمبيوتر
+========================= */
+
+function updateCPU(dt){
+
+ if(mode!=="cpu")
+  return;
+
+ if(!running||paused)
+  return;
+
+ const {h}=fieldSize();
+
+ let target=
+  ballY;
+
+ if(ballVX>0){
+
+  const level=
+   difficulty==="easy"
+   ? .035
+   :
+   difficulty==="medium"
+   ? .065
+   :
+   .10;
+
+  blueY+=
+   (target-blueY)*
+   level*
+   dt;
+
+ }else{
+
+  const center=
+   h*.67;
+
+  blueY+=
+   (center-blueY)*
+   .025*
+   dt;
+
+ }
+
+ const limitTop=110;
+ const limitBottom=h-75;
+
+ blueY=
+  Math.max(
+   limitTop,
+   Math.min(
+    limitBottom,
+    blueY
+   )
+  );
+
+ /* الكمبيوتر يضرب تلقائيًا */
+
+ if(
+  ballVX>0 &&
+  Math.abs(ballX-(blueX-30))<55 &&
+  Math.abs(ballY-blueY)<65
+ ){
+
+  const chance=
+   difficulty==="easy"
+   ? .025
+   :
+   difficulty==="medium"
+   ? .055
+   :
+   .09;
+
+  if(Math.random()<chance*dt)
+   hitBall("blue");
+
+ }
+
+}
+
+
+/* =========================
+   تسجيل النقطة
+========================= */
+
+function scorePoint(side){
+
+ if(side==="red"){
+
+  redScore++;
+  roundRed++;
+
+ }else{
+
+  blueScore++;
+  roundBlue++;
+
+ }
+
+ updateHud();
+
+ beep(
+  side==="red"?850:450,
+  .16,
+  "triangle"
+ );
+
+ ballMoving=false;
+
+ message.style.display="block";
+
+ message.textContent=
+  side==="red"
+  ?
+  "🔴 نقطة للأحمر!"
+  :
+  "🔵 نقطة للأزرق!";
+
+ setTimeout(()=>{
+
+  if(!running)return;
+
+  serveSide=
+   side;
+
+  resetBall();
+
+  message.style.display="none";
+
+ },650);
+
+}
+
+
+/* =========================
+   تحديث HUD
+========================= */
+
+function updateHud(){
+
+ document.getElementById(
+  "redScore"
+ ).textContent=redScore;
+
+ document.getElementById(
+  "blueScore"
+ ).textContent=blueScore;
+
+ document.getElementById(
+  "stageHud"
+ ).textContent=stage;
+
+ document.getElementById(
+  "roundHud"
+ ).textContent=round+"/3";
+
+ document.getElementById(
+  "timeHud"
+ ).textContent=timeLeft;
+
+}
+
+
+/* =========================
+   نهاية الجولة
+========================= */
+
 function endRound(){
-paused=true;
-document.getElementById("messageTitle").textContent="⏱️ انتهت الجولة";
-document.getElementById("messageText").innerHTML=
-"الجولة "+roundValue+"<br><br>🔴 "+redScoreValue+" - "+blueScoreValue+" 🔵";
-document.getElementById("messageButton").textContent="▶️ الجولة التالية";
-document.getElementById("message").style.display="block";
+
+ ballMoving=false;
+
+ message.style.display="block";
+
+ let text="";
+
+ if(roundRed>roundBlue){
+
+  text=
+   "🔴 الأحمر فاز بالجولة!";
+
+ }else if(roundBlue>roundRed){
+
+  text=
+   "🔵 الأزرق فاز بالجولة!";
+
+ }else{
+
+  text=
+   "🤝 الجولة انتهت بالتعادل!";
+
+ }
+
+ message.textContent=text;
+
+ beep(900,.18,"triangle");
+
+ setTimeout(()=>{
+
+  if(!running)return;
+
+  if(round>=3){
+
+   endStage();
+
+  }else{
+
+   round++;
+
+   roundRed=0;
+   roundBlue=0;
+
+   timeLeft=matchTime;
+
+   updateHud();
+
+   serveSide=
+    round%2===1
+    ?
+    "red"
+    :
+    "blue";
+
+   resetBall();
+
+   message.style.display="none";
+
+   startTimer();
+
+  }
+
+ },900);
+
 }
-function nextRound(){
-roundValue++;
-if(roundValue>3){roundValue=1;stageValue++;}
-timeLeft=selectedTime;paused=false;
-document.getElementById("round").textContent=roundValue;
-document.getElementById("stage").textContent=stageValue;
-document.getElementById("time").textContent=timeLeft;
-document.getElementById("message").style.display="none";
-resetPositions();serveBall();
+
+
+/* =========================
+   نهاية المرحلة
+========================= */
+
+function endStage(){
+
+ running=false;
+
+ clearInterval(timer);
+
+ cancelAnimationFrame(animation);
+
+ result.style.display="flex";
+
+ let title="🏆 نهاية المرحلة";
+
+ if(redScore>blueScore){
+
+  title="🔴 الأحمر يتصدر";
+
+ }else if(blueScore>redScore){
+
+  title="🔵 الأزرق يتصدر";
+
+ }else{
+
+  title="🤝 تعادل";
+
+ }
+
+ document.getElementById(
+  "resultTitle"
+ ).textContent=title;
+
+ document.getElementById(
+  "resultText"
+ ).textContent=
+ `المرحلة ${stage}
+النتيجة النهائية:
+🔴 ${redScore} — ${blueScore} 🔵
+
+يمكنك الانتقال للمرحلة التالية.`;
+
+ beep(1100,.25,"triangle");
+
 }
-function pauseGame(){
-if(!running)return;
-paused=!paused;
-document.getElementById("message").style.display=paused?"block":"none";
-document.getElementById("messageTitle").textContent="⏸️ اللعبة متوقفة";
-document.getElementById("messageText").textContent="اضغط متابعة للرجوع للعب";
-document.getElementById("messageButton").textContent="▶️ متابعة";
-document.getElementById("pauseButton").textContent=paused?"▶️":"⏸️";
+
+
+/* =========================
+   المرحلة التالية
+========================= */
+
+function nextStage(){
+
+ stage++;
+
+ round=1;
+
+ roundRed=0;
+ roundBlue=0;
+
+ redScore=0;
+ blueScore=0;
+
+ timeLeft=matchTime;
+
+ result.style.display="none";
+
+ running=true;
+ paused=false;
+
+ updateHud();
+
+ placePlayers();
+
+ serveSide="red";
+
+ resetBall();
+
+ message.style.display="block";
+
+ message.textContent=
+  "🏆 المرحلة "+stage;
+
+ setTimeout(()=>{
+
+  if(running)
+   message.style.display="none";
+
+ },800);
+
+ startTimer();
+
+ lastTime=performance.now();
+
+ animation=
+  requestAnimationFrame(loop);
+
 }
-function messageAction(){
-if(timeLeft<=0)nextRound();
-else{
-paused=false;
-document.getElementById("message").style.display="none";
-document.getElementById("pauseButton").textContent="⏸️";
-}
-}
+
+
+/* =========================
+   إعادة المباراة
+========================= */
+
 function restartGame(){
-if(!running)return;
-redScoreValue=0;blueScoreValue=0;stageValue=1;roundValue=1;
-timeLeft=selectedTime;paused=false;
-document.getElementById("redScore").textContent="0";
-document.getElementById("blueScore").textContent="0";
-document.getElementById("stage").textContent="1";
-document.getElementById("round").textContent="1";
-document.getElementById("time").textContent=timeLeft;
-document.getElementById("message").style.display="none";
-document.getElementById("pauseButton").textContent="⏸️";
-resetPositions();serveBall();startTimer();
+
+ result.style.display="none";
+
+ running=false;
+
+ clearInterval(timer);
+
+ cancelAnimationFrame(animation);
+
+ setTimeout(()=>{
+  startGame();
+ },20);
+
 }
-function normalHit(){
-if(!running||paused)return;
-var s=Math.max(ballSpeed,Math.hypot(vx,vy));
-vx=(vx<0?1:-1)*(s+1);beep(700,70);
-}
-function strongHit(){
-if(!running||paused)return;
-var s=Math.min(13,Math.hypot(vx,vy)+3);
-vx=(vx<0?1:-1)*s;vy*=1.15;beep(1050,130);
-}
+
+
+/* =========================
+   القائمة
+========================= */
+
 function backMenu(){
-running=false;paused=false;clearInterval(timer);
-cancelAnimationFrame(animation);
-document.getElementById("game").style.display="none";
-document.getElementById("menu").style.display="block";
+
+ running=false;
+ paused=false;
+
+ clearInterval(timer);
+
+ cancelAnimationFrame(animation);
+
+ result.style.display="none";
+
+ game.style.display="none";
+
+ menu.style.display="block";
+
 }
 
-field.addEventListener("pointerdown",function(e){
-if(!running||paused)return;
-e.preventDefault();
-var r=field.getBoundingClientRect();
-var x=e.clientX-r.left,y=e.clientY-r.top;
-var owner=x<W/2?"red":(mode==="pvp"?"blue":"");
-if(!owner)return;
-touchOwners[e.pointerId]=owner;
-try{field.setPointerCapture(e.pointerId);}catch(err){}
-if(owner==="red")moveRed(x,y);else moveBlue(x,y);
-});
-field.addEventListener("pointermove",function(e){
-var owner=touchOwners[e.pointerId];
-if(!owner||!running||paused)return;
-e.preventDefault();
-var r=field.getBoundingClientRect();
-var x=e.clientX-r.left,y=e.clientY-r.top;
-if(owner==="red")moveRed(x,y);
-if(owner==="blue"&&mode==="pvp")moveBlue(x,y);
-});
-function releasePointer(e){delete touchOwners[e.pointerId];}
-field.addEventListener("pointerup",releasePointer);
-field.addEventListener("pointercancel",releasePointer);
-field.addEventListener("lostpointercapture",releasePointer);
 
-window.addEventListener("resize",function(){
-if(document.getElementById("game").style.display==="flex")resizeField();
-});
-window.addEventListener("orientationchange",function(){
-setTimeout(function(){
-if(document.getElementById("game").style.display==="flex"){
-resizeField();resetPositions();serveBall();
+/* =========================
+   إيقاف
+========================= */
+
+function togglePause(){
+
+ if(!running)return;
+
+ paused=!paused;
+
+ document.getElementById(
+  "pauseBtn"
+ ).textContent=
+  paused
+  ?
+  "▶️ متابعة"
+  :
+  "⏸️ إيقاف";
+
+ if(paused){
+
+  message.style.display="block";
+  message.textContent="⏸️ اللعبة متوقفة";
+
+ }else{
+
+  message.style.display="none";
+  lastTime=performance.now();
+
+ }
+
 }
-},250);
-});
-document.addEventListener("visibilitychange",function(){
-if(document.hidden&&running&&!paused)pauseGame();
-});
 
-document.getElementById("time").textContent=selectedTime;
+
+/* =========================
+   تحكم اللمس والسحب
+========================= */
+
+function movePlayerFromPointer(
+ pointerId,
+ x,
+ y
+){
+
+ const rect=
+  field.getBoundingClientRect();
+
+ const fx=
+  x-rect.left;
+
+ const fy=
+  y-rect.top;
+
+ if(
+  fx<rect.width/2
+ ){
+
+  redX=
+   Math.max(
+    50,
+    Math.min(
+     rect.width*.47,
+     fx
+    )
+   );
+
+  redY=
+   Math.max(
+    110,
+    Math.min(
+     rect.height-75,
+     fy
+    )
+   );
+
+ }else{
+
+  if(mode==="pvp"){
+
+   blueX=
+    Math.max(
+     rect.width*.53,
+     Math.min(
+      rect.width-50,
+      fx
+     )
+    );
+
+   blueY=
+    Math.max(
+     110,
+     Math.min(
+      rect.height-75,
+      fy
+     )
+    );
+
+  }
+
+ }
+
+ setPlayerPosition();
+
+}
+
+
+field.addEventListener(
+ "pointerdown",
+ e=>{
+
+  if(!running||paused)
+   return;
+
+  try{
+   field.setPointerCapture(e.pointerId);
+  }catch(x){}
+
+  movePlayerFromPointer(
+   e.pointerId,
+   e.clientX,
+   e.clientY
+  );
+
+ }
+);
+
+
+field.addEventListener(
+ "pointermove",
+ e=>{
+
+  if(!running||paused)
+   return;
+
+  if(e.buttons===0)
+   return;
+
+  movePlayerFromPointer(
+   e.pointerId,
+   e.clientX,
+   e.clientY
+  );
+
+ }
+);
+
+
+/* =========================
+   الأزرار
+========================= */
+
+document.getElementById(
+ "startBtn"
+).onclick=startGame;
+
+
+document.getElementById(
+ "rulesBtn"
+).onclick=showRules;
+
+
+document.getElementById(
+ "aboutBtn"
+).onclick=showAbout;
+
+
+document.getElementById(
+ "soundBtn"
+).onclick=toggleSound;
+
+
+document.getElementById(
+ "gameSoundBtn"
+).onclick=toggleSound;
+
+
+document.getElementById(
+ "pauseBtn"
+).onclick=togglePause;
+
+
+document.getElementById(
+ "restartBtn"
+).onclick=restartGame;
+
+
+document.getElementById(
+ "gameHomeBtn"
+).onclick=backMenu;
+
+
+document.getElementById(
+ "gameRulesBtn"
+).onclick=showRules;
+
+
+document.getElementById(
+ "hitBtn"
+).onclick=()=>{
+ manualHit(false);
+};
+
+
+document.getElementById(
+ "strongBtn"
+).onclick=()=>{
+ manualHit(true);
+};
+
+
+document.getElementById(
+ "nextRoundBtn"
+).onclick=nextStage;
+
+
+document.getElementById(
+ "resultRestartBtn"
+).onclick=restartGame;
+
+
+document.getElementById(
+ "resultMenuBtn"
+).onclick=backMenu;
+
+
+/* =========================
+   تغيير الحجم
+========================= */
+
+window.addEventListener(
+ "resize",
+ ()=>{
+
+  if(game.style.display!=="none"){
+
+   const {w,h}=fieldSize();
+
+   redX=
+    Math.max(
+     45,
+     Math.min(
+      w*.47,
+      redX
+     )
+    );
+
+   blueX=
+    Math.max(
+     w*.53,
+     Math.min(
+      w-45,
+      blueX
+     )
+    );
+
+   redY=
+    Math.max(
+     110,
+     Math.min(
+      h-75,
+      redY
+     )
+    );
+
+   blueY=
+    Math.max(
+     110,
+     Math.min(
+      h-75,
+      blueY
+     )
+    );
+
+   setPlayerPosition();
+   setBall();
+
+  }
+
+ }
+);
+
+
+/* =========================
+   البداية
+========================= */
+
+document.getElementById(
+ "blueName"
+).disabled=false;
+
 </script>
+
 </body>
 </html>
