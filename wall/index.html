@@ -2,15 +2,13 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#101b24">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🎾 الحائط الصعب</title>
 
 <style>
 *{
 box-sizing:border-box;
 -webkit-tap-highlight-color:transparent;
-user-select:none;
 }
 
 html,body{
@@ -19,331 +17,279 @@ padding:0;
 width:100%;
 height:100%;
 overflow:hidden;
-background:#101b24;
-font-family:Arial,Tahoma,sans-serif;
+font-family:Arial,sans-serif;
+background:#101820;
 color:#fff;
 touch-action:none;
 }
 
 button{
 border:0;
-outline:0;
-border-radius:12px;
+border-radius:10px;
+padding:9px 12px;
+margin:3px;
+font-size:14px;
 font-weight:bold;
+background:#38576a;
 color:#fff;
 cursor:pointer;
 touch-action:manipulation;
 }
 
 button:active{
-transform:scale(.97);
+transform:scale(.96);
 }
-
-input{
-user-select:text;
-}
-
-.hidden{
-display:none!important;
-}
-
-/* ================= القائمة ================= */
 
 #page{
-position:fixed;
-inset:0;
+width:100%;
+height:100%;
 overflow:auto;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:12px;
-background:
-radial-gradient(circle at 50% 20%,#40596c,#1b2d3b 60%,#081016);
-}
-
-.menu{
-width:94%;
-max-width:480px;
-padding:20px;
-background:#293f53;
-border-radius:22px;
 text-align:center;
-box-shadow:0 12px 35px #000b;
+padding:7px;
+background:linear-gradient(#172833,#203d4b);
+touch-action:auto;
 }
 
-.menu h1{
-font-size:clamp(26px,8vw,34px);
-margin:4px 0 7px;
+.title{
+font-size:26px;
+font-weight:bold;
+margin:5px 0;
 }
 
-.menu .subtitle{
-font-size:14px;
-line-height:1.6;
-color:#d7e4e9;
-margin-bottom:12px;
+.subtitle{
+font-size:13px;
+color:#dce7ed;
+margin-bottom:7px;
 }
 
-.menu button{
-display:block;
-width:100%;
-min-height:48px;
-padding:12px;
-margin:8px 0;
-font-size:16px;
-}
-
-#b1{background:#c62828}
-#b2{background:#1976d2}
-#b3{background:#168449}
-#b4{background:#666}
-#b5{background:#76258c}
-#b6{background:#555}
-
-.selected{
-outline:3px solid #55d6ff;
-outline-offset:1px;
-}
-
-.names{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px;
-margin:10px 0;
-}
-
-.nameBox{
-background:#1a2c38;
+.box{
+width:96%;
+max-width:620px;
+margin:6px auto;
 padding:8px;
-border-radius:10px;
+background:#263e4b;
+border-radius:13px;
 }
 
-.nameBox label{
-display:block;
-font-size:12px;
-margin-bottom:5px;
-color:#c8d7dd;
+.box h3{
+font-size:15px;
+margin:2px 0 6px;
 }
 
-.nameBox input{
-width:100%;
-height:40px;
-border:0;
-border-radius:8px;
-text-align:center;
-font-size:14px;
+.sel{
+background:#079bd4;
+}
+
+#hard{
 background:#fff;
 color:#111;
 }
 
-.optionTitle{
-font-size:14px;
-font-weight:bold;
-margin-top:12px;
-margin-bottom:5px;
+.input{
+display:block;
+width:90%;
+max-width:400px;
+margin:5px auto;
+padding:9px;
+border-radius:9px;
+border:2px solid #657e8b;
+font-size:15px;
+text-align:center;
 }
 
-.options{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:6px;
+.start{
+display:block;
+width:92%;
+max-width:430px;
+margin:10px auto;
+padding:13px;
+font-size:19px;
+background:#10a95b;
 }
 
-.options button{
-margin:0;
-padding:9px 4px;
-min-height:42px;
-background:#334d5d;
-font-size:13px;
+.rulesButton{
+background:#7651a8;
 }
 
-#result{
-margin-top:10px;
-padding:10px;
-background:#111;
-border-radius:10px;
-min-height:38px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:14px;
-line-height:1.5;
-}
-
-/* ================= اللعبة ================= */
+/* اللعبة */
 
 #game{
-position:fixed;
-inset:0;
 display:none;
-background:#172832;
+position:relative;
+width:100%;
+height:100%;
+background:#3e8a46;
+overflow:hidden;
+}
+
+#hud{
+position:absolute;
+top:0;
+left:0;
+right:0;
+height:58px;
+z-index:50;
+background:#10181e;
+display:flex;
+align-items:center;
+justify-content:space-around;
+gap:4px;
+font-size:12px;
+font-weight:bold;
+white-space:nowrap;
+}
+
+.red{
+color:#ff5555;
+}
+
+.blue{
+color:#55aaff;
 }
 
 #canvas{
 position:absolute;
-inset:0;
+left:0;
+right:0;
+top:58px;
+bottom:118px;
 width:100%;
-height:100%;
+height:calc(100% - 176px);
 display:block;
+touch-action:none;
 }
-
-/* HUD */
-
-#hud{
-position:absolute;
-top:6px;
-left:6px;
-right:6px;
-z-index:20;
-display:grid;
-grid-template-columns:1fr auto auto auto 1fr;
-gap:4px;
-align-items:center;
-pointer-events:none;
-}
-
-.hud{
-background:#071018e8;
-border:1px solid #ffffff30;
-border-radius:9px;
-padding:6px 7px;
-font-size:12px;
-font-weight:bold;
-white-space:nowrap;
-text-align:center;
-min-width:0;
-}
-
-.hudName{
-overflow:hidden;
-text-overflow:ellipsis;
-max-width:100px;
-}
-
-.red{
-color:#ff6672;
-}
-
-.blue{
-color:#62a5ff;
-}
-
-#roundInfo{
-font-size:11px;
-color:#d6e1e6;
-}
-
-#time{
-font-size:16px;
-color:#fff;
-}
-
-/* الرسالة */
 
 #message{
 position:absolute;
-top:50%;
+top:64px;
 left:50%;
-transform:translate(-50%,-50%);
-width:min(330px,82%);
-padding:17px;
-border-radius:15px;
-background:#071019f5;
-border:2px solid #ffffff35;
-text-align:center;
-font-size:15px;
-font-weight:bold;
-z-index:50;
-display:none;
-box-shadow:0 10px 35px #000b;
-}
-
-#messageTitle{
-font-size:21px;
-margin-bottom:7px;
-}
-
-#messageText{
-font-size:14px;
-line-height:1.7;
-color:#dce8ed;
-}
-
-.messageButtons{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:7px;
-margin-top:12px;
-}
-
-.messageButtons button{
-min-height:44px;
-padding:8px;
-background:#168449;
-color:#fff;
-}
-
-.messageButtons button:last-child{
-background:#555;
-}
-
-/* الأزرار */
-
-#controls{
-position:absolute;
-bottom:6px;
-left:6px;
-right:6px;
-z-index:30;
-display:grid;
-grid-template-columns:repeat(5,1fr);
-gap:5px;
-}
-
-.gameBtn{
-min-height:43px;
-padding:8px 5px;
+transform:translateX(-50%);
+background:rgba(0,0,0,.72);
+padding:6px 11px;
+border-radius:9px;
 font-size:12px;
-background:#344d5c;
+z-index:55;
+white-space:nowrap;
+pointer-events:none;
+}
+
+#meters{
+position:absolute;
+left:7px;
+right:7px;
+bottom:64px;
+height:48px;
+background:rgba(10,18,23,.9);
+border-radius:10px;
+z-index:58;
+display:flex;
+align-items:center;
+gap:7px;
+padding:5px 8px;
+}
+
+.meter{
+flex:1;
+min-width:0;
+}
+
+.meterTitle{
+font-size:10px;
+margin-bottom:2px;
+white-space:nowrap;
+}
+
+.bar{
+width:100%;
+height:9px;
+background:#26343b;
+border:1px solid #61717a;
+border-radius:10px;
+overflow:hidden;
+}
+
+.fill{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#079bd4,#17b85a);
+transition:width .08s linear;
+}
+
+#gameButtons{
+position:absolute;
+left:0;
+right:0;
+bottom:0;
+min-height:60px;
+z-index:60;
+background:#10181e;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-wrap:wrap;
+padding:3px;
 }
 
 #strong{
-background:#168449;
-}
-
-#pause{
-background:#bd7614;
+background:#d8323c;
 }
 
 #sound{
-background:#76258c;
+background:#1684ba;
 }
 
-#back{
+#music{
+background:#7950a5;
+}
+
+#home{
 background:#555;
 }
 
-/* ================= القواعد ================= */
+/* النتيجة */
 
-#rules{
-position:fixed;
-inset:0;
+#result{
 display:none;
-align-items:center;
-justify-content:center;
-padding:12px;
-background:#000d;
+position:absolute;
+left:6%;
+right:6%;
+top:17%;
+background:rgba(10,18,23,.97);
+border:2px solid #fff;
+border-radius:16px;
+padding:15px;
+text-align:center;
 z-index:100;
 }
 
-.rulesBox{
-width:94%;
-max-width:440px;
-max-height:90%;
+#resultText{
+line-height:1.8;
+font-size:15px;
+}
+
+#next{
+background:#10a95b;
+}
+
+/* القواعد */
+
+#rules{
+display:none;
+width:100%;
+height:100%;
 overflow:auto;
-padding:18px;
-border-radius:20px;
-background:#293f53;
-line-height:1.7;
+padding:15px;
+background:#172832;
+touch-action:auto;
+}
+
+.rulesBox{
+max-width:600px;
+margin:auto;
+padding:17px;
+border-radius:15px;
+background:#263e4b;
+line-height:1.8;
 }
 
 .rulesBox h2{
@@ -351,98 +297,74 @@ text-align:center;
 margin-top:0;
 }
 
-.rulesBox p{
-margin:7px 0;
-}
-
-.rulesBox button{
+#backRules{
+display:block;
 width:100%;
-padding:13px;
-background:#666;
-font-size:16px;
+background:#10a95b;
 }
 
-/* ================= مناسب للموبايل ================= */
-
-@media(max-width:600px){
+@media(max-height:500px){
 
 #hud{
-grid-template-columns:1fr auto auto auto 1fr;
-}
-
-.hud{
-font-size:10px;
-padding:5px 3px;
-}
-
-.hudName{
-max-width:65px;
-}
-
-#time{
-font-size:14px;
-}
-
-#roundInfo{
+height:43px;
 font-size:9px;
 }
 
-#controls{
-grid-template-columns:repeat(3,1fr);
-}
-
-.gameBtn{
-font-size:11px;
-min-height:41px;
+#canvas{
+top:43px;
+bottom:105px;
+height:calc(100% - 148px);
 }
 
 #message{
-width:min(310px,84%);
+top:47px;
+font-size:10px;
 }
 
-.names{
-grid-template-columns:1fr;
+#meters{
+bottom:54px;
+height:43px;
 }
 
-.menu{
-padding:15px;
+#gameButtons{
+min-height:52px;
 }
 
-.menu button{
-min-height:45px;
+#gameButtons button{
+font-size:10px;
+padding:6px 8px;
+margin:2px;
+}
+
+.meterTitle{
+font-size:8px;
+}
+
+.bar{
+height:7px;
 }
 
 }
 
-/* وضع أفقي: تحسين المساحة فقط، بدون إجبار الهاتف */
-@media(orientation:landscape){
+@media(min-width:750px){
 
-#page{
-align-items:flex-start;
-padding-top:8px;
+#hud{
+height:62px;
+font-size:14px;
 }
 
-.menu{
-max-width:560px;
-padding:12px 18px;
+#canvas{
+top:62px;
+bottom:125px;
+height:calc(100% - 187px);
 }
 
-.menu h1{
-margin:0 0 3px;
+#meters{
+bottom:70px;
 }
 
-.menu button{
-margin:5px 0;
-min-height:40px;
-padding:8px;
-}
-
-#controls{
-bottom:5px;
-}
-
-.gameBtn{
-min-height:39px;
+#gameButtons{
+min-height:65px;
 }
 
 }
@@ -451,214 +373,85 @@ min-height:39px;
 
 <body>
 
-<!-- =====================================================
-     القائمة
-===================================================== -->
+<!-- ================= القائمة ================= -->
 
 <div id="page">
 
-<div class="menu">
-
-<h1>🎾 الحائط الصعب</h1>
+<div class="title">🎾 الحائط الصعب</div>
 
 <div class="subtitle">
-اضرب الكرة ودافع عن شبكتك
+لعبة مواجهة طولية — لاعب أسفل الملعب ولاعب أعلى الملعب
 </div>
 
-<div class="optionTitle">
-👥 أسماء اللاعبين
-</div>
+<div class="box">
 
-<div class="names">
+<h3>👥 طريقة اللعب</h3>
 
-<div class="nameBox">
-<label>🔴 اللاعب الأحمر</label>
-<input id="redName" value="أحمد" maxlength="14">
-</div>
-
-<div class="nameBox">
-<label>🔵 اللاعب الأزرق</label>
-<input id="blueName" value="محمد" maxlength="14">
-</div>
-
-</div>
-
-<div class="optionTitle">
-🎮 نوع اللعب
-</div>
-
-<div class="options">
-
-<button id="b1" class="selected">
-👥 لاعبان
+<button id="pvp" class="sel" type="button">
+👤 لاعب ضد لاعب
 </button>
 
-<button id="b2">
-🤖 كمبيوتر
-</button>
-
-<button id="b4">
-📖 القواعد
+<button id="cpu" type="button">
+🤖 لاعب ضد الكمبيوتر
 </button>
 
 </div>
 
-<div class="optionTitle">
-⏱️ مدة الجولة
-</div>
+<div class="box">
 
-<div class="options">
+<h3>🏷️ أسماء اللاعبين</h3>
 
-<button id="time60" class="selected">
-60 ثانية
-</button>
-
-<button id="time90">
-90 ثانية
-</button>
-
-<button id="time120">
-120 ثانية
-</button>
+<input id="redName" class="input" value="الأحمر">
+<input id="blueName" class="input" value="الأزرق">
 
 </div>
 
-<div class="optionTitle">
-🎯 الصعوبة
-</div>
+<div class="box">
 
-<div class="options">
+<h3>⏱️ مدة الجولة</h3>
 
-<button id="easy" class="selected">
-🟢 سهل
-</button>
-
-<button id="medium">
-🟡 متوسط
-</button>
-
-<button id="hard">
-⚪ صعب
-</button>
+<button id="t60" class="sel" type="button">60 ثانية</button>
+<button id="t90" type="button">90 ثانية</button>
+<button id="t120" type="button">120 ثانية</button>
 
 </div>
 
-<button id="b3">
+<div class="box">
+
+<h3>🎯 الصعوبة</h3>
+
+<button id="easy" class="sel" type="button">سهل</button>
+<button id="medium" type="button">متوسط</button>
+<button id="hard" type="button">صعب</button>
+
+</div>
+
+<div class="box">
+
+<h3>🔊 الصوت والموسيقى</h3>
+
+<button id="menuMusic" type="button">
+🎵 الموسيقى: تشغيل
+</button>
+
+<button id="menuSound" type="button">
+🔊 أصوات اللعب: تشغيل
+</button>
+
+</div>
+
+<button id="start" class="start" type="button">
 ▶️ ابدأ اللعبة
 </button>
 
-<button id="b5">
-🔊 الصوت: تشغيل
-</button>
-
-<button id="b6">
-ℹ️ عن اللعبة
-</button>
-
-<div id="result">
-اختر طريقة اللعب ثم اضغط ابدأ
-</div>
-
-</div>
-</div>
-
-
-<!-- =====================================================
-     اللعبة
-===================================================== -->
-
-<div id="game">
-
-<canvas id="canvas"></canvas>
-
-
-<div id="hud">
-
-<div class="hud red">
-🔴
-<span id="redHudName" class="hudName">أحمد</span>
-:
-<span id="redScore">0</span>
-</div>
-
-<div class="hud">
-🏆
-<span id="stage">1</span>
-</div>
-
-<div class="hud">
-<span id="roundInfo">ج1/3</span>
-</div>
-
-<div class="hud">
-⏱️
-<span id="time">60</span>
-</div>
-
-<div class="hud blue">
-<span id="blueHudName" class="hudName">محمد</span>
-:
-<span id="blueScore">0</span>
-🔵
-</div>
-
-</div>
-
-
-<div id="message">
-
-<div id="messageTitle">
-جاهز
-</div>
-
-<div id="messageText">
-</div>
-
-<div class="messageButtons">
-
-<button id="messageMain">
-▶️ متابعة
-</button>
-
-<button id="messageHome">
-🏠 القائمة
+<button id="rulesButton" class="rulesButton" type="button">
+📖 طريقة اللعب
 </button>
 
 </div>
 
-</div>
 
-
-<div id="controls">
-
-<button class="gameBtn" id="back">
-🏠 القائمة
-</button>
-
-<button class="gameBtn" id="pause">
-⏸️ إيقاف
-</button>
-
-<button class="gameBtn" id="normalHit">
-🏓 اضرب
-</button>
-
-<button class="gameBtn" id="strong">
-💥 قوية
-</button>
-
-<button class="gameBtn" id="sound">
-🔊 صوت
-</button>
-
-</div>
-
-</div>
-
-
-<!-- =====================================================
-     القواعد
-===================================================== -->
+<!-- ================= القواعد ================= -->
 
 <div id="rules">
 
@@ -666,30 +459,160 @@ min-height:39px;
 
 <h2>📖 طريقة اللعب</h2>
 
-<p>🔴 اللاعب الأحمر يدافع عن الشبكة الموجودة في أسفل الملعب.</p>
+<p>🎾 الأحمر يدافع عن الشبكة الموجودة أسفل الملعب.</p>
 
-<p>🔵 اللاعب الأزرق يدافع عن الشبكة الموجودة في أعلى الملعب.</p>
+<p>🎾 الأزرق يدافع عن الشبكة الموجودة أعلى الملعب.</p>
 
-<p>🎾 حرّك اللاعب والمضرب بالسحب على الشاشة.</p>
+<p>👆 اسحب المضرب بإصبعك لتحريك اللاعب.</p>
 
-<p>🏓 اضرب الكرة بالمضرب وأرسلها ناحية اللاعب الآخر.</p>
+<p>👥 في وضع لاعب ضد لاعب يمكن للاعبين اللعب بلمستين في نفس الوقت.</p>
 
-<p>💥 زر «قوية» يعطي الكرة سرعة أكبر.</p>
+<p>🤖 في وضع الكمبيوتر يتحرك الأزرق تلقائيًا.</p>
 
-<p>🥅 إذا دخلت الكرة شبكة لاعب يحصل الخصم على نقطة.</p>
+<p>💥 اضغط تسديدة قوية لتقوية الضربة التالية.</p>
 
-<p>🏇 الحواجز الموجودة في الملعب ليست جدرانًا كاملة؛ يمكن للكرة المرور حولها أو فوقها أو تحتها.</p>
+<p>⚽ إذا دخلت الكرة شبكة اللاعب يخسر النقطة.</p>
 
-<p>⏱️ كل جولة لها مدة محددة.</p>
+<p>📊 شريط سرعة الكرة يتغير أثناء اللعب.</p>
 
-<p>🏆 كل مرحلة تتكون من 3 جولات.</p>
+<p>📊 شريط سرعة المضرب يوضح سرعة الحركة.</p>
 
-<p>➡️ بعد الجولة الثالثة تبدأ مرحلة جديدة.</p>
+<p>🏆 كل مرحلة بها 3 جولات.</p>
 
-<p>📱 اللعبة تعمل في الوضع الرأسي والأفقي ولا تجبر الهاتف على التدوير.</p>
+<p>🔄 بعد الجولة الثالثة تبدأ مرحلة جديدة.</p>
 
-<button id="closeRules">
-إغلاق
+<button id="backRules" type="button">
+↩️ رجوع للقائمة
+</button>
+
+</div>
+
+</div>
+
+
+<!-- ================= اللعبة ================= -->
+
+<div id="game">
+
+<div id="hud">
+
+<div class="red">
+🟥 <span id="redGameName">الأحمر</span>
+:
+<span id="redScore">0</span>
+</div>
+
+<div>
+🏆 <span id="stage">1</span>
+</div>
+
+<div>
+🔄 <span id="round">1</span>/3
+</div>
+
+<div>
+⏱️ <span id="time">60</span>
+</div>
+
+<div class="blue">
+🟦 <span id="blueGameName">الأزرق</span>
+:
+<span id="blueScore">0</span>
+</div>
+
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div id="message">
+🎾 جاهز
+</div>
+
+
+<!-- أشرطة السرعة -->
+
+<div id="meters">
+
+<div class="meter">
+
+<div class="meterTitle">
+⚽ سرعة الكرة: <span id="ballSpeedText">0</span>
+</div>
+
+<div class="bar">
+<div id="ballSpeedBar" class="fill"></div>
+</div>
+
+</div>
+
+<div class="meter">
+
+<div class="meterTitle">
+🟥 سرعة المضرب: <span id="redSpeedText">0</span>
+</div>
+
+<div class="bar">
+<div id="redSpeedBar" class="fill"></div>
+</div>
+
+</div>
+
+<div class="meter">
+
+<div class="meterTitle">
+🟦 سرعة المضرب: <span id="blueSpeedText">0</span>
+</div>
+
+<div class="bar">
+<div id="blueSpeedBar" class="fill"></div>
+</div>
+
+</div>
+
+</div>
+
+
+<div id="gameButtons">
+
+<button id="strong" type="button">
+💥 قوية
+</button>
+
+<button id="pause" type="button">
+⏸️ إيقاف
+</button>
+
+<button id="restart" type="button">
+🔄 إعادة
+</button>
+
+<button id="sound" type="button">
+🔊 صوت
+</button>
+
+<button id="music" type="button">
+🎵 موسيقى
+</button>
+
+<button id="home" type="button">
+🏠 القائمة
+</button>
+
+</div>
+
+
+<div id="result">
+
+<h2 id="resultTitle">🏆 نهاية الجولة</h2>
+
+<div id="resultText"></div>
+
+<button id="next" type="button">
+▶️ الجولة التالية
+</button>
+
+<button id="resultHome" type="button">
+🏠 القائمة
 </button>
 
 </div>
@@ -698,666 +621,340 @@ min-height:39px;
 
 
 <script>
-(function(){
-
-"use strict";
 
 /* =====================================================
-   العناصر
+   الإعدادات
 ===================================================== */
 
-var page=document.getElementById("page");
-var game=document.getElementById("game");
-var canvas=document.getElementById("canvas");
-var ctx=canvas.getContext("2d");
+let mode="pvp";
 
-var b1=document.getElementById("b1");
-var b2=document.getElementById("b2");
-var b3=document.getElementById("b3");
-var b4=document.getElementById("b4");
-var b5=document.getElementById("b5");
-var b6=document.getElementById("b6");
+let roundDuration=60;
 
-var time60=document.getElementById("time60");
-var time90=document.getElementById("time90");
-var time120=document.getElementById("time120");
+let difficulty="easy";
 
-var easy=document.getElementById("easy");
-var medium=document.getElementById("medium");
-var hard=document.getElementById("hard");
+let musicOn=true;
 
-var redNameInput=document.getElementById("redName");
-var blueNameInput=document.getElementById("blueName");
+let soundOn=true;
 
-var redHudName=document.getElementById("redHudName");
-var blueHudName=document.getElementById("blueHudName");
+let stage=1;
 
-var redScoreEl=document.getElementById("redScore");
-var blueScoreEl=document.getElementById("blueScore");
-var stageEl=document.getElementById("stage");
-var roundInfo=document.getElementById("roundInfo");
-var timeEl=document.getElementById("time");
+let round=1;
 
-var result=document.getElementById("result");
+let redScore=0;
 
-var rules=document.getElementById("rules");
-var closeRules=document.getElementById("closeRules");
+let blueScore=0;
 
-var back=document.getElementById("back");
-var pause=document.getElementById("pause");
-var normalHit=document.getElementById("normalHit");
-var strong=document.getElementById("strong");
-var sound=document.getElementById("sound");
+let timeLeft=60;
 
-var message=document.getElementById("message");
-var messageTitle=document.getElementById("messageTitle");
-var messageText=document.getElementById("messageText");
-var messageMain=document.getElementById("messageMain");
-var messageHome=document.getElementById("messageHome");
+let running=false;
+
+let paused=false;
+
+let roundEnded=false;
+
+let strongReady=false;
+
+let animationId=null;
+
+let lastFrame=0;
+
+let lastClock=0;
 
 
 /* =====================================================
-   إعدادات
+   الكانفاس
 ===================================================== */
 
-var mode="pvp";
+const canvas=document.getElementById("canvas");
 
-var duration=60;
+const ctx=canvas.getContext("2d");
 
-var difficulty="easy";
-
-var soundOn=true;
-
-
-/* =====================================================
-   حالة اللعبة
-===================================================== */
-
-var W=0;
-var H=0;
-
-var running=false;
-var paused=false;
-
-var animationId=0;
-var timerId=0;
-
-var stage=1;
-var round=1;
-
-var redScore=0;
-var blueScore=0;
-
-var timeLeft=60;
-
-var roundEnded=false;
-
-var server="red";
-
-var pointLock=false;
-
-
-/* =====================================================
-   الصوت
-===================================================== */
-
-var audioCtx=null;
-
-function initAudio(){
-
-try{
-
-if(!audioCtx){
-
-var AC=
-window.AudioContext||
-window.webkitAudioContext;
-
-if(!AC)return;
-
-audioCtx=new AC();
-
-}
-
-if(audioCtx.state==="suspended"){
-
-audioCtx.resume();
-
-}
-
-}catch(e){}
-
-}
-
-
-function tone(freq,duration,type,volume){
-
-if(!soundOn)return;
-
-initAudio();
-
-if(!audioCtx)return;
-
-try{
-
-var osc=
-audioCtx.createOscillator();
-
-var gain=
-audioCtx.createGain();
-
-osc.type=type||"sine";
-
-osc.frequency.value=freq;
-
-gain.gain.setValueAtTime(
-0.0001,
-audioCtx.currentTime
-);
-
-gain.gain.exponentialRampToValueAtTime(
-volume||0.06,
-audioCtx.currentTime+0.01
-);
-
-gain.gain.exponentialRampToValueAtTime(
-0.0001,
-audioCtx.currentTime+duration
-);
-
-osc.connect(gain);
-gain.connect(audioCtx.destination);
-
-osc.start();
-
-osc.stop(
-audioCtx.currentTime+duration+0.02
-);
-
-}catch(e){}
-
-}
-
-
-function playHitSound(){
-
-tone(230,.06,"triangle",.09);
-
-}
-
-
-function playBallSound(){
-
-tone(430,.05,"sine",.055);
-
-}
-
-
-function playNetSound(){
-
-tone(520,.1,"triangle",.1);
-
-setTimeout(function(){
-
-tone(760,.12,"sine",.06);
-
-},80);
-
-}
-
-
-function playStrongSound(){
-
-tone(90,.12,"sawtooth",.12);
-
-setTimeout(function(){
-
-tone(300,.08,"square",.07);
-
-},70);
-
-}
-
-
-function playStageSound(){
-
-tone(420,.08,"sine",.06);
-
-setTimeout(function(){
-
-tone(600,.08,"sine",.06);
-
-},100);
-
-setTimeout(function(){
-
-tone(850,.12,"triangle",.07);
-
-},200);
-
-}
-
-
-/* =====================================================
-   اختيار الوضع
-===================================================== */
-
-function clearModeButtons(){
-
-b1.classList.remove("selected");
-b2.classList.remove("selected");
-
-}
-
-b1.onclick=function(){
-
-mode="pvp";
-
-clearModeButtons();
-
-b1.classList.add("selected");
-
-blueNameInput.disabled=false;
-
-if(blueNameInput.value==="الكمبيوتر"){
-
-blueNameInput.value="محمد";
-
-}
-
-result.innerHTML="👥 وضع لاعبين";
-
-};
-
-
-b2.onclick=function(){
-
-mode="cpu";
-
-clearModeButtons();
-
-b2.classList.add("selected");
-
-blueNameInput.value="الكمبيوتر";
-
-blueNameInput.disabled=true;
-
-result.innerHTML="🤖 لاعب ضد الكمبيوتر";
-
-};
-
-
-/* =====================================================
-   الوقت
-===================================================== */
-
-function selectTime(value){
-
-duration=value;
-
-time60.classList.remove("selected");
-time90.classList.remove("selected");
-time120.classList.remove("selected");
-
-if(value===60){
-time60.classList.add("selected");
-}
-
-if(value===90){
-time90.classList.add("selected");
-}
-
-if(value===120){
-time120.classList.add("selected");
-}
-
-result.innerHTML=
-"⏱️ مدة الجولة: "+value+" ثانية";
-
-}
-
-time60.onclick=function(){
-selectTime(60);
-};
-
-time90.onclick=function(){
-selectTime(90);
-};
-
-time120.onclick=function(){
-selectTime(120);
-};
-
-
-/* =====================================================
-   الصعوبة
-===================================================== */
-
-function selectDifficulty(value){
-
-difficulty=value;
-
-easy.classList.remove("selected");
-medium.classList.remove("selected");
-hard.classList.remove("selected");
-
-if(value==="easy"){
-easy.classList.add("selected");
-}
-
-if(value==="medium"){
-medium.classList.add("selected");
-}
-
-if(value==="hard"){
-hard.classList.add("selected");
-}
-
-result.innerHTML=
-"🎯 الصعوبة: "+
-(value==="easy"?"سهل":
- value==="medium"?"متوسط":"صعب");
-
-}
-
-easy.onclick=function(){
-selectDifficulty("easy");
-};
-
-medium.onclick=function(){
-selectDifficulty("medium");
-};
-
-hard.onclick=function(){
-selectDifficulty("hard");
-};
-
-
-/* =====================================================
-   القواعد
-===================================================== */
-
-b4.onclick=function(){
-
-rules.style.display="flex";
-
-};
-
-closeRules.onclick=function(){
-
-rules.style.display="none";
-
-};
-
-
-/* =====================================================
-   عن اللعبة
-===================================================== */
-
-b6.onclick=function(){
-
-result.innerHTML=
-"🎾 لعبة حائط الصعب<br>"+
-"👥 لاعبان أو 🤖 كمبيوتر<br>"+
-"🏆 3 جولات في كل مرحلة<br>"+
-"📱 تعمل رأسيًا وأفقيًا";
-
-};
-
-
-/* =====================================================
-   الصوت
-===================================================== */
-
-function updateSoundText(){
-
-b5.textContent=
-soundOn?
-"🔊 الصوت: تشغيل":
-"🔇 الصوت: إيقاف";
-
-sound.textContent=
-soundOn?
-"🔊 صوت":
-"🔇 صوت";
-
-}
-
-b5.onclick=function(){
-
-soundOn=!soundOn;
-
-if(soundOn){
-
-initAudio();
-
-tone(600,.08);
-
-}
-
-updateSoundText();
-
-};
-
-sound.onclick=function(){
-
-soundOn=!soundOn;
-
-if(soundOn){
-
-initAudio();
-
-tone(600,.08);
-
-}
-
-updateSoundText();
-
-};
-
-updateSoundText();
-
-
-/* =====================================================
-   الكائنات
-===================================================== */
-
-var ball={
-
-x:0,
-y:0,
-r:9,
-vx:0,
-vy:0,
-color:"#ffffff"
-
-};
-
-var redPlayer={
-
-x:0,
-y:0,
-w:66,
-h:22
-
-};
-
-var bluePlayer={
-
-x:0,
-y:0,
-w:66,
-h:22
-
-};
-
-var redNet={
-x:0,
-y:0,
-w:0,
-h:0
-};
-
-var blueNet={
-x:0,
-y:0,
-w:0,
-h:0
-};
-
-var hurdles=[];
-
-
-/* =====================================================
-   المقاسات
-===================================================== */
-
-function resize(){
-
-W=window.innerWidth;
-
-H=window.innerHeight;
-
-var dpr=
-window.devicePixelRatio||1;
-
-canvas.width=
-Math.floor(W*dpr);
-
-canvas.height=
-Math.floor(H*dpr);
-
-canvas.style.width=
-W+"px";
-
-canvas.style.height=
-H+"px";
-
-ctx.setTransform(
-dpr,0,0,dpr,0,0
-);
-
-positionObjects();
-
-draw();
-
-}
-
-window.addEventListener(
-"resize",
-resize
-);
-
-window.addEventListener(
-"orientationchange",
-function(){
-
-setTimeout(
-resize,
-150
-);
-
-}
-);
-
-
-/* =====================================================
-   وضع العناصر
-===================================================== */
-
-function positionObjects(){
-
-redNet.x=W*.16;
-redNet.y=H*.89;
-redNet.w=W*.68;
-redNet.h=Math.max(30,H*.055);
-
-blueNet.x=W*.16;
-blueNet.y=H*.055;
-blueNet.w=W*.68;
-blueNet.h=Math.max(30,H*.055);
-
-if(!running){
-
-redPlayer.x=W/2;
-redPlayer.y=H*.73;
-
-bluePlayer.x=W/2;
-bluePlayer.y=H*.25;
-
-}
-
-clampPlayers();
-
-createHurdles();
-
-}
+let W=0;
+let H=0;
 
 
 /* =====================================================
    اللاعبين
 ===================================================== */
 
-function clampPlayers(){
+const red={
 
-var bottomLimit=
-H-
-Math.max(70,H*.13);
+x:.5,
 
-var topLimit=
-Math.max(90,H*.13);
+y:.88,
 
-redPlayer.x=Math.max(
-redPlayer.w/2+8,
-Math.min(
-W-redPlayer.w/2-8,
-redPlayer.x
-)
-);
+w:95,
 
-bluePlayer.x=Math.max(
-bluePlayer.w/2+8,
-Math.min(
-W-bluePlayer.w/2-8,
-bluePlayer.x
-)
-);
+h:23,
 
-redPlayer.y=Math.max(
-H*.52,
-Math.min(
-bottomLimit,
-redPlayer.y
-)
-);
+lastX:.5,
 
-bluePlayer.y=Math.max(
-topLimit,
-Math.min(
-H*.48,
-bluePlayer.y
-)
-);
+speed:0
+
+};
+
+const blue={
+
+x:.5,
+
+y:.12,
+
+w:95,
+
+h:23,
+
+lastX:.5,
+
+speed:0
+
+};
 
 
-/*
-  الأحمر في النصف السفلي.
-*/
+/* =====================================================
+   الكرة
+===================================================== */
 
-if(redPlayer.y<H*.50){
-redPlayer.y=H*.50;
+const ball={
+
+x:.5,
+
+y:.5,
+
+vx:.25,
+
+vy:.38,
+
+r:11,
+
+scored:false
+
+};
+
+
+/* =====================================================
+   الحواجز
+===================================================== */
+
+let hurdles=[];
+
+
+/* =====================================================
+   الصوت
+===================================================== */
+
+let audio=null;
+
+let musicTimer=null;
+
+function getAudio(){
+
+try{
+
+const AC=
+window.AudioContext||
+window.webkitAudioContext;
+
+if(!AC) return null;
+
+if(!audio){
+
+audio=new AC();
+
+}
+
+if(audio.state==="suspended"){
+
+audio.resume();
+
+}
+
+return audio;
+
+}catch(e){
+
+return null;
+
+}
+
+}
+
+function beep(freq,duration,volume){
+
+if(!soundOn) return;
+
+const ac=getAudio();
+
+if(!ac) return;
+
+try{
+
+const osc=ac.createOscillator();
+
+const gain=ac.createGain();
+
+osc.type="sine";
+
+osc.frequency.value=freq;
+
+gain.gain.value=volume||.06;
+
+osc.connect(gain);
+
+gain.connect(ac.destination);
+
+osc.start();
+
+osc.stop(ac.currentTime+duration);
+
+}catch(e){}
+
 }
 
 
-/*
-  الأزرق في النصف العلوي.
-*/
+/* صوت المضرب */
 
-if(bluePlayer.y>H*.50){
-bluePlayer.y=H*.50;
+function paddleSound(){
+
+beep(250,.055,.07);
+
+}
+
+
+/* صوت الكرة */
+
+function ballSound(){
+
+beep(420,.045,.045);
+
+}
+
+
+/* الجمهور */
+
+function crowdSound(){
+
+if(!soundOn) return;
+
+const ac=getAudio();
+
+if(!ac) return;
+
+try{
+
+const osc=ac.createOscillator();
+
+const gain=ac.createGain();
+
+osc.type="sawtooth";
+
+osc.frequency.value=120;
+
+gain.gain.value=.035;
+
+osc.connect(gain);
+
+gain.connect(ac.destination);
+
+osc.start();
+
+osc.frequency.exponentialRampToValueAtTime(
+420,
+ac.currentTime+.5
+);
+
+osc.stop(ac.currentTime+.55);
+
+}catch(e){}
+
+}
+
+
+/* موسيقى */
+
+function startMusic(){
+
+if(!musicOn) return;
+
+if(musicTimer) return;
+
+musicTimer=setInterval(function(){
+
+if(!running||paused||!musicOn) return;
+
+beep(220,.08,.018);
+
+setTimeout(function(){
+
+if(running&&!paused&&musicOn){
+
+beep(330,.08,.018);
+
+}
+
+},130);
+
+setTimeout(function(){
+
+if(running&&!paused&&musicOn){
+
+beep(440,.08,.018);
+
+}
+
+},260);
+
+},1900);
+
+}
+
+function stopMusic(){
+
+if(musicTimer){
+
+clearInterval(musicTimer);
+
+musicTimer=null;
+
 }
 
 }
+
+
+/* =====================================================
+   الحجم
+===================================================== */
+
+function resize(){
+
+const rect=canvas.getBoundingClientRect();
+
+W=Math.max(300,rect.width);
+
+H=Math.max(200,rect.height);
+
+const dpr=Math.min(window.devicePixelRatio||1,2);
+
+canvas.width=Math.floor(W*dpr);
+
+canvas.height=Math.floor(H*dpr);
+
+ctx.setTransform(dpr,0,0,dpr,0,0);
+
+red.w=Math.max(70,Math.min(125,W*.20));
+
+blue.w=red.w;
+
+red.h=Math.max(17,Math.min(27,H*.05));
+
+blue.h=red.h;
+
+ball.r=Math.max(8,Math.min(14,W*.018));
+
+createHurdles();
+
+}
+
+window.addEventListener("resize",resize);
 
 
 /* =====================================================
@@ -1368,1489 +965,26 @@ function createHurdles(){
 
 hurdles=[];
 
-if(!W||!H)return;
+let count=Math.min(6,2+stage);
 
-var count=
-Math.min(
-2+Math.floor((stage-1)/2),
-5
-);
+for(let i=0;i<count;i++){
 
-for(
-var i=0;
-i<count;
-i++
-){
+hurdles.push({
 
-var side=
-i%2===0?0:1;
+x:.10+Math.random()*.75,
 
-var h={
+y:.25+Math.random()*.50,
 
-x:
-W*(0.18+Math.random()*0.58),
+w:.08+Math.random()*.12,
 
-y:
-H*(0.36+Math.random()*0.30),
+h:.025+Math.random()*.035,
 
-w:
-Math.max(60,W*.12),
+speed:(Math.random()>.5?1:-1)*
+(.00012+stage*.000012)
 
-h:
-Math.max(18,H*.035),
+});
 
-vx:
-(side===0?1:-1)*
-(0.35+Math.min(stage*.04,.8))
-
-};
-
-hurdles.push(h);
-
-}
-
-}
-
-
-/* =====================================================
-   الكرة
-===================================================== */
-
-function resetBall(){
-
-ball.x=W/2;
-
-ball.y=H/2;
-
-ball.color="#ffffff";
-
-var speed;
-
-if(difficulty==="easy"){
-speed=3.4;
-}
-
-else if(difficulty==="medium"){
-speed=4.5;
-}
-
-else{
-speed=5.7;
-}
-
-speed+=Math.min(stage*.08,1.6);
-
-if(server==="red"){
-
-ball.vx=
-(Math.random()>.5?1:-1)*
-speed*.28;
-
-ball.vy=
--speed;
-
-}
-
-else{
-
-ball.vx=
-(Math.random()>.5?1:-1)*
-speed*.28;
-
-ball.vy=
-speed;
-
-}
-
-}
-
-
-/* =====================================================
-   بداية الجولة
-===================================================== */
-
-function startGame(){
-
-initAudio();
-
-page.style.display="none";
-
-game.style.display="block";
-
-stage=1;
-
-round=1;
-
-redScore=0;
-
-blueScore=0;
-
-timeLeft=duration;
-
-server="red";
-
-roundEnded=false;
-
-pointLock=false;
-
-redHudName.textContent=
-cleanName(
-redNameInput.value,
-"أحمد"
-);
-
-blueHudName.textContent=
-mode==="cpu"?
-"الكمبيوتر":
-cleanName(
-blueNameInput.value,
-"محمد"
-);
-
-redScoreEl.textContent="0";
-
-blueScoreEl.textContent="0";
-
-stageEl.textContent="1";
-
-roundInfo.textContent="ج1/3";
-
-timeEl.textContent=
-duration;
-
-pause.textContent="⏸️ إيقاف";
-
-paused=false;
-
-running=true;
-
-positionObjects();
-
-resetBall();
-
-hideMessage();
-
-startTimer();
-
-cancelAnimationFrame(animationId);
-
-animationId=
-requestAnimationFrame(loop);
-
-tone(500,.08);
-
-setTimeout(function(){
-
-tone(700,.08);
-
-},100);
-
-}
-
-
-/* =====================================================
-   تنظيف الاسم
-===================================================== */
-
-function cleanName(value,fallback){
-
-value=String(value||"").trim();
-
-if(!value)return fallback;
-
-return value.substring(0,14);
-
-}
-
-
-/* =====================================================
-   المؤقت
-===================================================== */
-
-function startTimer(){
-
-clearInterval(timerId);
-
-timerId=setInterval(
-function(){
-
-if(!running||paused)return;
-
-timeLeft--;
-
-if(timeLeft<0){
-timeLeft=0;
-}
-
-timeEl.textContent=timeLeft;
-
-if(timeLeft<=0){
-
-endRound();
-
-}
-
-},
-1000
-);
-
-}
-
-
-/* =====================================================
-   إيقاف اللعبة
-===================================================== */
-
-function stopGame(){
-
-running=false;
-
-paused=false;
-
-roundEnded=false;
-
-pointLock=false;
-
-clearInterval(timerId);
-
-cancelAnimationFrame(animationId);
-
-game.style.display="none";
-
-page.style.display="flex";
-
-result.innerHTML=
-"🎾 عدت إلى القائمة";
-
-}
-
-
-/* =====================================================
-   زر القائمة
-===================================================== */
-
-back.onclick=function(){
-
-stopGame();
-
-};
-
-
-/* =====================================================
-   إيقاف مؤقت
-===================================================== */
-
-pause.onclick=function(){
-
-if(!running)return;
-
-paused=!paused;
-
-if(paused){
-
-pause.textContent="▶️ متابعة";
-
-showMessage(
-"⏸️ اللعبة متوقفة",
-"يمكنك متابعة المباراة من نفس المكان.",
-"▶️ متابعة",
-true
-);
-
-messageMain.onclick=function(){
-
-paused=false;
-
-pause.textContent="⏸️ إيقاف";
-
-hideMessage();
-
-};
-
-}
-
-else{
-
-pause.textContent="⏸️ إيقاف";
-
-hideMessage();
-
-}
-
-};
-
-
-/* =====================================================
-   حركة اللاعب باللمس
-===================================================== */
-
-var redPointer=null;
-
-var bluePointer=null;
-
-function getPosition(e){
-
-var rect=
-canvas.getBoundingClientRect();
-
-return {
-
-x:e.clientX-rect.left,
-
-y:e.clientY-rect.top
-
-};
-
-}
-
-canvas.addEventListener(
-"pointerdown",
-function(e){
-
-if(!running||paused)return;
-
-try{
-canvas.setPointerCapture(
-e.pointerId
-);
-}catch(err){}
-
-var p=
-getPosition(e);
-
-/*
-  يمين الشاشة = الأحمر.
-  يسار الشاشة = الأزرق.
-*/
-
-if(
-mode==="pvp" &&
-p.x<W*.5
-){
-
-bluePointer=e.pointerId;
-
-bluePlayer.x=p.x;
-
-bluePlayer.y=p.y;
-
-}
-
-else{
-
-redPointer=e.pointerId;
-
-redPlayer.x=p.x;
-
-redPlayer.y=p.y;
-
-}
-
-clampPlayers();
-
-e.preventDefault();
-
-},
-false
-);
-
-
-canvas.addEventListener(
-"pointermove",
-function(e){
-
-if(!running||paused)return;
-
-var p=
-getPosition(e);
-
-if(e.pointerId===redPointer){
-
-redPlayer.x=p.x;
-redPlayer.y=p.y;
-
-}
-
-if(
-e.pointerId===bluePointer
-){
-
-bluePlayer.x=p.x;
-bluePlayer.y=p.y;
-
-}
-
-clampPlayers();
-
-e.preventDefault();
-
-},
-false
-);
-
-
-canvas.addEventListener(
-"pointerup",
-releasePointer,
-false
-);
-
-canvas.addEventListener(
-"pointercancel",
-releasePointer,
-false
-);
-
-function releasePointer(e){
-
-if(e.pointerId===redPointer){
-redPointer=null;
-}
-
-if(e.pointerId===bluePointer){
-bluePointer=null;
-}
-
-}
-
-
-/* =====================================================
-   الكمبيوتر
-===================================================== */
-
-function updateCPU(){
-
-if(mode!=="cpu")return;
-
-var reaction;
-
-if(difficulty==="easy"){
-reaction=.035;
-}
-
-else if(difficulty==="medium"){
-reaction=.070;
-}
-
-else{
-reaction=.115;
-}
-
-var targetX=ball.x;
-
-bluePlayer.x+=
-(targetX-bluePlayer.x)*
-reaction;
-
-/*
-  الكمبيوتر لا يترك نصفه.
-*/
-
-bluePlayer.y=
-H*.25+
-(ball.y-H*.25)*.12;
-
-if(bluePlayer.y>H*.47){
-bluePlayer.y=H*.47;
-}
-
-if(bluePlayer.y<H*.12){
-bluePlayer.y=H*.12;
-}
-
-clampPlayers();
-
-}
-
-
-/* =====================================================
-   اصطدام المضرب
-===================================================== */
-
-function hitRedPaddle(){
-
-if(
-ball.vy<=0
-)return false;
-
-return(
-
-ball.x>
-redPlayer.x-redPlayer.w/2-ball.r&&
-
-ball.x<
-redPlayer.x+redPlayer.w/2+ball.r&&
-
-ball.y>
-redPlayer.y-redPlayer.h/2-ball.r&&
-
-ball.y<
-redPlayer.y+redPlayer.h/2+ball.r
-
-);
-
-}
-
-
-function hitBluePaddle(){
-
-if(
-ball.vy>=0
-)return false;
-
-return(
-
-ball.x>
-bluePlayer.x-bluePlayer.w/2-ball.r&&
-
-ball.x<
-bluePlayer.x+bluePlayer.w/2+ball.r&&
-
-ball.y>
-bluePlayer.y-bluePlayer.h/2-ball.r&&
-
-ball.y<
-bluePlayer.y+bluePlayer.h/2+ball.r
-
-);
-
-}
-
-
-/* =====================================================
-   الضربة
-===================================================== */
-
-function normalHit(){
-
-if(!running||paused)return;
-
-if(
-hitRedPaddle()
-){
-
-sendBallFromRed(false);
-
-return;
-
-}
-
-if(
-hitBluePaddle()
-){
-
-sendBallFromBlue(false);
-
-}
-
-}
-
-
-/* =====================================================
-   الضربة القوية
-===================================================== */
-
-function strongHit(){
-
-if(!running||paused)return;
-
-if(
-hitRedPaddle()
-){
-
-sendBallFromRed(true);
-
-}
-
-else if(
-hitBluePaddle()
-){
-
-sendBallFromBlue(true);
-
-}
-
-else{
-
-/*
-  زر قوية يعطي دفعة فقط إذا
-  كانت الكرة قريبة من اللاعب.
-*/
-
-var d1=
-Math.abs(
-ball.y-redPlayer.y
-);
-
-var d2=
-Math.abs(
-ball.y-bluePlayer.y
-);
-
-if(d1<120){
-
-sendBallFromRed(true);
-
-}
-
-else if(d2<120){
-
-sendBallFromBlue(true);
-
-}
-
-}
-
-}
-
-
-strong.onclick=strongHit;
-
-normalHit.onclick=normalHit;
-
-
-/* =====================================================
-   إرسال الكرة من الأحمر
-===================================================== */
-
-function sendBallFromRed(isStrong){
-
-var speed=
-Math.sqrt(
-ball.vx*ball.vx+
-ball.vy*ball.vy
-);
-
-if(speed<1){
-speed=4;
-}
-
-if(isStrong){
-
-speed+=2;
-
-playStrongSound();
-
-}
-
-else{
-
-playHitSound();
-
-}
-
-speed=Math.min(
-speed,
-difficulty==="hard"?11:9
-);
-
-ball.vy=-Math.abs(speed);
-
-ball.vx=
-(ball.x-redPlayer.x)*
-0.045;
-
-ball.color="#ffffff";
-
-server="blue";
-
-}
-
-
-/* =====================================================
-   إرسال الكرة من الأزرق
-===================================================== */
-
-function sendBallFromBlue(isStrong){
-
-var speed=
-Math.sqrt(
-ball.vx*ball.vx+
-ball.vy*ball.vy
-);
-
-if(speed<1){
-speed=4;
-}
-
-if(isStrong){
-
-speed+=2;
-
-playStrongSound();
-
-}
-
-else{
-
-playHitSound();
-
-}
-
-speed=Math.min(
-speed,
-difficulty==="hard"?11:9
-);
-
-ball.vy=Math.abs(speed);
-
-ball.vx=
-(ball.x-bluePlayer.x)*
-0.045;
-
-ball.color="#ffffff";
-
-server="red";
-
-}
-
-
-/* =====================================================
-   حركة الحواجز
-===================================================== */
-
-function updateHurdles(){
-
-for(
-var i=0;
-i<hurdles.length;
-i++
-){
-
-var h=hurdles[i];
-
-h.x+=h.vx;
-
-if(
-h.x<W*.08 ||
-h.x+h.w>W*.92
-){
-
-h.vx*=-1;
-
-}
-
-}
-
-}
-
-
-/* =====================================================
-   اصطدام الكرة بالحاجز
-===================================================== */
-
-function checkHurdles(){
-
-for(
-var i=0;
-i<hurdles.length;
-i++
-){
-
-var h=hurdles[i];
-
-var closestX=
-Math.max(
-h.x,
-Math.min(
-ball.x,
-h.x+h.w
-)
-);
-
-var closestY=
-Math.max(
-h.y,
-Math.min(
-ball.y,
-h.y+h.h
-)
-);
-
-var dx=
-ball.x-closestX;
-
-var dy=
-ball.y-closestY;
-
-if(
-dx*dx+dy*dy<=
-ball.r*ball.r
-){
-
-if(
-Math.abs(dx)>
-Math.abs(dy)
-){
-
-if(dx<0){
-
-ball.x=
-h.x-ball.r-1;
-
-ball.vx=
--Math.abs(ball.vx);
-
-}
-
-else{
-
-ball.x=
-h.x+h.w+ball.r+1;
-
-ball.vx=
-Math.abs(ball.vx);
-
-}
-
-}
-
-else{
-
-if(dy<0){
-
-ball.y=
-h.y-ball.r-1;
-
-ball.vy=
--Math.abs(ball.vy);
-
 }
-
-else{
-
-ball.y=
-h.y+h.h+ball.r+1;
-
-ball.vy=
-Math.abs(ball.vy);
-
-}
-
-}
-
-tone(140,.05,"triangle",.045);
-
-}
-
-}
-
-}
-
-
-/* =====================================================
-   تحديث الكرة
-===================================================== */
-
-function updateBall(){
-
-if(pointLock)return;
-
-ball.x+=ball.vx;
-
-ball.y+=ball.vy;
-
-
-/* الجانبان */
-
-if(
-ball.x-ball.r<10
-){
-
-ball.x=10+ball.r;
-
-ball.vx=
-Math.abs(ball.vx);
-
-playBallSound();
-
-}
-
-
-if(
-ball.x+ball.r>W-10
-){
-
-ball.x=
-W-10-ball.r;
-
-ball.vx=
--Math.abs(ball.vx);
-
-playBallSound();
-
-}
-
-
-/* المضرب الأحمر */
-
-if(
-hitRedPaddle()
-){
-
-sendBallFromRed(false);
-
-}
-
-
-/* المضرب الأزرق */
-
-if(
-hitBluePaddle()
-){
-
-sendBallFromBlue(false);
-
-}
-
-
-/* الحواجز */
-
-updateHurdles();
-
-checkHurdles();
-
-
-/* =====================================================
-   الشبكة الزرقاء
-===================================================== */
-
-if(
-
-ball.y-ball.r<
-blueNet.y+blueNet.h&&
-
-ball.y+ball.r>
-blueNet.y&&
-
-ball.x>
-blueNet.x&&
-
-ball.x<
-blueNet.x+blueNet.w
-
-){
-
-givePoint("red");
-
-return;
-
-}
-
-
-/* =====================================================
-   الشبكة الحمراء
-===================================================== */
-
-if(
-
-ball.y+ball.r>
-redNet.y&&
-
-ball.y-ball.r<
-redNet.y+redNet.h&&
-
-ball.x>
-redNet.x&&
-
-ball.x<
-redNet.x+redNet.w
-
-){
-
-givePoint("blue");
-
-return;
-
-}
-
-
-/* =====================================================
-   خروج الكرة من الملعب
-===================================================== */
-
-if(
-ball.y<-40
-){
-
-givePoint("red");
-
-return;
-
-}
-
-if(
-ball.y>H+40
-){
-
-givePoint("blue");
-
-return;
-
-}
-
-}
-
-
-/* =====================================================
-   النقطة
-===================================================== */
-
-function givePoint(winner){
-
-if(pointLock||roundEnded)return;
-
-pointLock=true;
-
-if(winner==="red"){
-
-redScore++;
-
-redScoreEl.textContent=
-redScore;
-
-ball.color="#ff4055";
-
-showMessage(
-"🔴 نقطة للأحمر",
-"الكرة دخلت شبكة الأزرق.",
-"",
-false
-);
-
-}
-
-else{
-
-blueScore++;
-
-blueScoreEl.textContent=
-blueScore;
-
-ball.color="#4d91ff";
-
-showMessage(
-"🔵 نقطة للأزرق",
-"الكرة دخلت شبكة الأحمر.",
-"",
-false
-);
-
-}
-
-playNetSound();
-
-setTimeout(
-function(){
-
-if(
-!running||
-roundEnded
-)return;
-
-server=
-winner==="red"?"blue":"red";
-
-resetBall();
-
-pointLock=false;
-
-hideMessage();
-
-},
-800
-);
-
-}
-
-
-/* =====================================================
-   نهاية الجولة
-===================================================== */
-
-function endRound(){
-
-if(roundEnded)return;
-
-roundEnded=true;
-
-running=false;
-
-clearInterval(timerId);
-
-var winner;
-
-if(redScore>blueScore){
-
-winner=
-"🔴 "+redHudName.textContent+
-" يفوز بالجولة";
-
-}
-
-else if(blueScore>redScore){
-
-winner=
-"🔵 "+blueHudName.textContent+
-" يفوز بالجولة";
-
-}
-
-else{
-
-winner="🤝 تعادل";
-
-}
-
-if(round<3){
-
-showMessage(
-"🏆 نهاية الجولة",
-winner+
-"<br><br>"+
-"النتيجة: "+
-redScore+" - "+blueScore,
-"▶️ الجولة التالية",
-true
-);
-
-messageMain.onclick=function(){
-
-round++;
-
-server=
-server==="red"?
-"blue":
-"red";
-
-roundEnded=false;
-
-timeLeft=duration;
-
-roundInfo.textContent=
-"ج"+round+"/3";
-
-timeEl.textContent=
-duration;
-
-running=true;
-
-resetBall();
-
-hideMessage();
-
-startTimer();
-
-};
-
-}
-
-else{
-
-showMessage(
-"🏆 نهاية المرحلة "+stage,
-winner+
-"<br><br>"+
-"نتيجة المرحلة: "+
-redScore+" - "+blueScore+
-"<br><br>"+
-"المرحلة التالية جاهزة.",
-"➡️ المرحلة التالية",
-true
-);
-
-messageMain.onclick=function(){
-
-stage++;
-
-round=1;
-
-redScore=0;
-
-blueScore=0;
-
-redScoreEl.textContent="0";
-
-blueScoreEl.textContent="0";
-
-stageEl.textContent=stage;
-
-roundInfo.textContent="ج1/3";
-
-timeLeft=duration;
-
-timeEl.textContent=duration;
-
-server=
-server==="red"?
-"blue":
-"red";
-
-roundEnded=false;
-
-running=true;
-
-createHurdles();
-
-resetBall();
-
-playStageSound();
-
-hideMessage();
-
-startTimer();
-
-};
-
-}
-
-}
-
-
-/* =====================================================
-   الرسائل
-===================================================== */
-
-function showMessage(
-title,
-text,
-buttonText,
-showHome
-){
-
-messageTitle.textContent=
-title;
-
-messageText.innerHTML=
-text||"";
-
-messageMain.textContent=
-buttonText||"";
-
-messageMain.style.display=
-buttonText?
-"block":
-"none";
-
-messageHome.style.display=
-showHome?
-"block":
-"none";
-
-message.style.display="block";
-
-}
-
-
-function hideMessage(){
-
-message.style.display="none";
-
-}
-
-
-/* =====================================================
-   القائمة من رسالة النتيجة
-===================================================== */
-
-messageHome.onclick=function(){
-
-stopGame();
-
-};
-
-
-/* =====================================================
-   الرسم
-===================================================== */
-
-function draw(){
-
-ctx.clearRect(
-0,
-0,
-W,
-H
-);
-
-
-/* الخلفية */
-
-var bg=
-ctx.createLinearGradient(
-0,
-0,
-0,
-H
-);
-
-bg.addColorStop(
-0,
-"#29485b"
-);
-
-bg.addColorStop(
-0.48,
-"#1d3e4c"
-);
-
-bg.addColorStop(
-1,
-"#10252e"
-);
-
-ctx.fillStyle=bg;
-
-ctx.fillRect(
-0,
-0,
-W,
-H
-);
-
-
-/* الملعب */
-
-ctx.fillStyle="#285c3d";
-
-ctx.fillRect(
-W*.06,
-H*.04,
-W*.88,
-H*.88
-);
-
-
-/* تدرج الملعب */
-
-var floor=
-ctx.createLinearGradient(
-0,
-H*.04,
-0,
-H*.92
-);
-
-floor.addColorStop(
-0,
-"#397c4c"
-);
-
-floor.addColorStop(
-1,
-"#1f5336"
-);
-
-ctx.fillStyle=floor;
-
-ctx.fillRect(
-W*.06,
-H*.04,
-W*.88,
-H*.88
-);
-
-
-/* الحدود */
-
-ctx.strokeStyle=
-"#ffffff66";
-
-ctx.lineWidth=3;
-
-ctx.strokeRect(
-W*.06,
-H*.04,
-W*.88,
-H*.88
-);
-
-
-/* خط المنتصف */
-
-ctx.strokeStyle=
-"#ffffff35";
-
-ctx.lineWidth=2;
-
-ctx.beginPath();
-
-ctx.moveTo(
-W*.06,
-H*.50
-);
-
-ctx.lineTo(
-W*.94,
-H*.50
-);
-
-ctx.stroke();
-
-
-/* مناطق اللعب */
-
-ctx.fillStyle=
-"rgba(220,40,55,.08)";
-
-ctx.fillRect(
-W*.06,
-H*.50,
-W*.88,
-H*.42
-);
-
-ctx.fillStyle=
-"rgba(40,100,220,.08)";
-
-ctx.fillRect(
-W*.06,
-H*.04,
-W*.88,
-H*.46
-);
-
-
-/* الشبكات */
-
-drawNet(
-redNet,
-"#d52b3f",
-"شبكة الأحمر"
-);
-
-drawNet(
-blueNet,
-"#2777dd",
-"شبكة الأزرق"
-);
-
-
-/* الحواجز */
-
-drawHurdles();
-
-
-/* اللاعبين */
-
-drawPlayer(
-redPlayer,
-"#d7192d",
-"#ff6672",
-"🔴"
-);
-
-drawPlayer(
-bluePlayer,
-"#2175dc",
-"#69a7ff",
-"🔵"
-);
-
-
-/* الكرة */
-
-drawBall();
 
 }
 
@@ -2859,308 +993,196 @@ drawBall();
    رسم الشبكة
 ===================================================== */
 
-function drawNet(
-net,
-color,
-label
-){
+function drawNet(y,color){
 
-ctx.fillStyle=
-color+"55";
+const x=W*.04;
+
+const nw=W*.18;
+
+const nh=Math.min(45,H*.08);
+
+ctx.fillStyle="rgba(255,255,255,.14)";
 
 ctx.fillRect(
-net.x,
-net.y,
-net.w,
-net.h
+x,
+y-nh/2,
+nw,
+nh
 );
 
-ctx.strokeStyle=
-color;
+ctx.strokeStyle="#fff";
 
 ctx.lineWidth=3;
 
 ctx.strokeRect(
-net.x,
-net.y,
-net.w,
-net.h
+x,
+y-nh/2,
+nw,
+nh
 );
 
-ctx.strokeStyle=
-"#ffffff55";
+ctx.strokeStyle=color;
 
-ctx.lineWidth=1;
-
-for(
-var x=net.x;
-x<net.x+net.w;
-x+=14
-){
+ctx.lineWidth=4;
 
 ctx.beginPath();
 
-ctx.moveTo(
-x,
-net.y
-);
+ctx.moveTo(x+nw/2,y-nh/2);
 
-ctx.lineTo(
-x,
-net.y+net.h
-);
+ctx.lineTo(x+nw/2,y+nh/2);
 
 ctx.stroke();
-
-}
-
-for(
-var y=net.y;
-y<net.y+net.h;
-y+=10
-){
-
-ctx.beginPath();
-
-ctx.moveTo(
-net.x,
-y
-);
-
-ctx.lineTo(
-net.x+net.w,
-y
-);
-
-ctx.stroke();
-
-}
-
-ctx.fillStyle="#fff";
-
-ctx.font=
-"bold 12px Arial";
-
-ctx.textAlign="center";
-
-ctx.fillText(
-label,
-net.x+net.w/2,
-net.y+net.h/2+4
-);
 
 }
 
 
 /* =====================================================
-   رسم اللاعب والمضرب
+   رسم المضرب
 ===================================================== */
 
-function drawPlayer(
-p,
-bodyColor,
-paddleColor,
-icon
-){
+function drawPaddle(p,color,top){
+
+const x=p.x*W;
+
+const y=p.y*H;
 
 ctx.save();
 
-ctx.translate(
-p.x,
-p.y
-);
+ctx.translate(x,y);
 
+ctx.fillStyle="#613b27";
 
-/* ظل */
+if(top){
 
-ctx.fillStyle=
-"rgba(0,0,0,.3)";
+ctx.fillRect(-6,12,12,25);
 
-ctx.beginPath();
+}else{
 
-ctx.ellipse(
-0,
-18,
-p.w*.55,
-7,
-0,
-0,
-Math.PI*2
-);
+ctx.fillRect(-6,-37,12,25);
 
-ctx.fill();
+}
 
-
-/* جسم */
-
-ctx.fillStyle=
-bodyColor;
+ctx.fillStyle=color;
 
 ctx.beginPath();
 
 ctx.roundRect(
--p.w*.25,
--9,
-p.w*.5,
-30,
-12
-);
-
-ctx.fill();
-
-
-/* الرأس */
-
-ctx.fillStyle="#e1a477";
-
-ctx.beginPath();
-
-ctx.arc(
-0,
--21,
-11,
-0,
-Math.PI*2
-);
-
-ctx.fill();
-
-ctx.strokeStyle="#442d22";
-
-ctx.lineWidth=2;
-
-ctx.stroke();
-
-
-/* المضرب */
-
-ctx.save();
-
-ctx.translate(
-p===redPlayer?
-p.w*.55:
--p.w*.55,
--3
-);
-
-ctx.rotate(
-p===redPlayer?
--0.35:
-0.35
-);
-
-ctx.fillStyle="#70401f";
-
-ctx.fillRect(
--3,
-9,
-6,
-22
-);
-
-ctx.fillStyle="#111";
-
-ctx.beginPath();
-
-ctx.ellipse(
-0,
-0,
-17,
-12,
-0,
-0,
-Math.PI*2
-);
-
-ctx.fill();
-
-ctx.fillStyle=paddleColor;
-
-ctx.beginPath();
-
-ctx.ellipse(
-0,
-0,
-14,
-9,
-0,
-0,
-Math.PI*2
-);
-
-ctx.fill();
-
-ctx.restore();
-
-
-/* العلامة */
-
-ctx.fillStyle="#fff";
-
-ctx.font=
-"bold 12px Arial";
-
-ctx.textAlign="center";
-
-ctx.fillText(
-icon,
-0,
--39
-);
-
-ctx.restore();
-
-}
-
-
-/* =====================================================
-   رسم الكرة
-===================================================== */
-
-function drawBall(){
-
-var glow=
-ctx.createRadialGradient(
-ball.x-3,
-ball.y-3,
-1,
-ball.x,
-ball.y,
-ball.r+5
-);
-
-glow.addColorStop(
-0,
-"#fff"
-);
-
-glow.addColorStop(
-.5,
-ball.color
-);
-
-glow.addColorStop(
-1,
-"#777"
-);
-
-ctx.fillStyle=glow;
-
-ctx.beginPath();
-
-ctx.arc(
-ball.x,
-ball.y,
-ball.r,
-0,
-Math.PI*2
+-p.w/2,
+-p.h/2,
+p.w,
+p.h,
+p.h/2
 );
 
 ctx.fill();
 
 ctx.strokeStyle="#fff";
 
-ctx.lineWidth=1;
+ctx.lineWidth=2;
+
+ctx.stroke();
+
+ctx.restore();
+
+}
+
+
+/* =====================================================
+   رسم الملعب
+===================================================== */
+
+function drawField(){
+
+ctx.clearRect(0,0,W,H);
+
+const g=ctx.createLinearGradient(0,0,0,H);
+
+g.addColorStop(0,"#428b4a");
+
+g.addColorStop(.5,"#58a756");
+
+g.addColorStop(1,"#36763e");
+
+ctx.fillStyle=g;
+
+ctx.fillRect(0,0,W,H);
+
+
+/* خطوط */
+
+ctx.strokeStyle="rgba(255,255,255,.55)";
+
+ctx.lineWidth=2;
+
+ctx.beginPath();
+
+ctx.moveTo(W*.05,H*.5);
+
+ctx.lineTo(W*.95,H*.5);
+
+ctx.stroke();
+
+
+/* الشبكات */
+
+drawNet(H*.95,"#e53935");
+
+drawNet(H*.05,"#1976d2");
+
+
+/* الحواجز */
+
+hurdles.forEach(function(o){
+
+ctx.fillStyle="#866242";
+
+ctx.fillRect(
+o.x*W,
+o.y*H,
+o.w*W,
+o.h*H
+);
+
+ctx.strokeStyle="#d8b083";
+
+ctx.lineWidth=2;
+
+ctx.strokeRect(
+o.x*W,
+o.y*H,
+o.w*W,
+o.h*H
+);
+
+});
+
+
+/* المضارب */
+
+drawPaddle(red,"#e53935",false);
+
+drawPaddle(blue,"#1976d2",true);
+
+
+/* الكرة */
+
+ctx.beginPath();
+
+ctx.arc(
+ball.x*W,
+ball.y*H,
+ball.r,
+0,
+Math.PI*2
+);
+
+ctx.fillStyle="#fff";
+
+ctx.fill();
+
+ctx.strokeStyle="#222";
+
+ctx.lineWidth=3;
 
 ctx.stroke();
 
@@ -3168,108 +1190,101 @@ ctx.stroke();
 
 
 /* =====================================================
-   رسم الحواجز
+   بداية الكرة
 ===================================================== */
 
-function drawHurdles(){
+function serve(){
 
-for(
-var i=0;
-i<hurdles.length;
-i++
-){
+ball.x=.5;
 
-var h=hurdles[i];
+ball.y=.5;
 
+const speed=.34+stage*.012;
 
-/* الظل */
+ball.vx=(Math.random()>.5?1:-1)*speed;
 
-ctx.fillStyle=
-"rgba(0,0,0,.25)";
+ball.vy=(Math.random()>.5?1:-1)*speed;
 
-ctx.beginPath();
+ball.scored=false;
 
-ctx.ellipse(
-h.x+h.w/2,
-h.y+h.h+10,
-h.w*.55,
-5,
-0,
-0,
-Math.PI*2
-);
-
-ctx.fill();
-
-
-/* الأرجل */
-
-ctx.fillStyle="#62401f";
-
-ctx.fillRect(
-h.x+5,
-h.y+h.h-2,
-7,
-22
-);
-
-ctx.fillRect(
-h.x+h.w-12,
-h.y+h.h-2,
-7,
-22
-);
-
-
-/* الجسم */
-
-ctx.fillStyle="#96592c";
-
-ctx.fillRect(
-h.x,
-h.y,
-h.w,
-h.h
-);
-
-
-/* الشرائط */
-
-for(
-var s=0;
-s<h.w;
-s+=24
-){
-
-ctx.fillStyle=
-(s/24)%2===0?
-"#f1f1f1":
-"#9a5a2d";
-
-ctx.fillRect(
-h.x+s,
-h.y,
-Math.min(12,h.w-s),
-h.h
-);
+strongReady=false;
 
 }
 
 
-/* الحافة */
+/* =====================================================
+   بداية اللعبة
+===================================================== */
 
-ctx.strokeStyle="#d39a61";
+function startGame(){
 
-ctx.lineWidth=2;
+document.getElementById("page").style.display="none";
 
-ctx.strokeRect(
-h.x,
-h.y,
-h.w,
-h.h
-);
+document.getElementById("rules").style.display="none";
+
+document.getElementById("game").style.display="block";
+
+redScore=0;
+
+blueScore=0;
+
+stage=1;
+
+round=1;
+
+timeLeft=roundDuration;
+
+document.getElementById("redScore").textContent="0";
+
+document.getElementById("blueScore").textContent="0";
+
+document.getElementById("stage").textContent="1";
+
+document.getElementById("round").textContent="1";
+
+document.getElementById("time").textContent=roundDuration;
+
+document.getElementById("redGameName").textContent=
+document.getElementById("redName").value||"الأحمر";
+
+document.getElementById("blueGameName").textContent=
+document.getElementById("blueName").value||"الأزرق";
+
+red.x=.5;
+
+blue.x=.5;
+
+resize();
+
+serve();
+
+createHurdles();
+
+running=true;
+
+paused=false;
+
+roundEnded=false;
+
+lastFrame=performance.now();
+
+lastClock=Date.now();
+
+document.getElementById("result").style.display="none";
+
+document.getElementById("pause").textContent="⏸️ إيقاف";
+
+setMessage("🎾 بدأت المباراة");
+
+startMusic();
+
+if(animationId){
+
+cancelAnimationFrame(animationId);
 
 }
+
+animationId=requestAnimationFrame(loop);
 
 }
 
@@ -3278,60 +1293,1135 @@ h.h
    الحلقة
 ===================================================== */
 
-function loop(){
+function loop(now){
 
-if(!running)return;
+if(!running){
 
-if(!paused){
+animationId=null;
 
-update();
+return;
 
 }
 
-draw();
+const dt=Math.min(
+(now-lastFrame)/1000,
+.05
+);
 
-animationId=
-requestAnimationFrame(loop);
+lastFrame=now;
+
+if(!paused&&!roundEnded){
+
+update(dt);
+
+}
+
+drawField();
+
+updateMeters();
+
+animationId=requestAnimationFrame(loop);
 
 }
 
 
 /* =====================================================
-   التحديث
+   تحديث
 ===================================================== */
 
-function update(){
+function update(dt){
 
-updateCPU();
+updateHurdles(dt);
 
-updateBall();
+updateComputer(dt);
+
+moveBall(dt);
+
+updatePlayerSpeed(dt);
 
 }
 
 
 /* =====================================================
-   زر البدء
+   سرعة المضارب
 ===================================================== */
 
-b3.onclick=function(){
+function updatePlayerSpeed(dt){
 
-startGame();
+const rDiff=Math.abs(red.x-red.lastX);
 
-};
+const bDiff=Math.abs(blue.x-blue.lastX);
+
+red.speed=
+Math.min(1,rDiff/Math.max(dt,.016)*.08);
+
+blue.speed=
+Math.min(1,bDiff/Math.max(dt,.016)*.08);
+
+red.lastX=red.x;
+
+blue.lastX=blue.x;
+
+}
 
 
 /* =====================================================
-   بداية الصفحة
+   الحواجز
+===================================================== */
+
+function updateHurdles(dt){
+
+hurdles.forEach(function(o){
+
+o.x+=o.speed*dt*60;
+
+if(o.x<.07){
+
+o.x=.07;
+
+o.speed=Math.abs(o.speed);
+
+}
+
+if(o.x+o.w>.93){
+
+o.x=.93-o.w;
+
+o.speed=-Math.abs(o.speed);
+
+}
+
+});
+
+}
+
+
+/* =====================================================
+   الكمبيوتر
+===================================================== */
+
+function updateComputer(dt){
+
+if(mode!=="cpu") return;
+
+let speed=.25;
+
+if(difficulty==="medium"){
+
+speed=.40;
+
+}
+
+if(difficulty==="hard"){
+
+speed=.62;
+
+}
+
+let target=ball.x;
+
+if(ball.vy>0){
+
+target=.5+(ball.x-.5)*.45;
+
+}
+
+const diff=target-blue.x;
+
+const amount=speed*dt;
+
+if(Math.abs(diff)<amount){
+
+blue.x=target;
+
+}else{
+
+blue.x+=diff>0?amount:-amount;
+
+}
+
+blue.x=Math.max(.08,Math.min(.92,blue.x));
+
+}
+
+
+/* =====================================================
+   حركة الكرة
+===================================================== */
+
+function moveBall(dt){
+
+ball.x+=ball.vx*dt*1.7;
+
+ball.y+=ball.vy*dt*1.7;
+
+
+/* الجوانب */
+
+if(ball.x<.025){
+
+ball.x=.025;
+
+ball.vx=Math.abs(ball.vx);
+
+ballSound();
+
+}
+
+if(ball.x>.975){
+
+ball.x=.975;
+
+ball.vx=-Math.abs(ball.vx);
+
+ballSound();
+
+}
+
+
+/* الحواجز */
+
+for(let i=0;i<hurdles.length;i++){
+
+const o=hurdles[i];
+
+if(
+
+ball.x>o.x-.018&&
+
+ball.x<o.x+o.w+.018&&
+
+ball.y>o.y-.018&&
+
+ball.y<o.y+o.h+.018
+
+){
+
+ball.vy*=-1;
+
+ballSound();
+
+break;
+
+}
+
+}
+
+
+/* الأحمر */
+
+if(
+ball.vy>0&&
+hitPaddle(ball,red)
+){
+
+ball.y=red.y-.04;
+
+ball.vy=-Math.abs(ball.vy);
+
+ball.vx+=(ball.x-red.x)*.65;
+
+if(strongReady){
+
+ball.vy=-Math.max(
+.75,
+Math.abs(ball.vy)*1.9
+);
+
+ball.vx*=1.3;
+
+strongReady=false;
+
+setMessage("💥 ضربة قوية!");
+
+}else{
+
+setMessage("🟥 ضربة الأحمر");
+
+}
+
+paddleSound();
+
+}
+
+
+/* الأزرق */
+
+if(
+ball.vy<0&&
+hitPaddle(ball,blue)
+){
+
+ball.y=blue.y+.04;
+
+ball.vy=Math.abs(ball.vy);
+
+ball.vx+=(ball.x-blue.x)*.65;
+
+setMessage("🟦 ضربة الأزرق");
+
+paddleSound();
+
+}
+
+
+/* شبكة الأحمر */
+
+if(ball.y>.94){
+
+if(ball.x<.24){
+
+scoreBlue();
+
+return;
+
+}
+
+ball.y=.94;
+
+ball.vy=-Math.abs(ball.vy);
+
+}
+
+
+/* شبكة الأزرق */
+
+if(ball.y<.06){
+
+if(ball.x<.24){
+
+scoreRed();
+
+return;
+
+}
+
+ball.y=.06;
+
+ball.vy=Math.abs(ball.vy);
+
+}
+
+}
+
+
+/* =====================================================
+   اصطدام
+===================================================== */
+
+function hitPaddle(b,p){
+
+const bx=b.x*W;
+
+const by=b.y*H;
+
+const px=p.x*W;
+
+const py=p.y*H;
+
+return(
+
+Math.abs(bx-px)<
+p.w/2+b.r&&
+
+Math.abs(by-py)<
+p.h/2+b.r
+
+);
+
+}
+
+
+/* =====================================================
+   تسجيل هدف
+===================================================== */
+
+function scoreRed(){
+
+if(ball.scored) return;
+
+ball.scored=true;
+
+redScore++;
+
+document.getElementById("redScore").textContent=redScore;
+
+setMessage("🟥 هدف للأحمر!");
+
+crowdSound();
+
+beep(700,.12,.08);
+
+setTimeout(function(){
+
+if(running&&!roundEnded){
+
+serve();
+
+}
+
+},500);
+
+}
+
+
+function scoreBlue(){
+
+if(ball.scored) return;
+
+ball.scored=true;
+
+blueScore++;
+
+document.getElementById("blueScore").textContent=blueScore;
+
+setMessage("🟦 هدف للأزرق!");
+
+crowdSound();
+
+beep(430,.12,.08);
+
+setTimeout(function(){
+
+if(running&&!roundEnded){
+
+serve();
+
+}
+
+},500);
+
+}
+
+
+/* =====================================================
+   أشرطة السرعة
+===================================================== */
+
+function updateMeters(){
+
+let ballSpeed=Math.sqrt(
+ball.vx*ball.vx+
+ball.vy*ball.vy
+);
+
+let ballValue=Math.min(
+100,
+ballSpeed*115
+);
+
+let redValue=Math.min(
+100,
+red.speed*100
+);
+
+let blueValue=Math.min(
+100,
+blue.speed*100
+);
+
+document.getElementById("ballSpeedBar").style.width=
+ballValue+"%";
+
+document.getElementById("redSpeedBar").style.width=
+redValue+"%";
+
+document.getElementById("blueSpeedBar").style.width=
+blueValue+"%";
+
+document.getElementById("ballSpeedText").textContent=
+Math.round(ballSpeed*100);
+
+document.getElementById("redSpeedText").textContent=
+Math.round(redValue);
+
+document.getElementById("blueSpeedText").textContent=
+Math.round(blueValue);
+
+}
+
+
+/* =====================================================
+   الساعة
+===================================================== */
+
+function updateClock(){
+
+if(!running||paused||roundEnded) return;
+
+const now=Date.now();
+
+if(!lastClock){
+
+lastClock=now;
+
+return;
+
+}
+
+if(now-lastClock>=1000){
+
+const seconds=Math.floor(
+(now-lastClock)/1000
+);
+
+lastClock+=seconds*1000;
+
+timeLeft-=seconds;
+
+if(timeLeft<0){
+
+timeLeft=0;
+
+}
+
+document.getElementById("time").textContent=
+timeLeft;
+
+if(timeLeft<=0){
+
+endRound();
+
+}
+
+}
+
+}
+
+setInterval(updateClock,250);
+
+
+/* =====================================================
+   نهاية الجولة
+===================================================== */
+
+function endRound(){
+
+if(roundEnded) return;
+
+roundEnded=true;
+
+const rn=
+document.getElementById("redGameName").textContent;
+
+const bn=
+document.getElementById("blueGameName").textContent;
+
+let winner="🤝 تعادل";
+
+if(redScore>blueScore){
+
+winner="🏆 "+rn+" فاز بالجولة";
+
+}
+
+if(blueScore>redScore){
+
+winner="🏆 "+bn+" فاز بالجولة";
+
+}
+
+document.getElementById("resultText").innerHTML=
+winner+
+"<br><br>"+
+"🟥 "+rn+" : "+redScore+
+"<br>"+
+"🟦 "+bn+" : "+blueScore+
+"<br><br>"+
+"🏆 المرحلة "+stage+
+" — الجولة "+round+" من 3";
+
+document.getElementById("result").style.display="block";
+
+crowdSound();
+
+beep(800,.18,.08);
+
+}
+
+
+/* =====================================================
+   الجولة التالية
+===================================================== */
+
+function nextRound(){
+
+document.getElementById("result").style.display="none";
+
+round++;
+
+if(round>3){
+
+round=1;
+
+stage++;
+
+}
+
+redScore=0;
+
+blueScore=0;
+
+timeLeft=roundDuration;
+
+document.getElementById("redScore").textContent="0";
+
+document.getElementById("blueScore").textContent="0";
+
+document.getElementById("stage").textContent=stage;
+
+document.getElementById("round").textContent=round;
+
+document.getElementById("time").textContent=timeLeft;
+
+red.x=.5;
+
+blue.x=.5;
+
+createHurdles();
+
+serve();
+
+roundEnded=false;
+
+paused=false;
+
+running=true;
+
+lastClock=Date.now();
+
+setMessage(
+"🎾 المرحلة "+stage+
+" — الجولة "+round
+);
+
+}
+
+
+/* =====================================================
+   إيقاف
+===================================================== */
+
+function togglePause(){
+
+if(!running||roundEnded) return;
+
+paused=!paused;
+
+if(paused){
+
+document.getElementById("pause").textContent=
+"▶️ متابعة";
+
+setMessage("⏸️ المباراة متوقفة");
+
+}else{
+
+document.getElementById("pause").textContent=
+"⏸️ إيقاف";
+
+lastClock=Date.now();
+
+setMessage("▶️ المباراة مستمرة");
+
+}
+
+}
+
+
+/* =====================================================
+   إعادة
+===================================================== */
+
+function restartGame(){
+
+redScore=0;
+
+blueScore=0;
+
+timeLeft=roundDuration;
+
+document.getElementById("redScore").textContent="0";
+
+document.getElementById("blueScore").textContent="0";
+
+document.getElementById("time").textContent=timeLeft;
+
+red.x=.5;
+
+blue.x=.5;
+
+serve();
+
+createHurdles();
+
+roundEnded=false;
+
+paused=false;
+
+running=true;
+
+lastClock=Date.now();
+
+document.getElementById("result").style.display="none";
+
+document.getElementById("pause").textContent=
+"⏸️ إيقاف";
+
+setMessage("🔄 تم إعادة الجولة");
+
+}
+
+
+/* =====================================================
+   القائمة
+===================================================== */
+
+function goHome(){
+
+running=false;
+
+paused=false;
+
+roundEnded=false;
+
+stopMusic();
+
+if(animationId){
+
+cancelAnimationFrame(animationId);
+
+animationId=null;
+
+}
+
+document.getElementById("result").style.display="none";
+
+document.getElementById("game").style.display="none";
+
+document.getElementById("rules").style.display="none";
+
+document.getElementById("page").style.display="block";
+
+}
+
+
+/* =====================================================
+   الرسائل
+===================================================== */
+
+let msgTimer=null;
+
+function setMessage(text){
+
+const el=document.getElementById("message");
+
+el.textContent=text;
+
+if(msgTimer){
+
+clearTimeout(msgTimer);
+
+}
+
+msgTimer=setTimeout(function(){
+
+if(running&&!paused&&!roundEnded){
+
+el.textContent="🎾 العب وصد الكرة";
+
+}
+
+},1400);
+
+}
+
+
+/* =====================================================
+   التسديدة القوية
+===================================================== */
+
+function strongHit(){
+
+if(!running||paused||roundEnded) return;
+
+strongReady=true;
+
+setMessage("💥 التسديدة القوية جاهزة");
+
+beep(180,.12,.08);
+
+}
+
+
+/* =====================================================
+   التحكم باللمس
+===================================================== */
+
+const pointers=new Map();
+
+canvas.addEventListener(
+"pointerdown",
+function(e){
+
+if(!running||paused||roundEnded){
+
+return;
+
+}
+
+try{
+
+canvas.setPointerCapture(e.pointerId);
+
+}catch(err){}
+
+let side=null;
+
+
+/*
+   في وضع الكمبيوتر:
+   أي لمسة تحرك الأحمر.
+*/
+
+if(mode==="cpu"){
+
+side="red";
+
+}
+
+/*
+   لاعب ضد لاعب:
+   النصف السفلي = الأحمر
+   النصف العلوي = الأزرق
+*/
+
+else{
+
+const rect=canvas.getBoundingClientRect();
+
+const y=(e.clientY-rect.top)/rect.height;
+
+if(y>=.5){
+
+side="red";
+
+}else{
+
+side="blue";
+
+}
+
+}
+
+pointers.set(e.pointerId,side);
+
+movePointer(e,side);
+
+e.preventDefault();
+
+},
+{passive:false}
+);
+
+
+canvas.addEventListener(
+"pointermove",
+function(e){
+
+const side=pointers.get(e.pointerId);
+
+if(!side) return;
+
+if(!running||paused||roundEnded) return;
+
+movePointer(e,side);
+
+e.preventDefault();
+
+},
+{passive:false}
+);
+
+
+function movePointer(e,side){
+
+const rect=canvas.getBoundingClientRect();
+
+let x=
+(e.clientX-rect.left)/rect.width;
+
+x=Math.max(.08,Math.min(.92,x));
+
+if(side==="red"){
+
+red.x=x;
+
+}else{
+
+blue.x=x;
+
+}
+
+}
+
+
+function removePointer(e){
+
+pointers.delete(e.pointerId);
+
+}
+
+canvas.addEventListener(
+"pointerup",
+removePointer
+);
+
+canvas.addEventListener(
+"pointercancel",
+removePointer
+);
+
+
+/* =====================================================
+   اختيار الوضع
+===================================================== */
+
+function selectMode(m){
+
+mode=m;
+
+document.getElementById("pvp").className=
+m==="pvp"?"sel":"";
+
+document.getElementById("cpu").className=
+m==="cpu"?"sel":"";
+
+}
+
+
+/* =====================================================
+   الوقت
+===================================================== */
+
+function selectTime(t){
+
+roundDuration=t;
+
+document.getElementById("t60").className=
+t===60?"sel":"";
+
+document.getElementById("t90").className=
+t===90?"sel":"";
+
+document.getElementById("t120").className=
+t===120?"sel":"";
+
+}
+
+
+/* =====================================================
+   الصعوبة
+===================================================== */
+
+function selectDifficulty(d){
+
+difficulty=d;
+
+document.getElementById("easy").className=
+d==="easy"?"sel":"";
+
+document.getElementById("medium").className=
+d==="medium"?"sel":"";
+
+document.getElementById("hard").className=
+d==="hard"?"sel":"";
+
+document.getElementById("hard").style.background="#fff";
+
+document.getElementById("hard").style.color="#111";
+
+}
+
+
+/* =====================================================
+   الموسيقى
+===================================================== */
+
+function toggleMusic(){
+
+musicOn=!musicOn;
+
+document.getElementById("menuMusic").textContent=
+"🎵 الموسيقى: "+
+(musicOn?"تشغيل":"إيقاف");
+
+document.getElementById("music").textContent=
+musicOn?"🎵 موسيقى":"🔇 موسيقى";
+
+if(musicOn){
+
+startMusic();
+
+}else{
+
+stopMusic();
+
+}
+
+}
+
+
+/* =====================================================
+   الأصوات
+===================================================== */
+
+function toggleSound(){
+
+soundOn=!soundOn;
+
+document.getElementById("menuSound").textContent=
+"🔊 أصوات اللعب: "+
+(soundOn?"تشغيل":"إيقاف");
+
+document.getElementById("sound").textContent=
+soundOn?"🔊 صوت":"🔇 صوت";
+
+}
+
+
+/* =====================================================
+   القواعد
+===================================================== */
+
+function showRules(){
+
+document.getElementById("page").style.display="none";
+
+document.getElementById("game").style.display="none";
+
+document.getElementById("rules").style.display="block";
+
+}
+
+
+function hideRules(){
+
+document.getElementById("rules").style.display="none";
+
+document.getElementById("page").style.display="block";
+
+}
+
+
+/* =====================================================
+   ربط الأزرار
+===================================================== */
+
+document.getElementById("pvp")
+.addEventListener("click",function(){
+
+selectMode("pvp");
+
+});
+
+document.getElementById("cpu")
+.addEventListener("click",function(){
+
+selectMode("cpu");
+
+});
+
+document.getElementById("t60")
+.addEventListener("click",function(){
+
+selectTime(60);
+
+});
+
+document.getElementById("t90")
+.addEventListener("click",function(){
+
+selectTime(90);
+
+});
+
+document.getElementById("t120")
+.addEventListener("click",function(){
+
+selectTime(120);
+
+});
+
+document.getElementById("easy")
+.addEventListener("click",function(){
+
+selectDifficulty("easy");
+
+});
+
+document.getElementById("medium")
+.addEventListener("click",function(){
+
+selectDifficulty("medium");
+
+});
+
+document.getElementById("hard")
+.addEventListener("click",function(){
+
+selectDifficulty("hard");
+
+});
+
+document.getElementById("menuMusic")
+.addEventListener("click",toggleMusic);
+
+document.getElementById("menuSound")
+.addEventListener("click",toggleSound);
+
+document.getElementById("start")
+.addEventListener("click",startGame);
+
+document.getElementById("rulesButton")
+.addEventListener("click",showRules);
+
+document.getElementById("backRules")
+.addEventListener("click",hideRules);
+
+document.getElementById("strong")
+.addEventListener("click",strongHit);
+
+document.getElementById("pause")
+.addEventListener("click",togglePause);
+
+document.getElementById("restart")
+.addEventListener("click",restartGame);
+
+document.getElementById("sound")
+.addEventListener("click",toggleSound);
+
+document.getElementById("music")
+.addEventListener("click",toggleMusic);
+
+document.getElementById("home")
+.addEventListener("click",goHome);
+
+document.getElementById("next")
+.addEventListener("click",nextRound);
+
+document.getElementById("resultHome")
+.addEventListener("click",goHome);
+
+
+/* =====================================================
+   التشغيل الأولي
 ===================================================== */
 
 resize();
 
-updateSoundText();
+drawField();
 
-result.innerHTML=
-"اختر طريقة اللعب ثم اضغط ▶️ ابدأ اللعبة";
-
-})();
 </script>
 
 </body>
