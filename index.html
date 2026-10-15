@@ -6,210 +6,69 @@
 <title>🎮 منصة ألعابي</title>
 
 <style>
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{
-margin:0;
-padding:0;
-min-height:100%;
-font-family:Arial,sans-serif;
-background:#101820;
-color:#fff;
+margin:0;padding:0;min-height:100%;
+font-family:Arial,sans-serif;background:#101820;color:#fff
 }
 body{overflow-x:hidden}
-
 button{
-border:0;
-border-radius:12px;
-padding:12px 16px;
-margin:5px;
-font-size:15px;
-font-weight:bold;
-cursor:pointer;
-color:#fff;
-background:#1976d2;
+border:0;border-radius:12px;padding:12px 16px;margin:5px;
+font-size:15px;font-weight:bold;cursor:pointer;color:#fff;
+background:#1976d2
 }
-button:active{transform:scale(.97)}
-
-.app{
-width:100%;
-max-width:1100px;
-margin:auto;
-padding:12px;
-}
-
+button:disabled{opacity:.55;cursor:wait}
+button:active{transform:scale(.98)}
+.app{width:100%;max-width:1100px;margin:auto;padding:12px}
 header{
-background:#182a38;
-border-radius:18px;
-padding:18px 12px;
-text-align:center;
-margin-bottom:12px;
+background:#182a38;border-radius:18px;padding:18px 12px;
+text-align:center;margin-bottom:12px
 }
-
-header h1{
-margin:0 0 6px;
-font-size:28px;
-}
-
-header p{
-margin:0;
-color:#c9d5dc;
-}
-
+header h1{margin:0 0 6px;font-size:28px}
+header p{margin:0;color:#c9d5dc}
 .panel{
-background:#182a38;
-border-radius:16px;
-padding:14px;
-margin-bottom:12px;
+background:#182a38;border-radius:16px;padding:14px;margin-bottom:12px
 }
-
-.panel h2{
-margin:0 0 12px;
-font-size:20px;
-}
-
+.panel h2{margin:0 0 12px;font-size:20px}
 input{
-width:100%;
-padding:12px;
-margin:5px 0;
-border:2px solid #40596a;
-border-radius:10px;
-background:#fff;
-color:#111;
-font-size:15px;
+width:100%;padding:12px;margin:5px 0;border:2px solid #40596a;
+border-radius:10px;background:#fff;color:#111;font-size:15px
 }
-
-.row{
-display:flex;
-gap:8px;
-flex-wrap:wrap;
-}
-
-.row button{
-flex:1;
-min-width:130px;
-}
-
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row button{flex:1;min-width:130px}
 .green{background:#10a85a}
 .red{background:#d83b42}
 .orange{background:#e18b19}
 .gray{background:#52606a}
-
-#account{
-display:none;
-}
-
+#account,#forgotBox,#signupBox,#gamesSection{display:none}
 .accountInfo{
-display:flex;
-justify-content:space-between;
-gap:10px;
-align-items:center;
-flex-wrap:wrap;
+display:flex;justify-content:space-between;gap:10px;
+align-items:center;flex-wrap:wrap
 }
-
-.email{
-color:#71d7ff;
-font-weight:bold;
-word-break:break-word;
-}
-
-.status{
-padding:8px 12px;
-border-radius:10px;
-background:#263c49;
-}
-
+.email{color:#71d7ff;font-weight:bold;word-break:break-word}
+.status{padding:8px 12px;border-radius:10px;background:#263c49}
 .games{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-gap:12px;
+display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px
 }
-
 .game{
-background:#213746;
-border-radius:18px;
-padding:15px;
-border:1px solid #395466;
-display:flex;
-flex-direction:column;
-min-height:260px;
+background:#213746;border-radius:18px;padding:15px;
+border:1px solid #395466;display:flex;flex-direction:column;min-height:260px
 }
-
-.gameIcon{
-font-size:48px;
-text-align:center;
-margin:5px;
-}
-
-.game h3{
-font-size:20px;
-margin:6px 0;
-text-align:center;
-}
-
-.game p{
-color:#cbd8de;
-line-height:1.6;
-font-size:14px;
-margin:6px 0;
-flex:1;
-}
-
-.price{
-text-align:center;
-font-size:18px;
-font-weight:bold;
-margin:8px 0;
-color:#7cffb2;
-}
-
-.game button{
-width:100%;
-margin:4px 0;
-}
-
-.locked{
-background:#40515b;
-}
-
+.gameIcon{font-size:48px;text-align:center;margin:5px}
+.game h3{font-size:20px;margin:6px 0;text-align:center}
+.game p{color:#cbd8de;line-height:1.6;font-size:14px;margin:6px 0;flex:1}
+.price{text-align:center;font-size:18px;font-weight:bold;margin:8px 0;color:#7cffb2}
+.game button{width:100%;margin:4px 0}
 #message{
-display:none;
-padding:12px;
-border-radius:10px;
-background:#3b2930;
-color:#ffd8dc;
-margin-bottom:10px;
-text-align:center;
+display:none;padding:12px;border-radius:10px;background:#3b2930;
+color:#ffd8dc;margin-bottom:10px;text-align:center;line-height:1.7;
+overflow-wrap:anywhere
 }
-
-#gamesSection{
-display:none;
-}
-
-#forgotBox,#signupBox{
-display:none;
-}
-
-.small{
-font-size:13px;
-color:#b9c8d0;
-line-height:1.6;
-}
-
+.small{font-size:13px;color:#b9c8d0;line-height:1.6}
 .payment{
-background:#17252d;
-border-radius:12px;
-padding:12px;
-margin-top:12px;
-line-height:1.8;
+background:#17252d;border-radius:12px;padding:12px;margin-top:12px;line-height:1.8
 }
-
-footer{
-text-align:center;
-padding:20px 5px;
-color:#82939c;
-font-size:13px;
-}
-
+footer{text-align:center;padding:20px 5px;color:#82939c;font-size:13px}
 @media(max-width:600px){
 header h1{font-size:23px}
 .app{padding:8px}
@@ -220,7 +79,6 @@ button{font-size:14px}
 </head>
 
 <body>
-
 <div class="app">
 
 <header>
@@ -228,915 +86,556 @@ button{font-size:14px}
 <p>ألعابك كلها في مكان واحد</p>
 </header>
 
-<div id="message"></div>
+<div id="message" role="status" aria-live="polite"></div>
 
 <!-- تسجيل الدخول -->
 <div id="loginPanel" class="panel">
-
 <h2>🔐 تسجيل الدخول</h2>
 
-<input id="loginEmail" type="email" placeholder="البريد الإلكتروني">
-
-<input id="loginPassword" type="password" placeholder="كلمة المرور">
+<input id="loginEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
+<input id="loginPassword" type="password" placeholder="كلمة المرور" autocomplete="current-password">
 
 <div class="row">
 <button id="loginBtn" class="green">🔑 دخول</button>
 <button id="signupShowBtn">📝 إنشاء حساب</button>
 </div>
 
-<button id="forgotShowBtn" class="gray">
-🔁 نسيت كلمة المرور؟
-</button>
+<button id="forgotShowBtn" class="gray">🔁 نسيت كلمة المرور؟</button>
 
 <div id="forgotBox">
-<input id="forgotEmail" type="email" placeholder="البريد الإلكتروني">
+<input id="forgotEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
 <button id="forgotBtn" class="orange">📧 إرسال رابط الاستعادة</button>
 </div>
 
 <div id="signupBox">
-
 <hr>
-
 <h2>📝 إنشاء حساب</h2>
-
-<input id="signupEmail" type="email" placeholder="البريد الإلكتروني">
-
-<input id="signupPassword" type="password" placeholder="كلمة المرور">
-
-<input id="signupPassword2" type="password" placeholder="تأكيد كلمة المرور">
-
+<input id="signupEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
+<input id="signupPassword" type="password" placeholder="كلمة المرور" autocomplete="new-password">
+<input id="signupPassword2" type="password" placeholder="تأكيد كلمة المرور" autocomplete="new-password">
 <button id="signupBtn" class="green">✅ إنشاء الحساب</button>
-
-<p class="small">
-بعد إنشاء الحساب قد يطلب منك تأكيد البريد الإلكتروني.
-</p>
-
+<p class="small">بعد إنشاء الحساب قد يطلب منك تأكيد البريد الإلكتروني.</p>
 </div>
-
 </div>
-
 
 <!-- الحساب -->
 <div id="account" class="panel">
-
 <div class="accountInfo">
-
 <div>
 <div>👤 الحساب</div>
 <div id="accountEmail" class="email"></div>
 </div>
-
-<div id="accountStatus" class="status">
-🔒 لم يتم التحقق
-</div>
-
+<div id="accountStatus" class="status">🔒 لم يتم التحقق</div>
 </div>
 
 <div class="row">
 <button id="refreshBtn" class="green">🔄 تحديث الاشتراكات</button>
 <button id="logoutBtn" class="gray">🚪 خروج</button>
 </div>
-
 </div>
-
 
 <!-- الألعاب -->
 <div id="gamesSection">
-
 <div class="panel">
-
 <h2>🎮 ألعاب المنصة</h2>
-
-<p class="small">
-اختر اللعبة التي تريد تشغيلها. الألعاب التي تحتاج اشتراكًا ستظهر لك حالة الاشتراك.
-</p>
+<p class="small">اختر اللعبة التي تريد تشغيلها. الألعاب التي تحتاج اشتراكًا ستظهر لك حالة الاشتراك.</p>
 
 <div class="games">
 
-
-<!-- الحائط الصعب -->
 <div class="game">
-
 <div class="gameIcon">🎾</div>
-
 <h3>الحائط الصعب</h3>
-
-<p>
-لعبة الكرة والمضرب. العب ضد الكمبيوتر أو لاعب آخر، وتحدى المراحل والصعوبات.
-</p>
-
-<div class="price">
-30 جنيه / 30 يوم
-<br>
-أو 5 دولار
+<p>لعبة الكرة والمضرب. العب ضد الكمبيوتر أو لاعب آخر، وتحدى المراحل والصعوبات.</p>
+<div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
+<button class="green" data-game="al7aet" data-url="/samy_gams/wall/">▶️ تشغيل اللعبة</button>
 </div>
 
-<button class="green" data-game="al7aet" data-url="/samy_gams/wall/">
-▶️ تشغيل اللعبة
-</button>
-
-</div>
-
-
-<!-- العشرة -->
 <div class="game">
-
 <div class="gameIcon">🃏</div>
-
 <h3>العشرة - لعبة الإثارة</h3>
-
-<p>
-لعبة كوتشينة متعددة اللاعبين، مع 156 ورقة و3 مجموعات وأنظمة لعب مختلفة.
-</p>
-
-<div class="price">
-30 جنيه / 30 يوم
-<br>
-أو 5 دولار
+<p>لعبة كوتشينة متعددة اللاعبين، مع 156 ورقة و3 مجموعات وأنظمة لعب مختلفة.</p>
+<div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
+<button class="green" data-game="alashra" data-url="https://samimisk62-byte.github.io/Alashra-Gam/">▶️ تشغيل اللعبة</button>
 </div>
 
-<button class="green" data-game="alashra" data-url="https://samimisk62-byte.github.io/Alashra-Gam/">
-▶️ تشغيل اللعبة
-</button>
-
-</div>
-
-
-<!-- صائد السمك -->
 <div class="game">
-
 <div class="gameIcon">🎣</div>
-
 <h3>صائد السمك</h3>
-
-<p>
-رحلة صيد في البحر، أسماك متعددة، مراحل، أخطار ومفاجآت أثناء اللعب.
-</p>
-
-<div class="price">
-30 جنيه / 30 يوم
-<br>
-أو 5 دولار
+<p>رحلة صيد في البحر، أسماك متعددة، مراحل، أخطار ومفاجآت أثناء اللعب.</p>
+<div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
+<button class="green" data-game="saed_alsamak" data-url="https://samimisk62-byte.github.io/saed-Al-samak/">▶️ تشغيل اللعبة</button>
 </div>
 
-<button class="green" data-game="saed_alsamak" data-url="https://samimisk62-byte.github.io/saed-Al-samak/">
-▶️ تشغيل اللعبة
-</button>
-
-</div>
-
-
-<!-- مطعمي -->
 <div class="game">
-
 <div class="gameIcon">🍔</div>
-
 <h3>مطعمي</h3>
-
-<p>
-أدر مطعمك، استقبل الزبائن، اطبخ الطلبات وطوّر مطعمك واربح المزيد.
-</p>
-
-<div class="price">
-30 جنيه / 30 يوم
-<br>
-أو 5 دولار
-</div>
-
-<button class="green" data-game="matamy" data-url="https://samimisk62-byte.github.io/Matamy/">
-▶️ تشغيل اللعبة
-</button>
-
+<p>أدر مطعمك، استقبل الزبائن، اطبخ الطلبات وطوّر مطعمك واربح المزيد.</p>
+<div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
+<button class="green" data-game="matamy" data-url="https://samimisk62-byte.github.io/Matamy/">▶️ تشغيل اللعبة</button>
 </div>
 
 </div>
-
 
 <div class="payment">
-
 <b>💰 الاشتراك</b><br>
 داخل مصر: <b>30 جنيه</b> لمدة 30 يومًا لكل لعبة.<br>
 خارج مصر: <b>5 دولار</b> لمدة 30 يومًا لكل لعبة.<br>
 📱 الدفع يمكن أن يتم عبر وسيلة الدفع التي تحددها إدارة المنصة.
 </div>
-
+</div>
 </div>
 
+<footer>🎮 منصة ألعابي © 2026</footer>
 </div>
-
-
-<footer>
-🎮 منصة ألعابي © 2026
-</footer>
-
-</div>
-
 
 <script>
+"use strict";
 
-/* =========================
-   إعداد Supabase
-========================= */
-
-const SUPABASE_URL =
-"https://auptwgjiivhglxtdjlnd.supabase.co";
-
-const SUPABASE_KEY =
-"sb_publishable_6dszOZKIdlA57hHf2E3V5Q_VO-ewwtM";
-
-
-/* =========================
-   متغيرات
-========================= */
+/* إعداد Supabase */
+const SUPABASE_URL = "https://auptwgjiivhglxtdjlnd.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6dszOZKIdlA57hHf2E3V5Q_VO-ewwtM";
 
 let session = null;
-
-
-/* =========================
-   أدوات
-========================= */
+let messageTimer = null;
 
 function $(id){
-return document.getElementById(id);
+  return document.getElementById(id);
 }
 
-function showMessage(text,good=false){
+/* عرض الرسائل كنص آمن */
+function showMessage(text, good = false){
+  const box = $("message");
+  box.style.display = "block";
+  box.style.background = good ? "#173d2b" : "#3b2930";
+  box.style.color = good ? "#baffd5" : "#ffd8dc";
+  box.textContent = String(text);
 
-const box=$("message");
-
-box.style.display="block";
-
-box.style.background=good ? "#173d2b" : "#3b2930";
-
-box.style.color=good ? "#baffd5" : "#ffd8dc";
-
-box.innerHTML=text;
-
-setTimeout(function(){
-box.style.display="none";
-},5000);
+  if(messageTimer) clearTimeout(messageTimer);
+  messageTimer = setTimeout(function(){
+    box.style.display = "none";
+  }, 9000);
 }
-
 
 function headers(){
-
-return {
-"apikey":SUPABASE_KEY,
-"Content-Type":"application/json"
-};
-
+  return {
+    "apikey": SUPABASE_KEY,
+    "Content-Type": "application/json"
+  };
 }
-
 
 function authHeaders(){
-
-return {
-"apikey":SUPABASE_KEY,
-"Authorization":"Bearer "+session.access_token,
-"Content-Type":"application/json"
-};
-
+  return {
+    "apikey": SUPABASE_KEY,
+    "Authorization": "Bearer " + session.access_token,
+    "Content-Type": "application/json"
+  };
 }
-
-
-/* =========================
-   تخزين الجلسة
-========================= */
-
-function saveSession(){
-
-if(session){
-
-localStorage.setItem(
-"game_platform_session",
-JSON.stringify(session)
-);
-
-}
-
-}
-
-
-function loadSession(){
-
-try{
-
-const raw=
-localStorage.getItem("game_platform_session");
-
-if(raw){
-session=JSON.parse(raw);
-}
-
-}catch(e){
-
-session=null;
-
-}
-
-}
-
-
-/* =========================
-   واجهة الدخول
-========================= */
-
-function updateUI(){
-
-if(session && session.access_token){
-
-$("loginPanel").style.display="none";
-
-$("account").style.display="block";
-
-$("gamesSection").style.display="block";
-
-$("accountEmail").textContent=
-session.user?.email || "";
-
-$("accountStatus").innerHTML=
-"🔓 تم تسجيل الدخول";
-
-}else{
-
-$("loginPanel").style.display="block";
-
-$("account").style.display="none";
-
-$("gamesSection").style.display="none";
-
-}
-
-}
-
-
-/* =========================
-   تسجيل الدخول
-========================= */
-
-async function login(){
-
-const email=
-$("loginEmail").value.trim();
-
-const password=
-$("loginPassword").value;
-
-if(!email || !password){
-
-showMessage("⚠️ اكتب البريد الإلكتروني وكلمة المرور.");
-
-return;
-
-}
-
-$("loginBtn").disabled=true;
-
-try{
-
-const response=await fetch(
-SUPABASE_URL+
-"/auth/v1/token?grant_type=password",
-{
-method:"POST",
-headers:headers(),
-body:JSON.stringify({
-email:email,
-password:password
-})
-}
-);
-
-const data=await response.json();
-
-if(!response.ok){
-
-throw new Error(
-data.error_description ||
-data.msg ||
-"بيانات الدخول غير صحيحة."
-);
-
-}
-
-session=data;
-
-saveSession();
-
-updateUI();
-
-showMessage(
-"✅ تم تسجيل الدخول بنجاح.",
-true
-);
-
-await refreshAccess();
-
-}catch(error){
-
-showMessage(
-"❌ "+error.message
-);
-
-}finally{
-
-$("loginBtn").disabled=false;
-
-}
-
-}
-
-
-/* =========================
-   إنشاء حساب
-========================= */
-
-async function signup(){
-
-const email=
-$("signupEmail").value.trim();
-
-const password=
-$("signupPassword").value;
-
-const password2=
-$("signupPassword2").value;
-
-if(!email || !password){
-
-showMessage("⚠️ اكتب البريد وكلمة المرور.");
-
-return;
-
-}
-
-if(password.length < 6){
-
-showMessage(
-"⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل."
-);
-
-return;
-
-}
-
-if(password!==password2){
-
-showMessage(
-"⚠️ تأكيد كلمة المرور غير مطابق."
-);
-
-return;
-
-}
-
-$("signupBtn").disabled=true;
-
-try{
-
-const response=await fetch(
-SUPABASE_URL+
-"/auth/v1/signup",
-{
-method:"POST",
-headers:headers(),
-body:JSON.stringify({
-email:email,
-password:password
-})
-}
-);
-
-const data=await response.json();
-
-if(!response.ok){
-
-throw new Error(
-data.msg ||
-data.error_description ||
-"تعذر إنشاء الحساب."
-);
-
-}
-
-if(data.access_token){
-
-session=data;
-
-saveSession();
-
-updateUI();
-
-showMessage(
-"✅ تم إنشاء الحساب وتسجيل الدخول.",
-true
-);
-
-}else{
-
-showMessage(
-"✅ تم إنشاء الحساب. راجع بريدك الإلكتروني لتأكيد الحساب.",
-true
-);
-
-}
-
-}catch(error){
-
-showMessage(
-"❌ "+error.message
-);
-
-}finally{
-
-$("signupBtn").disabled=false;
-
-}
-
-}
-
-
-/* =========================
-   نسيت كلمة المرور
-========================= */
-
-async function forgotPassword(){
-
-const email=
-$("forgotEmail").value.trim();
-
-if(!email){
-
-showMessage(
-"⚠️ اكتب البريد الإلكتروني أولًا."
-);
-
-return;
-
-}
-
-try{
-
-const response=await fetch(
-SUPABASE_URL+
-"/auth/v1/recover",
-{
-method:"POST",
-headers:headers(),
-body:JSON.stringify({
-email:email,
-redirect_to:location.href
-})
-}
-);
-
-if(!response.ok){
-
-const data=await response.json();
-
-throw new Error(
-data.msg ||
-data.error_description ||
-"تعذر إرسال الرابط."
-);
-
-}
-
-showMessage(
-"📧 تم إرسال رابط استعادة كلمة المرور إلى بريدك.",
-true
-);
-
-}catch(error){
-
-showMessage(
-"❌ "+error.message
-);
-
-}
-
-}
-
-
-/* =========================
-   تسجيل الخروج
-========================= */
-
-async function logout(){
-
-try{
-
-if(session?.access_token){
-
-await fetch(
-SUPABASE_URL+"/auth/v1/logout",
-{
-method:"POST",
-headers:authHeaders()
-}
-);
-
-}
-
-}catch(e){}
-
-session=null;
-
-localStorage.removeItem(
-"game_platform_session"
-);
-
-updateUI();
-
-showMessage(
-"🚪 تم تسجيل الخروج.",
-true
-);
-
-}
-
-
-/* =========================
-   تحديث الجلسة
-========================= */
-
-async function refreshToken(){
-
-if(!session?.refresh_token){
-return false;
-}
-
-try{
-
-const response=await fetch(
-SUPABASE_URL+
-"/auth/v1/token?grant_type=refresh_token",
-{
-method:"POST",
-headers:headers(),
-body:JSON.stringify({
-refresh_token:session.refresh_token
-})
-}
-);
-
-if(!response.ok){
-
-return false;
-
-}
-
-const data=await response.json();
-
-session=data;
-
-saveSession();
-
-return true;
-
-}catch(e){
-
-return false;
-
-}
-
-}
-
-
-/* =========================
-   فحص الاشتراك
-========================= */
-
-async function checkGameAccess(gameCode){
-
-if(!session?.access_token){
-return false;
-}
-
-try{
-
-const response=await fetch(
-SUPABASE_URL+
-"/functions/v1/account-game-access",
-{
-method:"POST",
-headers:authHeaders(),
-body:JSON.stringify({
-game_code:gameCode
-})
-}
-);
-
-if(!response.ok){
-
-return false;
-
-}
-
-const data=await response.json();
-
-return !!(
-data.has_access ||
-data.access ||
-data.active ||
-data.is_active
-);
-
-}catch(e){
-
-return false;
-
-}
-
-}
-
-
-/* =========================
-   فتح اللعبة
-========================= */
-
-async function openGame(button){
-
-const url=button.dataset.url;
-
-const gameCode=button.dataset.game;
-
-if(!url){
-return;
-}
-
-if(!session?.access_token){
-
-showMessage(
-"🔒 سجل الدخول أولًا لتشغيل الألعاب."
-);
-
-return;
-
-}
-
 
 /*
-  الحائط الصعب له اشتراك مربوط في Supabase.
-  الألعاب الأخرى يمكن تشغيلها من المنصة،
-  لكن الحماية الكاملة تحتاج إضافة فحص
-  الاشتراك داخل كل لعبة أيضًا.
+  قراءة الرد بأمان:
+  لا نفترض أن كل رد من الخادم هو JSON.
 */
+async function readResponse(response){
+  const raw = await response.text();
 
-if(gameCode==="al7aet"){
+  if(!raw){
+    return {data:null, raw:""};
+  }
 
-const allowed=
-await checkGameAccess("al7aet");
-
-if(!allowed){
-
-showMessage(
-"🔒 اشتراكك في 🎾 الحائط الصعب غير فعال. اشترِ أو جدّد الاشتراك أولًا."
-);
-
-return;
-
+  try{
+    return {data:JSON.parse(raw), raw:raw};
+  }catch(e){
+    return {data:null, raw:raw};
+  }
 }
 
+function getServerError(result, response){
+  const data = result.data;
+
+  if(data && typeof data === "object"){
+    return data.msg ||
+           data.message ||
+           data.error_description ||
+           data.error ||
+           data.msg_description ||
+           ("تعذر إتمام الطلب. رمز الاستجابة: " + response.status);
+  }
+
+  if(result.raw){
+    const clean = result.raw.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    if(clean){
+      return "ردّ الخادم غير متوقع (HTTP " + response.status + "): " +
+             clean.slice(0, 220);
+    }
+  }
+
+  return "تعذر إتمام الطلب. رمز الاستجابة: " + response.status;
 }
 
-window.location.href=url;
-
+/* تخزين الجلسة */
+function saveSession(){
+  try{
+    if(session){
+      localStorage.setItem("game_platform_session", JSON.stringify(session));
+    }
+  }catch(e){
+    showMessage("تعذر حفظ جلسة الدخول على هذا المتصفح.");
+  }
 }
 
+function loadSession(){
+  try{
+    const raw = localStorage.getItem("game_platform_session");
+    if(raw) session = JSON.parse(raw);
+  }catch(e){
+    session = null;
+  }
+}
 
-/* =========================
-   تحديث حالة الاشتراك
-========================= */
+/* واجهة الدخول */
+function updateUI(){
+  if(session && session.access_token){
+    $("loginPanel").style.display = "none";
+    $("account").style.display = "block";
+    $("gamesSection").style.display = "block";
+    $("accountEmail").textContent = session.user?.email || "";
+    $("accountStatus").textContent = "🔓 تم تسجيل الدخول";
+  }else{
+    $("loginPanel").style.display = "block";
+    $("account").style.display = "none";
+    $("gamesSection").style.display = "none";
+  }
+}
 
+/* تسجيل الدخول */
+async function login(){
+  const email = $("loginEmail").value.trim();
+  const password = $("loginPassword").value;
+
+  if(!email || !password){
+    showMessage("⚠️ اكتب البريد الإلكتروني وكلمة المرور.");
+    return;
+  }
+
+  $("loginBtn").disabled = true;
+
+  try{
+    const response = await fetch(
+      SUPABASE_URL + "/auth/v1/token?grant_type=password",
+      {
+        method:"POST",
+        headers:headers(),
+        body:JSON.stringify({email:email, password:password})
+      }
+    );
+
+    const result = await readResponse(response);
+
+    if(!response.ok){
+      throw new Error(getServerError(result, response));
+    }
+
+    if(!result.data || !result.data.access_token){
+      throw new Error("استجابة تسجيل الدخول غير مكتملة. حاول مرة أخرى.");
+    }
+
+    session = result.data;
+    saveSession();
+    updateUI();
+    showMessage("✅ تم تسجيل الدخول بنجاح.", true);
+    await refreshAccess();
+
+  }catch(error){
+    showMessage("❌ " + (error.message || "حدث خطأ أثناء تسجيل الدخول."));
+  }finally{
+    $("loginBtn").disabled = false;
+  }
+}
+
+/* إنشاء حساب */
+async function signup(){
+  const email = $("signupEmail").value.trim();
+  const password = $("signupPassword").value;
+  const password2 = $("signupPassword2").value;
+
+  if(!email || !password){
+    showMessage("⚠️ اكتب البريد الإلكتروني وكلمة المرور.");
+    return;
+  }
+
+  if(password.length < 6){
+    showMessage("⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
+    return;
+  }
+
+  if(password !== password2){
+    showMessage("⚠️ تأكيد كلمة المرور غير مطابق.");
+    return;
+  }
+
+  $("signupBtn").disabled = true;
+
+  try{
+    const response = await fetch(
+      SUPABASE_URL + "/auth/v1/signup",
+      {
+        method:"POST",
+        headers:headers(),
+        body:JSON.stringify({email:email, password:password})
+      }
+    );
+
+    const result = await readResponse(response);
+
+    if(!response.ok){
+      throw new Error(getServerError(result, response));
+    }
+
+    const data = result.data || {};
+
+    if(data.access_token){
+      session = data;
+      saveSession();
+      updateUI();
+      showMessage("✅ تم إنشاء الحساب وتسجيل الدخول.", true);
+    }else{
+      showMessage("✅ تم إرسال طلب إنشاء الحساب. راجع بريدك الإلكتروني لتأكيده.", true);
+    }
+
+  }catch(error){
+    showMessage("❌ " + (error.message || "تعذر إنشاء الحساب."));
+  }finally{
+    $("signupBtn").disabled = false;
+  }
+}
+
+/* استعادة كلمة المرور — الإصلاح الأساسي */
+async function forgotPassword(){
+  const email = $("forgotEmail").value.trim();
+
+  if(!email){
+    showMessage("⚠️ اكتب البريد الإلكتروني أولًا.");
+    return;
+  }
+
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    showMessage("⚠️ تأكد من كتابة عنوان بريد إلكتروني صحيح.");
+    return;
+  }
+
+  const button = $("forgotBtn");
+  button.disabled = true;
+
+  try{
+    /*
+      redirect_to يوضع في عنوان الطلب.
+      عنوان العودة هو صفحة المنصة نفسها.
+    */
+    const redirectTo = window.location.origin + window.location.pathname;
+    const endpoint =
+      SUPABASE_URL +
+      "/auth/v1/recover?redirect_to=" +
+      encodeURIComponent(redirectTo);
+
+    const response = await fetch(endpoint, {
+      method:"POST",
+      headers:headers(),
+      body:JSON.stringify({email:email})
+    });
+
+    const result = await readResponse(response);
+
+    if(!response.ok){
+      throw new Error(getServerError(result, response));
+    }
+
+    showMessage(
+      "📧 إذا كان الحساب مؤهلًا لاستعادة كلمة المرور، فستصلك رسالة على بريدك. افحص الوارد والرسائل غير المرغوب فيها.",
+      true
+    );
+
+  }catch(error){
+    const message = error && error.message ? error.message : "";
+
+    if(message === "Failed to fetch" || message === "NetworkError"){
+      showMessage("❌ تعذر الاتصال بخادم Supabase. تحقق من الإنترنت وحاول لاحقًا.");
+    }else{
+      showMessage("❌ تعذر إرسال طلب الاستعادة: " + (message || "خطأ غير معروف."));
+    }
+
+  }finally{
+    button.disabled = false;
+  }
+}
+
+/* تسجيل الخروج */
+async function logout(){
+  try{
+    if(session?.access_token){
+      await fetch(SUPABASE_URL + "/auth/v1/logout", {
+        method:"POST",
+        headers:authHeaders()
+      });
+    }
+  }catch(e){
+    /* تسجيل الخروج محليًا حتى لو فشل الاتصال */
+  }
+
+  session = null;
+
+  try{
+    localStorage.removeItem("game_platform_session");
+  }catch(e){}
+
+  updateUI();
+  showMessage("🚪 تم تسجيل الخروج.", true);
+}
+
+/* تحديث الجلسة */
+async function refreshToken(){
+  if(!session?.refresh_token) return false;
+
+  try{
+    const response = await fetch(
+      SUPABASE_URL + "/auth/v1/token?grant_type=refresh_token",
+      {
+        method:"POST",
+        headers:headers(),
+        body:JSON.stringify({refresh_token:session.refresh_token})
+      }
+    );
+
+    const result = await readResponse(response);
+
+    if(!response.ok || !result.data?.access_token){
+      return false;
+    }
+
+    session = result.data;
+    saveSession();
+    return true;
+
+  }catch(e){
+    return false;
+  }
+}
+
+/* فحص الاشتراك */
+async function checkGameAccess(gameCode){
+  if(!session?.access_token) return false;
+
+  try{
+    const response = await fetch(
+      SUPABASE_URL + "/functions/v1/account-game-access",
+      {
+        method:"POST",
+        headers:authHeaders(),
+        body:JSON.stringify({game_code:gameCode})
+      }
+    );
+
+    if(!response.ok) return false;
+
+    const result = await readResponse(response);
+    const data = result.data;
+
+    if(!data) return false;
+
+    return !!(
+      data.has_access ||
+      data.access ||
+      data.active ||
+      data.is_active
+    );
+
+  }catch(e){
+    return false;
+  }
+}
+
+/* فتح اللعبة */
+async function openGame(button){
+  const url = button.dataset.url;
+  const gameCode = button.dataset.game;
+
+  if(!url) return;
+
+  if(!session?.access_token){
+    showMessage("🔒 سجل الدخول أولًا لتشغيل الألعاب.");
+    return;
+  }
+
+  if(gameCode === "al7aet"){
+    const allowed = await checkGameAccess("al7aet");
+
+    if(!allowed){
+      showMessage("🔒 اشتراكك في 🎾 الحائط الصعب غير فعال. اشترِ أو جدّد الاشتراك أولًا.");
+      return;
+    }
+  }
+
+  window.location.href = url;
+}
+
+/* تحديث حالة الاشتراك */
 async function refreshAccess(){
+  if(!session?.access_token) return;
 
-if(!session?.access_token){
-return;
+  const allowed = await checkGameAccess("al7aet");
+
+  if(allowed){
+    $("accountStatus").textContent = "🟢 اشتراك الحائط الصعب فعال";
+  }else{
+    $("accountStatus").textContent =
+      "🟡 تم تسجيل الدخول — لا يوجد اشتراك نشط للحائط الصعب";
+  }
 }
 
-const allowed=
-await checkGameAccess("al7aet");
-
-if(allowed){
-
-$("accountStatus").innerHTML=
-"🟢 اشتراك الحائط الصعب فعال";
-
-}else{
-
-$("accountStatus").innerHTML=
-"🟡 تم تسجيل الدخول — لا يوجد اشتراك نشط للحائط الصعب";
-
-}
-
-}
-
-
-/* =========================
-   الأحداث
-========================= */
-
-$("loginBtn").addEventListener(
-"click",
-login
-);
-
-$("signupBtn").addEventListener(
-"click",
-signup
-);
-
-$("forgotBtn").addEventListener(
-"click",
-forgotPassword
-);
-
-$("logoutBtn").addEventListener(
-"click",
-logout
-);
-
-$("refreshBtn").addEventListener(
-"click",
-refreshAccess
-);
-
-$("signupShowBtn").addEventListener(
-"click",
-function(){
-
-$("signupBox").style.display=
-$("signupBox").style.display==="block"
-?"none"
-:"block";
-
-}
-);
-
-$("forgotShowBtn").addEventListener(
-"click",
-function(){
-
-$("forgotBox").style.display=
-$("forgotBox").style.display==="block"
-?"none"
-:"block";
-
-}
-);
-
-
-document
-.querySelectorAll("[data-game]")
-.forEach(function(button){
-
-button.addEventListener(
-"click",
-function(){
-
-openGame(button);
-
-}
-);
-
+/* إظهار وإخفاء النماذج */
+$("signupShowBtn").addEventListener("click", function(){
+  const box = $("signupBox");
+  box.style.display = box.style.display === "block" ? "none" : "block";
 });
 
+$("forgotShowBtn").addEventListener("click", function(){
+  const box = $("forgotBox");
+  box.style.display = box.style.display === "block" ? "none" : "block";
+});
 
-/* =========================
-   تشغيل المنصة
-========================= */
+/* ربط الأزرار */
+$("loginBtn").addEventListener("click", login);
+$("signupBtn").addEventListener("click", signup);
+$("forgotBtn").addEventListener("click", forgotPassword);
+$("logoutBtn").addEventListener("click", logout);
+$("refreshBtn").addEventListener("click", refreshAccess);
 
+document.querySelectorAll("[data-game]").forEach(function(button){
+  button.addEventListener("click", function(){
+    openGame(button);
+  });
+});
+
+/* تشغيل المنصة */
 loadSession();
-
 updateUI();
 
 if(session?.access_token){
+  refreshToken().then(function(ok){
+    if(!ok){
+      session = null;
 
-refreshToken().then(function(ok){
+      try{
+        localStorage.removeItem("game_platform_session");
+      }catch(e){}
 
-if(!ok){
+      updateUI();
+      return;
+    }
 
-session=null;
-
-localStorage.removeItem(
-"game_platform_session"
-);
-
-updateUI();
-
-return;
-
+    updateUI();
+    refreshAccess();
+  });
 }
-
-updateUI();
-
-refreshAccess();
-
-});
-
-}
-
 </script>
 
 </body>
