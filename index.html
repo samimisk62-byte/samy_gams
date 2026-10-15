@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🎮 منصة ألعابي</title>
 
 <style>
@@ -32,7 +32,7 @@ background:#182a38;border-radius:16px;padding:14px;margin-bottom:12px
 .panel h2{margin:0 0 12px;font-size:20px}
 input{
 width:100%;padding:12px;margin:5px 0;border:2px solid #40596a;
-border-radius:10px;background:#fff;color:#111;font-size:15px
+border-radius:10px;background:#fff;color:#111;font-size:16px
 }
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .row button{flex:1;min-width:130px}
@@ -40,7 +40,7 @@ border-radius:10px;background:#fff;color:#111;font-size:15px
 .red{background:#d83b42}
 .orange{background:#e18b19}
 .gray{background:#52606a}
-#account,#forgotBox,#signupBox,#gamesSection{display:none}
+#account,#forgotBox,#signupBox,#gamesSection,#resetPanel{display:none}
 .accountInfo{
 display:flex;justify-content:space-between;gap:10px;
 align-items:center;flex-wrap:wrap
@@ -64,11 +64,12 @@ display:none;padding:12px;border-radius:10px;background:#3b2930;
 color:#ffd8dc;margin-bottom:10px;text-align:center;line-height:1.7;
 overflow-wrap:anywhere
 }
-.small{font-size:13px;color:#b9c8d0;line-height:1.6}
+.small{font-size:13px;color:#b9c8d0;line-height:1.8}
 .payment{
 background:#17252d;border-radius:12px;padding:12px;margin-top:12px;line-height:1.8
 }
 footer{text-align:center;padding:20px 5px;color:#82939c;font-size:13px}
+hr{border:0;border-top:1px solid #40596a;margin:16px 0}
 @media(max-width:600px){
 header h1{font-size:23px}
 .app{padding:8px}
@@ -88,7 +89,7 @@ button{font-size:14px}
 
 <div id="message" role="status" aria-live="polite"></div>
 
-<!-- تسجيل الدخول -->
+<!-- تسجيل الدخول وإنشاء الحساب واستعادة كلمة المرور -->
 <div id="loginPanel" class="panel">
 <h2>🔐 تسجيل الدخول</h2>
 
@@ -103,19 +104,38 @@ button{font-size:14px}
 <button id="forgotShowBtn" class="gray">🔁 نسيت كلمة المرور؟</button>
 
 <div id="forgotBox">
+<hr>
+<h2>🔁 استعادة كلمة المرور</h2>
+<p class="small">اكتب البريد الإلكتروني المسجل في حسابك، ثم اضغط إرسال رابط الاستعادة.</p>
 <input id="forgotEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
 <button id="forgotBtn" class="orange">📧 إرسال رابط الاستعادة</button>
 </div>
 
 <div id="signupBox">
 <hr>
-<h2>📝 إنشاء حساب</h2>
+<h2>📝 إنشاء حساب جديد</h2>
 <input id="signupEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
-<input id="signupPassword" type="password" placeholder="كلمة المرور" autocomplete="new-password">
+<input id="signupPassword" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" autocomplete="new-password">
 <input id="signupPassword2" type="password" placeholder="تأكيد كلمة المرور" autocomplete="new-password">
 <button id="signupBtn" class="green">✅ إنشاء الحساب</button>
-<p class="small">بعد إنشاء الحساب قد يطلب منك تأكيد البريد الإلكتروني.</p>
+<p class="small">قد تحتاج إلى فتح رسالة تأكيد البريد الإلكتروني قبل تسجيل الدخول.</p>
 </div>
+</div>
+
+<!-- نموذج تعيين كلمة مرور جديدة -->
+<div id="resetPanel" class="panel">
+<h2>🔐 تعيين كلمة مرور جديدة</h2>
+<p class="small">اكتب كلمة المرور الجديدة مرتين. بعد الحفظ يمكنك تسجيل الدخول بها.</p>
+
+<input id="newPassword" type="password"
+placeholder="كلمة المرور الجديدة (6 أحرف على الأقل)"
+autocomplete="new-password">
+
+<input id="newPassword2" type="password"
+placeholder="تأكيد كلمة المرور الجديدة"
+autocomplete="new-password">
+
+<button id="resetPasswordBtn" class="green">✅ حفظ كلمة المرور الجديدة</button>
 </div>
 
 <!-- الحساب -->
@@ -125,7 +145,7 @@ button{font-size:14px}
 <div>👤 الحساب</div>
 <div id="accountEmail" class="email"></div>
 </div>
-<div id="accountStatus" class="status">🔒 لم يتم التحقق</div>
+<div id="accountStatus" class="status">🔒 حالة الحساب</div>
 </div>
 
 <div class="row">
@@ -138,22 +158,22 @@ button{font-size:14px}
 <div id="gamesSection">
 <div class="panel">
 <h2>🎮 ألعاب المنصة</h2>
-<p class="small">اختر اللعبة التي تريد تشغيلها. الألعاب التي تحتاج اشتراكًا ستظهر لك حالة الاشتراك.</p>
+<p class="small">اختر اللعبة التي تريد تشغيلها.</p>
 
 <div class="games">
 
 <div class="game">
 <div class="gameIcon">🎾</div>
 <h3>الحائط الصعب</h3>
-<p>لعبة الكرة والمضرب. العب ضد الكمبيوتر أو لاعب آخر، وتحدى المراحل والصعوبات.</p>
+<p>لعبة الكرة والمضرب. العب ضد الكمبيوتر أو لاعب آخر وتحدى المراحل.</p>
 <div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
-<button class="green" data-game="al7aet" data-url="/samy_gams/wall/">▶️ تشغيل اللعبة</button>
+<button class="green" data-game="al7aet" data-url="https://samimisk62-byte.github.io/samy_gams/wall/">▶️ تشغيل اللعبة</button>
 </div>
 
 <div class="game">
 <div class="gameIcon">🃏</div>
 <h3>العشرة - لعبة الإثارة</h3>
-<p>لعبة كوتشينة متعددة اللاعبين، مع 156 ورقة و3 مجموعات وأنظمة لعب مختلفة.</p>
+<p>لعبة كوتشينة متعددة اللاعبين، مع أنظمة لعب مختلفة.</p>
 <div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
 <button class="green" data-game="alashra" data-url="https://samimisk62-byte.github.io/Alashra-Gam/">▶️ تشغيل اللعبة</button>
 </div>
@@ -161,7 +181,7 @@ button{font-size:14px}
 <div class="game">
 <div class="gameIcon">🎣</div>
 <h3>صائد السمك</h3>
-<p>رحلة صيد في البحر، أسماك متعددة، مراحل، أخطار ومفاجآت أثناء اللعب.</p>
+<p>رحلة صيد في البحر، أسماك متعددة ومراحل وأخطار أثناء اللعب.</p>
 <div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
 <button class="green" data-game="saed_alsamak" data-url="https://samimisk62-byte.github.io/saed-Al-samak/">▶️ تشغيل اللعبة</button>
 </div>
@@ -169,7 +189,7 @@ button{font-size:14px}
 <div class="game">
 <div class="gameIcon">🍔</div>
 <h3>مطعمي</h3>
-<p>أدر مطعمك، استقبل الزبائن، اطبخ الطلبات وطوّر مطعمك واربح المزيد.</p>
+<p>أدر مطعمك، واستقبل الزبائن واطبخ الطلبات وطوّر مطعمك.</p>
 <div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
 <button class="green" data-game="matamy" data-url="https://samimisk62-byte.github.io/Matamy/">▶️ تشغيل اللعبة</button>
 </div>
@@ -180,7 +200,7 @@ button{font-size:14px}
 <b>💰 الاشتراك</b><br>
 داخل مصر: <b>30 جنيه</b> لمدة 30 يومًا لكل لعبة.<br>
 خارج مصر: <b>5 دولار</b> لمدة 30 يومًا لكل لعبة.<br>
-📱 الدفع يمكن أن يتم عبر وسيلة الدفع التي تحددها إدارة المنصة.
+📱 يتم تفعيل الاشتراك حسب إعدادات إدارة المنصة.
 </div>
 </div>
 </div>
@@ -191,18 +211,26 @@ button{font-size:14px}
 <script>
 "use strict";
 
-/* إعداد Supabase */
 const SUPABASE_URL = "https://auptwgjiivhglxtdjlnd.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6dszOZKIdlA57hHf2E3V5Q_VO-ewwtM";
 
+/*
+  يجب أن يكون هذا العنوان موجودًا في:
+  Supabase Dashboard
+  Authentication
+  URL Configuration
+  Redirect URLs
+*/
+const SITE_URL = "https://samimisk62-byte.github.io/samy_gams/";
+
 let session = null;
 let messageTimer = null;
+let recoveryAccessToken = null;
 
 function $(id){
   return document.getElementById(id);
 }
 
-/* عرض الرسائل كنص آمن */
 function showMessage(text, good = false){
   const box = $("message");
   box.style.display = "block";
@@ -213,7 +241,7 @@ function showMessage(text, good = false){
   if(messageTimer) clearTimeout(messageTimer);
   messageTimer = setTimeout(function(){
     box.style.display = "none";
-  }, 9000);
+  }, 12000);
 }
 
 function headers(){
@@ -231,71 +259,53 @@ function authHeaders(){
   };
 }
 
-/*
-  قراءة الرد بأمان:
-  لا نفترض أن كل رد من الخادم هو JSON.
-*/
 async function readResponse(response){
   const raw = await response.text();
 
-  if(!raw){
-    return {data:null, raw:""};
-  }
+  if(!raw) return {data:null,raw:""};
 
   try{
-    return {data:JSON.parse(raw), raw:raw};
+    return {data:JSON.parse(raw),raw:raw};
   }catch(e){
-    return {data:null, raw:raw};
+    return {data:null,raw:raw};
   }
 }
 
-function getServerError(result, response){
+function getServerError(result,response){
   const data = result.data;
 
   if(data && typeof data === "object"){
     return data.msg ||
-           data.message ||
-           data.error_description ||
-           data.error ||
-           data.msg_description ||
-           ("تعذر إتمام الطلب. رمز الاستجابة: " + response.status);
-  }
-
-  if(result.raw){
-    const clean = result.raw.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-    if(clean){
-      return "ردّ الخادم غير متوقع (HTTP " + response.status + "): " +
-             clean.slice(0, 220);
-    }
+      data.message ||
+      data.error_description ||
+      data.error ||
+      ("تعذر إتمام الطلب. رمز الاستجابة: " + response.status);
   }
 
   return "تعذر إتمام الطلب. رمز الاستجابة: " + response.status;
 }
 
-/* تخزين الجلسة */
 function saveSession(){
   try{
     if(session){
-      localStorage.setItem("game_platform_session", JSON.stringify(session));
+      localStorage.setItem("game_platform_session",JSON.stringify(session));
     }
-  }catch(e){
-    showMessage("تعذر حفظ جلسة الدخول على هذا المتصفح.");
-  }
+  }catch(e){}
 }
 
 function loadSession(){
   try{
     const raw = localStorage.getItem("game_platform_session");
-    if(raw) session = JSON.parse(raw);
+    session = raw ? JSON.parse(raw) : null;
   }catch(e){
     session = null;
   }
 }
 
-/* واجهة الدخول */
 function updateUI(){
   if(session && session.access_token){
     $("loginPanel").style.display = "none";
+    $("resetPanel").style.display = "none";
     $("account").style.display = "block";
     $("gamesSection").style.display = "block";
     $("accountEmail").textContent = session.user?.email || "";
@@ -317,7 +327,8 @@ async function login(){
     return;
   }
 
-  $("loginBtn").disabled = true;
+  const button = $("loginBtn");
+  button.disabled = true;
 
   try{
     const response = await fetch(
@@ -325,30 +336,25 @@ async function login(){
       {
         method:"POST",
         headers:headers(),
-        body:JSON.stringify({email:email, password:password})
+        body:JSON.stringify({email:email,password:password})
       }
     );
 
     const result = await readResponse(response);
 
-    if(!response.ok){
-      throw new Error(getServerError(result, response));
-    }
-
-    if(!result.data || !result.data.access_token){
-      throw new Error("استجابة تسجيل الدخول غير مكتملة. حاول مرة أخرى.");
-    }
+    if(!response.ok) throw new Error(getServerError(result,response));
+    if(!result.data?.access_token) throw new Error("لم تكتمل عملية تسجيل الدخول.");
 
     session = result.data;
     saveSession();
     updateUI();
-    showMessage("✅ تم تسجيل الدخول بنجاح.", true);
+    showMessage("✅ تم تسجيل الدخول بنجاح.",true);
     await refreshAccess();
 
   }catch(error){
-    showMessage("❌ " + (error.message || "حدث خطأ أثناء تسجيل الدخول."));
+    showMessage("❌ " + (error.message || "تعذر تسجيل الدخول."));
   }finally{
-    $("loginBtn").disabled = false;
+    button.disabled = false;
   }
 }
 
@@ -373,43 +379,37 @@ async function signup(){
     return;
   }
 
-  $("signupBtn").disabled = true;
+  const button = $("signupBtn");
+  button.disabled = true;
 
   try{
-    const response = await fetch(
-      SUPABASE_URL + "/auth/v1/signup",
-      {
-        method:"POST",
-        headers:headers(),
-        body:JSON.stringify({email:email, password:password})
-      }
-    );
+    const response = await fetch(SUPABASE_URL + "/auth/v1/signup",{
+      method:"POST",
+      headers:headers(),
+      body:JSON.stringify({email:email,password:password})
+    });
 
     const result = await readResponse(response);
 
-    if(!response.ok){
-      throw new Error(getServerError(result, response));
-    }
+    if(!response.ok) throw new Error(getServerError(result,response));
 
-    const data = result.data || {};
-
-    if(data.access_token){
-      session = data;
+    if(result.data?.access_token){
+      session = result.data;
       saveSession();
       updateUI();
-      showMessage("✅ تم إنشاء الحساب وتسجيل الدخول.", true);
+      showMessage("✅ تم إنشاء الحساب بنجاح.",true);
     }else{
-      showMessage("✅ تم إرسال طلب إنشاء الحساب. راجع بريدك الإلكتروني لتأكيده.", true);
+      showMessage("📧 تم إرسال طلب إنشاء الحساب. افتح رسالة تأكيد البريد الإلكتروني.",true);
     }
 
   }catch(error){
     showMessage("❌ " + (error.message || "تعذر إنشاء الحساب."));
   }finally{
-    $("signupBtn").disabled = false;
+    button.disabled = false;
   }
 }
 
-/* استعادة كلمة المرور — الإصلاح الأساسي */
+/* إرسال رابط استعادة كلمة المرور */
 async function forgotPassword(){
   const email = $("forgotEmail").value.trim();
 
@@ -419,7 +419,7 @@ async function forgotPassword(){
   }
 
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-    showMessage("⚠️ تأكد من كتابة عنوان بريد إلكتروني صحيح.");
+    showMessage("⚠️ تأكد من كتابة بريد إلكتروني صحيح.");
     return;
   }
 
@@ -428,16 +428,15 @@ async function forgotPassword(){
 
   try{
     /*
-      redirect_to يوضع في عنوان الطلب.
-      عنوان العودة هو صفحة المنصة نفسها.
+      نستخدم رابط GitHub Pages مباشرةً،
+      ولا نعتمد على عنوان HTML Editor أو file://.
     */
-    const redirectTo = window.location.origin + window.location.pathname;
     const endpoint =
       SUPABASE_URL +
       "/auth/v1/recover?redirect_to=" +
-      encodeURIComponent(redirectTo);
+      encodeURIComponent(SITE_URL);
 
-    const response = await fetch(endpoint, {
+    const response = await fetch(endpoint,{
       method:"POST",
       headers:headers(),
       body:JSON.stringify({email:email})
@@ -446,23 +445,193 @@ async function forgotPassword(){
     const result = await readResponse(response);
 
     if(!response.ok){
-      throw new Error(getServerError(result, response));
+      throw new Error(getServerError(result,response));
     }
 
     showMessage(
-      "📧 إذا كان الحساب مؤهلًا لاستعادة كلمة المرور، فستصلك رسالة على بريدك. افحص الوارد والرسائل غير المرغوب فيها.",
+      "📧 تم إرسال طلب الاستعادة. افتح أحدث رسالة في Gmail واضغط رابط الاستعادة. إذا لم تجدها، افحص الرسائل غير المرغوب فيها.",
       true
     );
 
   }catch(error){
-    const message = error && error.message ? error.message : "";
+    showMessage("❌ تعذر إرسال طلب الاستعادة: " +
+      (error.message || "تحقق من اتصال الإنترنت."));
+  }finally{
+    button.disabled = false;
+  }
+}
 
-    if(message === "Failed to fetch" || message === "NetworkError"){
-      showMessage("❌ تعذر الاتصال بخادم Supabase. تحقق من الإنترنت وحاول لاحقًا.");
-    }else{
-      showMessage("❌ تعذر إرسال طلب الاستعادة: " + (message || "خطأ غير معروف."));
+/* عرض نموذج كلمة المرور الجديدة */
+function showResetForm(accessToken){
+  recoveryAccessToken = accessToken;
+
+  $("loginPanel").style.display = "none";
+  $("account").style.display = "none";
+  $("gamesSection").style.display = "none";
+  $("resetPanel").style.display = "block";
+
+  $("newPassword").value = "";
+  $("newPassword2").value = "";
+
+  /*
+    بعد حفظ رمز الاستعادة في الذاكرة،
+    نزيل الرمز من شريط العنوان حتى لا يبقى ظاهرًا.
+  */
+  try{
+    history.replaceState(null,document.title,SITE_URL);
+  }catch(e){}
+
+  showMessage("✅ تم التحقق من رابط الاستعادة. اكتب كلمة المرور الجديدة.",true);
+}
+
+/* اكتشاف رابط الاستعادة القادم من Gmail */
+async function detectPasswordRecovery(){
+  const params = new URLSearchParams(window.location.search);
+
+  const hashText = window.location.hash.startsWith("#")
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+
+  const hash = new URLSearchParams(hashText);
+
+  const errorCode =
+    hash.get("error_code") || params.get("error_code");
+
+  const errorDescription =
+    hash.get("error_description") || params.get("error_description");
+
+  if(errorCode || errorDescription){
+    showMessage(
+      "❌ رابط الاستعادة منتهي الصلاحية أو غير صالح. اطلب رابطًا جديدًا من المنصة."
+    );
+    return false;
+  }
+
+  const type = hash.get("type") || params.get("type");
+
+  const accessToken =
+    hash.get("access_token") || params.get("access_token");
+
+  /*
+    الطريقة الأولى: Supabase يعيد access_token
+    داخل عنوان الصفحة بعد التحقق من البريد.
+  */
+  if(type === "recovery" && accessToken){
+    showResetForm(accessToken);
+    return true;
+  }
+
+  /*
+    الطريقة الثانية: إذا أعاد Supabase token_hash
+    في عنوان الصفحة، نتحقق منه عبر واجهة verify.
+  */
+  const tokenHash =
+    params.get("token_hash") || hash.get("token_hash");
+
+  if(type === "recovery" && tokenHash){
+    try{
+      const response = await fetch(SUPABASE_URL + "/auth/v1/verify",{
+        method:"POST",
+        headers:headers(),
+        body:JSON.stringify({
+          token_hash:tokenHash,
+          type:"recovery"
+        })
+      });
+
+      const result = await readResponse(response);
+
+      if(!response.ok){
+        throw new Error(getServerError(result,response));
+      }
+
+      if(result.data?.access_token){
+        showResetForm(result.data.access_token);
+        return true;
+      }
+
+      showMessage("❌ لم يُرجع خادم الاستعادة رمز الجلسة المطلوب. اطلب رابطًا جديدًا.");
+      return false;
+
+    }catch(error){
+      showMessage(
+        "❌ تعذر التحقق من رابط الاستعادة. اطلب رابطًا جديدًا، وافتحه من أحدث رسالة في Gmail."
+      );
+      return false;
+    }
+  }
+
+  /*
+    إذا لم يحمل الرابط بيانات الاستعادة، لا نعرض نموذجًا
+    يوهم المستخدم بأنه يستطيع تغيير كلمة المرور.
+  */
+  return false;
+}
+
+/* حفظ كلمة المرور الجديدة */
+async function resetPassword(){
+  const password = $("newPassword").value;
+  const password2 = $("newPassword2").value;
+
+  if(!recoveryAccessToken){
+    showMessage("❌ رابط الاستعادة غير جاهز. اطلب رابطًا جديدًا وافتحه من Gmail.");
+    return;
+  }
+
+  if(password.length < 6){
+    showMessage("⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
+    return;
+  }
+
+  if(password !== password2){
+    showMessage("⚠️ كلمتا المرور غير متطابقتين.");
+    return;
+  }
+
+  const button = $("resetPasswordBtn");
+  button.disabled = true;
+
+  try{
+    const response = await fetch(SUPABASE_URL + "/auth/v1/user",{
+      method:"PUT",
+      headers:{
+        "apikey":SUPABASE_KEY,
+        "Authorization":"Bearer " + recoveryAccessToken,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({password:password})
+    });
+
+    const result = await readResponse(response);
+
+    if(!response.ok){
+      throw new Error(getServerError(result,response));
     }
 
+    recoveryAccessToken = null;
+    session = null;
+
+    try{
+      localStorage.removeItem("game_platform_session");
+    }catch(e){}
+
+    $("resetPanel").style.display = "none";
+    $("loginPanel").style.display = "block";
+    $("account").style.display = "none";
+    $("gamesSection").style.display = "none";
+    $("loginPassword").value = "";
+
+    showMessage(
+      "✅ تم تغيير كلمة المرور بنجاح. ارجع إلى تسجيل الدخول واستخدم كلمة المرور الجديدة.",
+      true
+    );
+
+  }catch(error){
+    showMessage(
+      "❌ لم يتم تغيير كلمة المرور: " +
+      (error.message || "خطأ غير معروف") +
+      ". قد يكون رابط الاستعادة انتهت صلاحيته؛ اطلب رابطًا جديدًا."
+    );
   }finally{
     button.disabled = false;
   }
@@ -472,14 +641,12 @@ async function forgotPassword(){
 async function logout(){
   try{
     if(session?.access_token){
-      await fetch(SUPABASE_URL + "/auth/v1/logout", {
+      await fetch(SUPABASE_URL + "/auth/v1/logout",{
         method:"POST",
         headers:authHeaders()
       });
     }
-  }catch(e){
-    /* تسجيل الخروج محليًا حتى لو فشل الاتصال */
-  }
+  }catch(e){}
 
   session = null;
 
@@ -488,10 +655,10 @@ async function logout(){
   }catch(e){}
 
   updateUI();
-  showMessage("🚪 تم تسجيل الخروج.", true);
+  showMessage("🚪 تم تسجيل الخروج.",true);
 }
 
-/* تحديث الجلسة */
+/* تحديث رمز الجلسة */
 async function refreshToken(){
   if(!session?.refresh_token) return false;
 
@@ -520,7 +687,7 @@ async function refreshToken(){
   }
 }
 
-/* فحص الاشتراك */
+/* فحص صلاحية اللعبة */
 async function checkGameAccess(gameCode){
   if(!session?.access_token) return false;
 
@@ -553,12 +720,10 @@ async function checkGameAccess(gameCode){
   }
 }
 
-/* فتح اللعبة */
+/* تشغيل اللعبة */
 async function openGame(button){
   const url = button.dataset.url;
   const gameCode = button.dataset.game;
-
-  if(!url) return;
 
   if(!session?.access_token){
     showMessage("🔒 سجل الدخول أولًا لتشغيل الألعاب.");
@@ -569,7 +734,7 @@ async function openGame(button){
     const allowed = await checkGameAccess("al7aet");
 
     if(!allowed){
-      showMessage("🔒 اشتراكك في 🎾 الحائط الصعب غير فعال. اشترِ أو جدّد الاشتراك أولًا.");
+      showMessage("🔒 اشتراك الحائط الصعب غير فعال أو لم يتم التحقق منه.");
       return;
     }
   }
@@ -583,45 +748,51 @@ async function refreshAccess(){
 
   const allowed = await checkGameAccess("al7aet");
 
-  if(allowed){
-    $("accountStatus").textContent = "🟢 اشتراك الحائط الصعب فعال";
-  }else{
-    $("accountStatus").textContent =
-      "🟡 تم تسجيل الدخول — لا يوجد اشتراك نشط للحائط الصعب";
-  }
+  $("accountStatus").textContent = allowed
+    ? "🟢 اشتراك الحائط الصعب فعال"
+    : "🟡 لا يوجد اشتراك نشط للحائط الصعب";
 }
 
 /* إظهار وإخفاء النماذج */
-$("signupShowBtn").addEventListener("click", function(){
+$("signupShowBtn").addEventListener("click",function(){
   const box = $("signupBox");
   box.style.display = box.style.display === "block" ? "none" : "block";
 });
 
-$("forgotShowBtn").addEventListener("click", function(){
+$("forgotShowBtn").addEventListener("click",function(){
   const box = $("forgotBox");
   box.style.display = box.style.display === "block" ? "none" : "block";
 });
 
 /* ربط الأزرار */
-$("loginBtn").addEventListener("click", login);
-$("signupBtn").addEventListener("click", signup);
-$("forgotBtn").addEventListener("click", forgotPassword);
-$("logoutBtn").addEventListener("click", logout);
-$("refreshBtn").addEventListener("click", refreshAccess);
+$("loginBtn").addEventListener("click",login);
+$("signupBtn").addEventListener("click",signup);
+$("forgotBtn").addEventListener("click",forgotPassword);
+$("resetPasswordBtn").addEventListener("click",resetPassword);
+$("logoutBtn").addEventListener("click",logout);
+$("refreshBtn").addEventListener("click",refreshAccess);
 
 document.querySelectorAll("[data-game]").forEach(function(button){
-  button.addEventListener("click", function(){
+  button.addEventListener("click",function(){
     openGame(button);
   });
 });
 
-/* تشغيل المنصة */
-loadSession();
-updateUI();
+/* بدء المنصة وفحص رابط الاستعادة أولًا */
+(async function startPlatform(){
+  const isRecovery = await detectPasswordRecovery();
 
-if(session?.access_token){
-  refreshToken().then(function(ok){
-    if(!ok){
+  if(isRecovery){
+    return;
+  }
+
+  loadSession();
+  updateUI();
+
+  if(session?.access_token){
+    const refreshed = await refreshToken();
+
+    if(!refreshed){
       session = null;
 
       try{
@@ -633,9 +804,9 @@ if(session?.access_token){
     }
 
     updateUI();
-    refreshAccess();
-  });
-}
+    await refreshAccess();
+  }
+})();
 </script>
 
 </body>
