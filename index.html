@@ -743,21 +743,41 @@ async function checkGameAccess(gameCode){
   }catch(e){return false;}
 }
 const GAME_NAMES={al7aet:"الحائط الصعب",alashra:"العشرة",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
+function pendingOrderStorageKey(gameCode){
+  return "platform_pending_order_" + (session?.user?.id || "user") + "_" + gameCode;
+}
+function displaySubscriptionOrder(order,reused){
+  currentOrderId=order.id;
+  $("orderIdText").textContent=order.id;
+  $("orderAmount").textContent=order.currency==="EGP"?"المطلوب دفعه: "+(Number(order.amount_minor)/100)+" جنيه مصري":"المطلوب دفعه: "+(Number(order.amount_minor)/100).toFixed(2)+" دولار أمريكي";
+  $("orderDetails").style.display="block";
+  showMessage(reused?"📋 عندك طلب سابق لهذه اللعبة؛ استخدمنا نفس الطلب لمنع التكرار.":"✅ تم إنشاء طلب الاشتراك. حوّل المبلغ ثم اكتب رقم العملية.",true);
+}
 function openSubscription(gameCode,gameName){
   if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا قبل طلب الاشتراك.");return;}
-  selectedGameCode=gameCode;currentOrderId=null;$("subscriptionTitle").textContent="💳 اشتراك / تجديد: "+(gameName||GAME_NAMES[gameCode]||gameCode);
-  $("orderDetails").style.display="none";$("paymentReference").value="";$("createOrderBtn").disabled=false;$("subscriptionPanel").style.display="block";$("subscriptionPanel").scrollIntoView({behavior:"smooth",block:"start"});
+  selectedGameCode=gameCode;
+  $("subscriptionTitle").textContent="💳 اشتراك / تجديد: "+(gameName||GAME_NAMES[gameCode]||gameCode);
+  $("orderDetails").style.display="none";$("paymentReference").value="";
+  let cached=null;
+  try{cached=JSON.parse(localStorage.getItem(pendingOrderStorageKey(gameCode))||"null");}catch(e){}
+  if(cached&&cached.id){displaySubscriptionOrder(cached,true);}else{currentOrderId=null;$("createOrderBtn").disabled=false;}
+  $("subscriptionPanel").style.display="block";$("subscriptionPanel").scrollIntoView({behavior:"smooth",block:"start"});
 }
 async function createSubscriptionOrder(){
   if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا.");return;}if(!selectedGameCode){showMessage("اختر لعبة أولًا.");return;}
-  const button=$("createOrderBtn");button.disabled=true;
+  const button=$("createOrderBtn");
+  if(button.disabled)return;
+  button.disabled=true;
   try{
+    let cached=null;
+    try{cached=JSON.parse(localStorage.getItem(pendingOrderStorageKey(selectedGameCode))||"null");}catch(e){}
+    if(cached&&cached.id){displaySubscriptionOrder(cached,true);await loadMyOrders();return;}
     const response=await fetch(SUPABASE_URL+"/functions/v1/create-game-order",{method:"POST",headers:authHeaders(),body:JSON.stringify({game_code:selectedGameCode,country:$("paymentCountry").value})});
     const result=await readResponse(response);if(!response.ok||!result.data?.order)throw new Error(getServerError(result,response));
-    const order=result.data.order;currentOrderId=order.id;$("orderIdText").textContent=order.id;
-    $("orderAmount").textContent=order.currency==="EGP"?"المطلوب دفعه: "+(Number(order.amount_minor)/100)+" جنيه مصري":"المطلوب دفعه: "+(Number(order.amount_minor)/100).toFixed(2)+" دولار أمريكي";
-    $("orderDetails").style.display="block";showMessage("✅ تم إنشاء طلب الاشتراك. حوّل المبلغ ثم اكتب رقم العملية.",true);await loadMyOrders();
-  }catch(error){showMessage("❌ تعذر إنشاء طلب الاشتراك: "+(error.message||"خطأ غير معروف"));}finally{button.disabled=false;}
+    const order=result.data.order;
+    try{localStorage.setItem(pendingOrderStorageKey(selectedGameCode),JSON.stringify(order));}catch(e){}
+    displaySubscriptionOrder(order,false);await loadMyOrders();
+  }catch(error){showMessage("❌ تعذر إنشاء طلب الاشتراك: "+(error.message||"خطأ غير معروف"));}finally{button.disabled=!!currentOrderId;}
 }
 async function submitPaymentReference(){
   if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا.");return;}if(!currentOrderId){showMessage("أنشئ طلب الاشتراك أولًا.");return;}
@@ -766,7 +786,7 @@ async function submitPaymentReference(){
   try{
     const response=await fetch(SUPABASE_URL+"/functions/v1/submit-payment-reference",{method:"POST",headers:authHeaders(),body:JSON.stringify({order_id:currentOrderId,payment_reference:reference})});
     const result=await readResponse(response);if(!response.ok||!result.data?.ok)throw new Error(getServerError(result,response));
-    $("paymentReference").value="";$("orderDetails").style.display="none";currentOrderId=null;showMessage("✅ تم إرسال رقم التحويل. سيُفعّل الاشتراك بعد مراجعة الإدارة وتأكيد الدفع.",true);await loadMyOrders();
+    $("paymentReference").value="";$("orderDetails").style.display="none";try{localStorage.removeItem(pendingOrderStorageKey(selectedGameCode));}catch(e){}currentOrderId=null;$("createOrderBtn").disabled=false;showMessage("✅ تم إرسال رقم التحويل. سيُفعّل الاشتراك بعد مراجعة الإدارة وتأكيد الدفع.",true);await loadMyOrders();
   }catch(error){showMessage("❌ تعذر إرسال رقم التحويل: "+(error.message||"خطأ غير معروف"));}finally{button.disabled=false;}
 }
 async function loadMyOrders(){
