@@ -67,7 +67,10 @@ display:none;padding:12px;border-radius:10px;background:#3b2930;
 color:#ffd8dc;margin-bottom:10px;text-align:center;line-height:1.7;
 overflow-wrap:anywhere
 }
-.small{font-size:13px;color:#b9c8d0;line-height:1.8}
+ .small{font-size:13px;color:#b9c8d0;line-height:1.8}
+.adminOrder{background:#213746;border:1px solid #40596a;border-radius:12px;padding:12px;margin:10px 0;overflow-wrap:anywhere}
+.adminOrder .meta{line-height:1.9;color:#d4e0e6}
+#adminPanel{display:none}
 .payment{
 background:#17252d;border-radius:12px;padding:12px;margin-top:12px;line-height:1.8
 }
@@ -153,8 +156,17 @@ autocomplete="new-password">
 
 <div class="row">
 <button id="refreshBtn" class="green">🔄 تحديث الاشتراكات</button>
+<button id="adminOpenBtn" class="orange">🔐 لوحة الإدارة</button>
 <button id="logoutBtn" class="gray">🚪 خروج</button>
 </div>
+</div>
+
+<div id="adminPanel" class="panel">
+<h2>🛠️ لوحة إدارة الاشتراكات</h2>
+<p class="small">هذه اللوحة مخصصة لحساب صاحب المنصة فقط. راجع رقم التحويل بنفسك قبل اعتماد أي طلب. اعتماد الطلب يفعّل الاشتراك لمدة المدة المحددة للعبة.</p>
+<div class="row"><button id="adminReloadBtn" class="green">🔄 تحديث الطلبات</button><button id="adminCloseBtn" class="gray">إغلاق اللوحة</button></div>
+<div id="adminSummary" class="small" style="margin-top:10px">اضغط تحديث الطلبات لعرض الطلبات.</div>
+<div id="adminOrders"></div>
 </div>
 
 <!-- الألعاب -->
@@ -767,6 +779,66 @@ async function loadMyOrders(){
   }catch(error){box.textContent="تعذر تحميل الطلبات الآن. جرّب زر تحديث الاشتراكات لاحقًا."}
 }
 
+/* لوحة إدارة الطلبات — صلاحية المالك تتحقق منها دالة الخادم */
+async function loadOwnerDashboard(){
+  const summary=$("adminSummary"), list=$("adminOrders");
+  if(!session?.access_token){showMessage("سجّل الدخول أولًا.");return;}
+  summary.textContent="⏳ جاري تحميل الطلبات والتحقق من صلاحية الإدارة...";
+  list.textContent="";
+  try{
+    const response=await fetch(SUPABASE_URL+"/functions/v1/owner-dashboard",{
+      method:"POST",headers:authHeaders(),body:JSON.stringify({action:"summary"})
+    });
+    const result=await readResponse(response);
+    if(!response.ok) throw new Error(getServerError(result,response));
+    const orders=Array.isArray(result.data?.orders)?result.data.orders:[];
+    const pending=orders.filter(o=>!["paid","rejected","refunded","cancelled","expired"].includes(o.status));
+    summary.textContent="✅ تم التحقق من صلاحية الإدارة. إجمالي الطلبات المعروضة: "+orders.length+" — الطلبات التي تحتاج مراجعة: "+pending.length;
+    if(!orders.length){list.textContent="لا توجد طلبات حتى الآن.";return;}
+    const names={al7aet:"الحائط الصعب",alashra:"العشرة",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
+    const statuses={pending:"في انتظار المراجعة",paid:"تم اعتماد الدفع",active:"مفعّل",approved:"تمت الموافقة",rejected:"مرفوض",refunded:"تم رد المبلغ",cancelled:"ملغي",expired:"منتهي"};
+    orders.forEach(function(order){
+      const card=document.createElement("div");card.className="adminOrder";
+      const title=document.createElement("h3");title.textContent=(names[order.game_code]||order.game_code||"لعبة")+" — "+(statuses[order.status]||order.status||"غير معروف");card.appendChild(title);
+      const details=document.createElement("div");details.className="meta";
+      const amount=Number(order.amount_minor||0)/100;
+      details.textContent="العميل: "+(order.customer_email||"بريد غير متاح")+"\nالمبلغ: "+(order.currency==="EGP"?amount+" جنيه مصري":amount.toFixed(2)+" دولار أمريكي")+"\nرقم الطلب: "+(order.id||"غير متاح")+"\nرقم التحويل: "+(order.payment_reference||"لم يُرسل رقم التحويل بعد")+"\nتاريخ الطلب: "+(order.created_at?new Date(order.created_at).toLocaleString("ar-EG"):"غير متاح");
+      details.style.whiteSpace="pre-line";card.appendChild(details);
+      if(!["paid","rejected","refunded","cancelled","expired"].includes(order.status)){
+        const row=document.createElement("div");row.className="row";
+        const approve=document.createElement("button");approve.className="green";approve.textContent="✅ اعتماد الدفع وتفعيل الاشتراك";
+        approve.addEventListener("click",async function(){
+          if(!order.payment_reference){showMessage("⚠️ لا يوجد رقم تحويل في الطلب. لا تعتمد الطلب قبل استلام الرقم والتحقق من الدفع.");return;}
+          if(!confirm("هل تحققت بنفسك من وصول المبلغ فعلًا؟ عند الموافقة سيتفعّل الاشتراك."))return;
+          await changeOwnerOrderStatus(order.id,"paid");
+        });
+        const reject=document.createElement("button");reject.className="red";reject.textContent="❌ رفض الطلب";
+        reject.addEventListener("click",async function(){
+          if(!confirm("هل تريد رفض هذا الطلب؟"))return;
+          await changeOwnerOrderStatus(order.id,"rejected");
+        });
+        row.append(approve,reject);card.appendChild(row);
+      }
+      list.appendChild(card);
+    });
+  }catch(error){
+    summary.textContent="تعذر فتح لوحة الإدارة: "+(error.message||"خطأ غير معروف");
+    list.textContent="لو ظهر «غير مصرح»، فهذا يعني أن الحساب الحالي غير مسجل كصاحب للمنصة في قاعدة البيانات. لم يتم تغيير أي طلب.";
+  }
+}
+async function changeOwnerOrderStatus(orderId,status){
+  try{
+    const response=await fetch(SUPABASE_URL+"/functions/v1/owner-dashboard",{
+      method:"POST",headers:authHeaders(),body:JSON.stringify({action:"set_order_status",order_id:orderId,status:status})
+    });
+    const result=await readResponse(response);
+    if(!response.ok)throw new Error(getServerError(result,response));
+    showMessage(status==="paid"?"✅ تم اعتماد الدفع وتفعيل الاشتراك.":"تم رفض الطلب.",true);
+    await loadOwnerDashboard();
+    await refreshAccess();
+  }catch(error){showMessage("❌ تعذر تحديث الطلب: "+(error.message||"خطأ غير معروف"));}
+}
+
 /* تشغيل اللعبة */
 async function openGame(button){
   const url=button.dataset.url;const gameCode=button.dataset.game;
@@ -797,6 +869,9 @@ $("forgotBtn").addEventListener("click",forgotPassword);
 $("resetPasswordBtn").addEventListener("click",resetPassword);
 $("logoutBtn").addEventListener("click",logout);
 $("refreshBtn").addEventListener("click",refreshAccess);
+$("adminOpenBtn").addEventListener("click",function(){$("adminPanel").style.display="block";$("adminPanel").scrollIntoView({behavior:"smooth",block:"start"});loadOwnerDashboard();});
+$("adminReloadBtn").addEventListener("click",loadOwnerDashboard);
+$("adminCloseBtn").addEventListener("click",function(){$("adminPanel").style.display="none";});
 
 document.querySelectorAll("[data-game]").forEach(function(button){button.addEventListener("click",function(){openGame(button);});});
 document.querySelectorAll("[data-subscribe-game]").forEach(function(button){button.addEventListener("click",function(){openSubscription(button.dataset.subscribeGame,button.dataset.gameName);});});
