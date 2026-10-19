@@ -401,54 +401,70 @@ async function login(){
   }
 }
 
-/* إنشاء حساب */
+/* رسائل أخطاء التسجيل بالعربية مع السماح بتصحيح البيانات وإعادة المحاولة */
+function signupErrorArabic(message){
+  const m=String(message||"").toLowerCase();
+  if(m.includes("already registered")||m.includes("user already exists")||m.includes("already been registered"))
+    return "هذا البريد الإلكتروني مسجّل بالفعل. جرّب تسجيل الدخول أو استخدم «نسيت كلمة المرور».";
+  if(m.includes("invalid email")||m.includes("email address is invalid"))
+    return "البريد الإلكتروني غير صحيح. راجع كتابته ثم حاول مرة أخرى.";
+  if(m.includes("password")&&(m.includes("weak")||m.includes("short")||m.includes("least")))
+    return "كلمة المرور ضعيفة أو قصيرة. استخدم 6 أحرف على الأقل.";
+  if(m.includes("rate limit")||m.includes("too many requests"))
+    return "حاولت التسجيل مرات كثيرة في وقت قصير. انتظر قليلًا ثم أعد المحاولة.";
+  if(m.includes("email")&&(m.includes("send")||m.includes("smtp")||m.includes("provider")))
+    return "تعذر إرسال رسالة التأكيد الآن. انتظر قليلًا ثم حاول مرة أخرى، أو تواصل مع إدارة المنصة.";
+  return "تعذر إنشاء الحساب حاليًا. راجع البيانات وحاول مرة أخرى. إذا استمر الخطأ، تواصل مع إدارة المنصة.";
+}
 async function signup(){
-  const email = $("signupEmail").value.trim();
-  const password = $("signupPassword").value;
-  const password2 = $("signupPassword2").value;
+  const emailInput=$("signupEmail");
+  const passwordInput=$("signupPassword");
+  const confirmInput=$("signupPassword2");
+  const email=emailInput.value.trim();
+  const password=passwordInput.value;
+  const password2=confirmInput.value;
 
-  if(!email || !password){
-    showMessage("⚠️ اكتب البريد الإلكتروني وكلمة المرور.");
-    return;
+  if(!email){
+    showMessage("⚠️ اكتب البريد الإلكتروني أولًا.");emailInput.focus();return;
+  }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    showMessage("⚠️ البريد الإلكتروني غير صحيح. راجع كتابته، مثل name@example.com.");emailInput.focus();return;
+  }
+  if(!password){
+    showMessage("⚠️ اكتب كلمة المرور.");passwordInput.focus();return;
+  }
+  if(password.length<6){
+    showMessage("⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل. اكتب كلمة مرور أطول.");passwordInput.focus();return;
+  }
+  if(!password2){
+    showMessage("⚠️ اكتب كلمة المرور مرة أخرى في خانة التأكيد.");confirmInput.focus();return;
+  }
+  if(password!==password2){
+    showMessage("⚠️ كلمتا المرور غير متطابقتين. صحّح الخانتين ثم حاول مرة أخرى.");confirmInput.focus();confirmInput.select();return;
   }
 
-  if(password.length < 6){
-    showMessage("⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
-    return;
-  }
-
-  if(password !== password2){
-    showMessage("⚠️ تأكيد كلمة المرور غير مطابق.");
-    return;
-  }
-
-  const button = $("signupBtn");
-  button.disabled = true;
-
+  const button=$("signupBtn");
+  button.disabled=true;
+  button.textContent="⏳ جارٍ إنشاء الحساب...";
   try{
-    const response = await fetch(SUPABASE_URL + "/auth/v1/signup",{
-      method:"POST",
-      headers:headers(),
+    const response=await fetch(SUPABASE_URL+"/auth/v1/signup",{
+      method:"POST",headers:headers(),
       body:JSON.stringify({email:email,password:password})
     });
-
-    const result = await readResponse(response);
-
+    const result=await readResponse(response);
     if(!response.ok) throw new Error(getServerError(result,response));
 
     if(result.data?.access_token){
-      session = result.data;
-      saveSession();
-      updateUI();
-      showMessage("✅ تم إنشاء الحساب بنجاح.",true);
+      session=result.data;saveSession();updateUI();
+      showMessage("✅ تم إنشاء الحساب بنجاح. يمكنك الآن استخدام المنصة.",true);
     }else{
-      showMessage("📧 تم إرسال طلب إنشاء الحساب. افتح رسالة تأكيد البريد الإلكتروني.",true);
+      showMessage("📧 أرسلنا رسالة تأكيد إلى "+email+". افتح بريدك واضغط رابط التأكيد، وتفقّد مجلد الرسائل غير المرغوب فيها إذا لم تجدها. بعد التأكيد ارجع للمنصة وسجّل الدخول.",true);
     }
-
   }catch(error){
-    showMessage("❌ " + (error.message || "تعذر إنشاء الحساب."));
+    showMessage("❌ "+signupErrorArabic(error.message));
   }finally{
-    button.disabled = false;
+    button.disabled=false;
+    button.textContent="✅ إنشاء الحساب";
   }
 }
 
