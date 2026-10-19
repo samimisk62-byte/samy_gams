@@ -218,10 +218,12 @@ autocomplete="new-password">
 <div id="subscriptionPanel" class="panel">
 <h2 id="subscriptionTitle">💳 الاشتراك في لعبة</h2>
 <p class="small">اختر مكان الدفع ثم أنشئ طلب الاشتراك. بعد التحويل، اكتب رقم العملية. لن يتفعّل الاشتراك إلا بعد تأكيد الإدارة.</p>
-<label for="paymentCountry">مكان الدفع</label>
-<select id="paymentCountry" style="width:100%;padding:12px;margin:5px 0;border-radius:10px;font-size:16px">
-<option value="EG">داخل مصر — 30 جنيهًا</option><option value="US">خارج مصر — 5 دولارات</option>
+<label for="paymentCountry" style="display:block;margin-top:10px;font-weight:bold;font-size:17px">🌍 اختار مكان الدفع (اضغط على المربع لاختيار العملة)</label>
+<select id="paymentCountry" aria-label="اختيار مكان الدفع والعملة" style="display:block;width:100%;min-height:54px;padding:12px 14px;margin:8px 0 14px;border:2px solid #10a85a;border-radius:10px;font-size:17px;font-weight:bold;background:#fff;color:#111;appearance:auto;-webkit-appearance:menulist;direction:rtl">
+<option value="EG">🇪🇬 داخل مصر — 30 جنيهًا لمدة 30 يومًا</option>
+<option value="US">🌎 خارج مصر — 5 دولارات لمدة 30 يومًا</option>
 </select>
+<p class="small" style="margin-top:0">لو أنت خارج مصر، افتح القائمة واختر السطر الثاني الذي يبدأ بـ «خارج مصر — 5 دولارات».</p>
 <div class="row"><button id="createOrderBtn" class="green">🧾 إنشاء طلب اشتراك</button><button id="closeSubscriptionBtn" class="gray">إغلاق</button></div>
 <div id="orderDetails" style="display:none"><hr><p id="orderAmount" class="price"></p><p>حوّل المبلغ إلى رقم فودافون كاش التالي:</p>
 <div class="row"><button id="copyWalletBtn" class="orange">📱 نسخ رقم فودافون كاش</button></div>
