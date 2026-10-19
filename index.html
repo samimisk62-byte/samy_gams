@@ -58,6 +58,9 @@ border:1px solid #395466;display:flex;flex-direction:column;min-height:260px
 .game h3{font-size:20px;margin:6px 0;text-align:center}
 .game p{color:#cbd8de;line-height:1.6;font-size:14px;margin:6px 0;flex:1}
 .price{text-align:center;font-size:18px;font-weight:bold;margin:8px 0;color:#7cffb2}
+.accessStatus{font-size:13px;text-align:center;line-height:1.6;padding:7px;border-radius:9px;background:#17252d;margin:5px 0;color:#ffe29a}
+#subscriptionPanel{display:none}
+#orderIdText{display:block;direction:ltr;overflow-wrap:anywhere;background:#101820;padding:10px;border-radius:8px}
 .game button{width:100%;margin:4px 0}
 #message{
 display:none;padding:12px;border-radius:10px;background:#3b2930;
@@ -167,6 +170,8 @@ autocomplete="new-password">
 <h3>الحائط الصعب</h3>
 <p>لعبة الكرة والمضرب. العب ضد الكمبيوتر أو لاعب آخر وتحدى المراحل.</p>
 <div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
+<div class="accessStatus" data-status-for="al7aet">🔄 حالة الاشتراك: جاري الفحص</div>
+<button class="orange" data-subscribe-game="al7aet" data-game-name="الحائط الصعب">💳 اشتراك / تجديد</button>
 <button class="green" data-game="al7aet" data-url="https://samimisk62-byte.github.io/samy_gams/wall/">▶️ تشغيل اللعبة</button>
 </div>
 
@@ -175,6 +180,8 @@ autocomplete="new-password">
 <h3>العشرة - لعبة الإثارة</h3>
 <p>لعبة كوتشينة متعددة اللاعبين، مع أنظمة لعب مختلفة.</p>
 <div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
+<div class="accessStatus" data-status-for="alashra">🔄 حالة الاشتراك: جاري الفحص</div>
+<button class="orange" data-subscribe-game="alashra" data-game-name="العشرة">💳 اشتراك / تجديد</button>
 <button class="green" data-game="alashra" data-url="https://samimisk62-byte.github.io/Alashra-Gam/">▶️ تشغيل اللعبة</button>
 </div>
 
@@ -183,7 +190,9 @@ autocomplete="new-password">
 <h3>صائد السمك</h3>
 <p>رحلة صيد في البحر، أسماك متعددة ومراحل وأخطار أثناء اللعب.</p>
 <div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
-<button class="green" data-game="saed_alsamak" data-url="https://samimisk62-byte.github.io/saed-Al-samak/">▶️ تشغيل اللعبة</button>
+<div class="accessStatus" data-status-for="saed_al_samak">🔄 حالة الاشتراك: جاري الفحص</div>
+<button class="orange" data-subscribe-game="saed_al_samak" data-game-name="صائد السمك">💳 اشتراك / تجديد</button>
+<button class="green" data-game="saed_al_samak" data-url="https://samimisk62-byte.github.io/saed-Al-samak/">▶️ تشغيل اللعبة</button>
 </div>
 
 <div class="game">
@@ -191,7 +200,9 @@ autocomplete="new-password">
 <h3>مطعمي</h3>
 <p>أدر مطعمك، واستقبل الزبائن واطبخ الطلبات وطوّر مطعمك.</p>
 <div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
-<button class="green" data-game="matamy" data-url="https://samimisk62-byte.github.io/Matamy/">▶️ تشغيل اللعبة</button>
+<div class="accessStatus" data-status-for="mat3amy">🔄 حالة الاشتراك: جاري الفحص</div>
+<button class="orange" data-subscribe-game="mat3amy" data-game-name="مطعمي">💳 اشتراك / تجديد</button>
+<button class="green" data-game="mat3amy" data-url="https://samimisk62-byte.github.io/Matamy/">▶️ تشغيل اللعبة</button>
 </div>
 
 </div>
@@ -200,8 +211,24 @@ autocomplete="new-password">
 <b>💰 الاشتراك</b><br>
 داخل مصر: <b>30 جنيه</b> لمدة 30 يومًا لكل لعبة.<br>
 خارج مصر: <b>5 دولار</b> لمدة 30 يومًا لكل لعبة.<br>
-📱 يتم تفعيل الاشتراك حسب إعدادات إدارة المنصة.
+📱 الدفع عبر فودافون كاش، ولا يتم تفعيل الاشتراك إلا بعد مراجعة الإدارة.
 </div>
+</div>
+
+<div id="subscriptionPanel" class="panel">
+<h2 id="subscriptionTitle">💳 الاشتراك في لعبة</h2>
+<p class="small">اختر مكان الدفع ثم أنشئ طلب الاشتراك. بعد التحويل، اكتب رقم العملية. لن يتفعّل الاشتراك إلا بعد تأكيد الإدارة.</p>
+<label for="paymentCountry">مكان الدفع</label>
+<select id="paymentCountry" style="width:100%;padding:12px;margin:5px 0;border-radius:10px;font-size:16px">
+<option value="EG">داخل مصر — 30 جنيهًا</option><option value="US">خارج مصر — 5 دولارات</option>
+</select>
+<div class="row"><button id="createOrderBtn" class="green">🧾 إنشاء طلب اشتراك</button><button id="closeSubscriptionBtn" class="gray">إغلاق</button></div>
+<div id="orderDetails" style="display:none"><hr><p id="orderAmount" class="price"></p><p>حوّل المبلغ إلى رقم فودافون كاش التالي:</p>
+<div class="row"><button id="copyWalletBtn" class="orange">📱 نسخ رقم فودافون كاش</button></div>
+<p class="small">رقم فودافون كاش: <b dir="ltr">01099083048</b></p><p>رقم طلب الاشتراك:</p><code id="orderIdText"></code>
+<label for="paymentReference">رقم عملية التحويل</label><input id="paymentReference" type="text" maxlength="80" autocomplete="off" placeholder="اكتب رقم العملية بعد التحويل">
+<button id="submitReferenceBtn" class="green">✅ إرسال رقم التحويل للمراجعة</button></div>
+<hr><h3>📋 طلبات اشتراكي</h3><div id="ordersList" class="small">ستظهر طلباتك هنا بعد تسجيل الدخول.</div>
 </div>
 </div>
 
@@ -226,6 +253,8 @@ const SITE_URL = "https://samimisk62-byte.github.io/samy_gams/";
 let session = null;
 let messageTimer = null;
 let recoveryAccessToken = null;
+let selectedGameCode = null;
+let currentOrderId = null;
 
 function $(id){
   return document.getElementById(id);
@@ -689,68 +718,63 @@ async function refreshToken(){
 
 /* فحص صلاحية اللعبة */
 async function checkGameAccess(gameCode){
-  if(!session?.access_token) return false;
-
+  if(!session?.access_token)return false;
   try{
-    const response = await fetch(
-      SUPABASE_URL + "/functions/v1/account-game-access",
-      {
-        method:"POST",
-        headers:authHeaders(),
-        body:JSON.stringify({game_code:gameCode})
-      }
-    );
-
-    if(!response.ok) return false;
-
-    const result = await readResponse(response);
-    const data = result.data;
-
-    if(!data) return false;
-
-    return !!(
-      data.has_access ||
-      data.access ||
-      data.active ||
-      data.is_active
-    );
-
-  }catch(e){
-    return false;
-  }
+    const response=await fetch(SUPABASE_URL+"/functions/v1/account-game-access",{method:"POST",headers:authHeaders(),body:JSON.stringify({game_code:gameCode})});
+    if(!response.ok)return false;
+    const result=await readResponse(response);const data=result.data;if(!data)return false;
+    const list=Array.isArray(data)?data:(Array.isArray(data.access)?data.access:null);
+    if(list)return list.some(function(item){if(!item||item.game_code!==gameCode)return false;if(item.owner===true)return true;if(item.active!==true)return false;return !item.expires_at||new Date(item.expires_at).getTime()>Date.now();});
+    return (data.game_code===gameCode&&(data.owner===true||data.active===true))||data.has_access===true||data.is_active===true||data.active===true;
+  }catch(e){return false;}
+}
+const GAME_NAMES={al7aet:"الحائط الصعب",alashra:"العشرة",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
+function openSubscription(gameCode,gameName){
+  if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا قبل طلب الاشتراك.");return;}
+  selectedGameCode=gameCode;currentOrderId=null;$("subscriptionTitle").textContent="💳 اشتراك / تجديد: "+(gameName||GAME_NAMES[gameCode]||gameCode);
+  $("orderDetails").style.display="none";$("paymentReference").value="";$("createOrderBtn").disabled=false;$("subscriptionPanel").style.display="block";$("subscriptionPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+async function createSubscriptionOrder(){
+  if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا.");return;}if(!selectedGameCode){showMessage("اختر لعبة أولًا.");return;}
+  const button=$("createOrderBtn");button.disabled=true;
+  try{
+    const response=await fetch(SUPABASE_URL+"/functions/v1/create-game-order",{method:"POST",headers:authHeaders(),body:JSON.stringify({game_code:selectedGameCode,country:$("paymentCountry").value})});
+    const result=await readResponse(response);if(!response.ok||!result.data?.order)throw new Error(getServerError(result,response));
+    const order=result.data.order;currentOrderId=order.id;$("orderIdText").textContent=order.id;
+    $("orderAmount").textContent=order.currency==="EGP"?"المطلوب دفعه: "+(Number(order.amount_minor)/100)+" جنيه مصري":"المطلوب دفعه: "+(Number(order.amount_minor)/100).toFixed(2)+" دولار أمريكي";
+    $("orderDetails").style.display="block";showMessage("✅ تم إنشاء طلب الاشتراك. حوّل المبلغ ثم اكتب رقم العملية.",true);await loadMyOrders();
+  }catch(error){showMessage("❌ تعذر إنشاء طلب الاشتراك: "+(error.message||"خطأ غير معروف"));}finally{button.disabled=false;}
+}
+async function submitPaymentReference(){
+  if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا.");return;}if(!currentOrderId){showMessage("أنشئ طلب الاشتراك أولًا.");return;}
+  const reference=$("paymentReference").value.trim();if(reference.length<4){showMessage("⚠️ اكتب رقم عملية التحويل (4 أحرف أو أرقام على الأقل).");return;}
+  const button=$("submitReferenceBtn");button.disabled=true;
+  try{
+    const response=await fetch(SUPABASE_URL+"/functions/v1/submit-payment-reference",{method:"POST",headers:authHeaders(),body:JSON.stringify({order_id:currentOrderId,payment_reference:reference})});
+    const result=await readResponse(response);if(!response.ok||!result.data?.ok)throw new Error(getServerError(result,response));
+    $("paymentReference").value="";$("orderDetails").style.display="none";currentOrderId=null;showMessage("✅ تم إرسال رقم التحويل. سيُفعّل الاشتراك بعد مراجعة الإدارة وتأكيد الدفع.",true);await loadMyOrders();
+  }catch(error){showMessage("❌ تعذر إرسال رقم التحويل: "+(error.message||"خطأ غير معروف"));}finally{button.disabled=false;}
+}
+async function loadMyOrders(){
+  const box=$("ordersList");if(!box||!session?.access_token)return;
+  try{
+    const response=await fetch(SUPABASE_URL+"/functions/v1/my-game-orders",{method:"POST",headers:authHeaders(),body:JSON.stringify({})});const result=await readResponse(response);if(!response.ok)throw new Error(getServerError(result,response));
+    const orders=Array.isArray(result.data?.orders)?result.data.orders:[];box.textContent="";if(!orders.length){box.textContent="لا توجد طلبات اشتراك حتى الآن.";return;}
+    const statusNames={pending:"في انتظار المراجعة",active:"مفعّل",paid:"تم الدفع",approved:"تمت الموافقة",rejected:"مرفوض",cancelled:"ملغي",expired:"منتهي"};
+    orders.forEach(function(order){const row=document.createElement("div");row.style.cssText="background:#213746;border-radius:9px;padding:9px;margin:7px 0;overflow-wrap:anywhere";const name=GAME_NAMES[order.game_code]||order.game_code||"لعبة";const amount=Number(order.amount_minor||0)/100;const money=order.currency==="EGP"?amount+" جنيه":amount.toFixed(2)+" دولار";row.textContent=name+" — "+money+" — "+(statusNames[order.status]||order.status||"قيد المتابعة")+(order.payment_reference?" — رقم التحويل: "+order.payment_reference:"");box.appendChild(row);});
+  }catch(error){box.textContent="تعذر تحميل الطلبات الآن. جرّب زر تحديث الاشتراكات لاحقًا."}
 }
 
 /* تشغيل اللعبة */
 async function openGame(button){
-  const url = button.dataset.url;
-  const gameCode = button.dataset.game;
-
-  if(!session?.access_token){
-    showMessage("🔒 سجل الدخول أولًا لتشغيل الألعاب.");
-    return;
-  }
-
-  if(gameCode === "al7aet"){
-    const allowed = await checkGameAccess("al7aet");
-
-    if(!allowed){
-      showMessage("🔒 اشتراك الحائط الصعب غير فعال أو لم يتم التحقق منه.");
-      return;
-    }
-  }
-
-  window.location.href = url;
+  const url=button.dataset.url;const gameCode=button.dataset.game;
+  if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا لتشغيل الألعاب.");return;}
+  const allowed=await checkGameAccess(gameCode);if(!allowed){showMessage("🔒 لا يوجد اشتراك فعال للعبة "+(GAME_NAMES[gameCode]||gameCode)+". اضغط اشتراك / تجديد أولًا.");return;}window.location.href=url;
 }
-
-/* تحديث حالة الاشتراك */
 async function refreshAccess(){
-  if(!session?.access_token) return;
-
-  const allowed = await checkGameAccess("al7aet");
-
-  $("accountStatus").textContent = allowed
-    ? "🟢 اشتراك الحائط الصعب فعال"
-    : "🟡 لا يوجد اشتراك نشط للحائط الصعب";
+  if(!session?.access_token)return;const codes=Object.keys(GAME_NAMES);let activeCount=0;
+  for(const code of codes){const allowed=await checkGameAccess(code);if(allowed)activeCount++;const status=document.querySelector('[data-status-for="' + code + '"]');if(status)status.textContent=allowed?"🟢 الاشتراك فعال":"🟡 لا يوجد اشتراك فعال";}
+  $("accountStatus").textContent=activeCount?"🟢 لديك اشتراك فعال في "+activeCount+" لعبة":"🟡 لا توجد اشتراكات نشطة حاليًا";await loadMyOrders();
 }
 
 /* إظهار وإخفاء النماذج */
@@ -772,11 +796,12 @@ $("resetPasswordBtn").addEventListener("click",resetPassword);
 $("logoutBtn").addEventListener("click",logout);
 $("refreshBtn").addEventListener("click",refreshAccess);
 
-document.querySelectorAll("[data-game]").forEach(function(button){
-  button.addEventListener("click",function(){
-    openGame(button);
-  });
-});
+document.querySelectorAll("[data-game]").forEach(function(button){button.addEventListener("click",function(){openGame(button);});});
+document.querySelectorAll("[data-subscribe-game]").forEach(function(button){button.addEventListener("click",function(){openSubscription(button.dataset.subscribeGame,button.dataset.gameName);});});
+$("createOrderBtn").addEventListener("click",createSubscriptionOrder);
+$("closeSubscriptionBtn").addEventListener("click",function(){$("subscriptionPanel").style.display="none";});
+$("submitReferenceBtn").addEventListener("click",submitPaymentReference);
+$("copyWalletBtn").addEventListener("click",async function(){try{await navigator.clipboard.writeText("01099083048");showMessage("✅ تم نسخ رقم فودافون كاش: 01099083048",true);}catch(e){showMessage("رقم فودافون كاش للتحويل: 01099083048");}});
 
 /* بدء المنصة وفحص رابط الاستعادة أولًا */
 (async function startPlatform(){
