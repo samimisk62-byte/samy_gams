@@ -91,6 +91,12 @@ button{font-size:14px}
 #closeFishingGameBtn{background:#b93838;color:#fff}
 @media(max-width:600px){#embeddedFishingPanel{padding:8px}#embeddedFishingFrame{height:72vh;min-height:420px;border-radius:8px}}
 
+
+.password-field{position:relative;width:100%;display:flex;align-items:center;margin:8px 0}
+.password-field input{width:100%;min-width:0;padding-left:54px!important;direction:ltr;text-align:left}
+.password-field .toggle-password{position:absolute;left:7px;top:50%;transform:translateY(-50%);width:42px;height:40px;margin:0;padding:0;border:1px solid #607d8b;border-radius:9px;background:#eaf5fb;color:#163243;font-size:19px;display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer}
+.password-field .toggle-password:focus-visible{outline:3px solid #35c6df;outline-offset:2px}
+
 </style>
 </head>
 
@@ -109,7 +115,7 @@ button{font-size:14px}
 <h2>🔐 تسجيل الدخول</h2>
 
 <input id="loginEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
-<input id="loginPassword" type="password" placeholder="كلمة المرور" autocomplete="current-password">
+<div class="password-field"><input id="loginPassword" type="password" placeholder="كلمة المرور" autocomplete="current-password"><button type="button" class="toggle-password" data-password-target="loginPassword" aria-label="إظهار كلمة المرور" aria-pressed="false">👁</button></div>
 
 <div class="row">
 <button id="loginBtn" class="green">🔑 دخول</button>
@@ -130,8 +136,8 @@ button{font-size:14px}
 <hr>
 <h2>📝 إنشاء حساب جديد</h2>
 <input id="signupEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
-<input id="signupPassword" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" autocomplete="new-password">
-<input id="signupPassword2" type="password" placeholder="تأكيد كلمة المرور" autocomplete="new-password">
+<div class="password-field"><input id="signupPassword" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" autocomplete="new-password"><button type="button" class="toggle-password" data-password-target="signupPassword" aria-label="إظهار كلمة المرور" aria-pressed="false">👁</button></div>
+<div class="password-field"><input id="signupPassword2" type="password" placeholder="تأكيد كلمة المرور" autocomplete="new-password"><button type="button" class="toggle-password" data-password-target="signupPassword2" aria-label="إظهار كلمة المرور" aria-pressed="false">👁</button></div>
 <button id="signupBtn" class="green">✅ إنشاء الحساب</button>
 <p class="small">قد تحتاج إلى فتح رسالة تأكيد البريد الإلكتروني قبل تسجيل الدخول.</p>
 </div>
@@ -142,13 +148,13 @@ button{font-size:14px}
 <h2>🔐 تعيين كلمة مرور جديدة</h2>
 <p class="small">اكتب كلمة المرور الجديدة مرتين. بعد الحفظ يمكنك تسجيل الدخول بها.</p>
 
-<input id="newPassword" type="password"
+<div class="password-field"><input id="newPassword" type="password"
 placeholder="كلمة المرور الجديدة (6 أحرف على الأقل)"
-autocomplete="new-password">
+autocomplete="new-password"><button type="button" class="toggle-password" data-password-target="newPassword" aria-label="إظهار كلمة المرور" aria-pressed="false">👁</button></div>
 
-<input id="newPassword2" type="password"
+<div class="password-field"><input id="newPassword2" type="password"
 placeholder="تأكيد كلمة المرور الجديدة"
-autocomplete="new-password">
+autocomplete="new-password"><button type="button" class="toggle-password" data-password-target="newPassword2" aria-label="إظهار كلمة المرور" aria-pressed="false">👁</button></div>
 
 <button id="resetPasswordBtn" class="green">✅ حفظ كلمة المرور الجديدة</button>
 </div>
@@ -934,6 +940,20 @@ $("signupShowBtn").addEventListener("click",function(){
 $("forgotShowBtn").addEventListener("click",function(){
   const box = $("forgotBox");
   box.style.display = box.style.display === "block" ? "none" : "block";
+});
+
+
+/* إظهار كلمة المرور وإخفاؤها عند الضغط على العين */
+document.querySelectorAll("[data-password-target]").forEach(function(button){
+  button.addEventListener("click",function(){
+    const input=document.getElementById(button.dataset.passwordTarget);
+    if(!input)return;
+    const show=input.type==="password";
+    input.type=show?"text":"password";
+    button.textContent=show?"🙈":"👁";
+    button.setAttribute("aria-label",show?"إخفاء كلمة المرور":"إظهار كلمة المرور");
+    button.setAttribute("aria-pressed",show?"true":"false");
+  });
 });
 
 /* ربط الأزرار */
