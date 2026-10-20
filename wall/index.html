@@ -1166,6 +1166,7 @@ var paused = false;
 
 var gameTimer = null;
 var ballTimer = null;
+var ballFrame = null;
 
 var bx = 50;
 var by = 70;
@@ -1732,23 +1733,14 @@ if(ballTimer !== null){
 clearInterval(ballTimer);
 }
 
-ballTimer =
-setInterval(
-function(){
-
-if(!gameRunning || paused){
-return;
+if(ballFrame !== null){cancelAnimationFrame(ballFrame);}
+function animateBall(){
+  if(!gameRunning || paused){ballFrame=requestAnimationFrame(animateBall);return;}
+  moveBall();
+  if(playerCount === 1){computerMove();}
+  ballFrame=requestAnimationFrame(animateBall);
 }
-
-moveBall();
-
-if(playerCount === 1){
-computerMove();
-}
-
-},
-16
-);
+ballFrame=requestAnimationFrame(animateBall);
 
 }
 
@@ -1767,6 +1759,7 @@ if(ballTimer !== null){
 clearInterval(ballTimer);
 ballTimer = null;
 }
+if(ballFrame !== null){cancelAnimationFrame(ballFrame);ballFrame=null;}
 
 gameRunning = false;
 dragging = false;
@@ -1787,13 +1780,13 @@ var direction =
 Math.random() > .5 ? 1 : -1;
 
 var speed =
-owned.fastBall ? .82 : .70;
+owned.fastBall ? 1.15 : 1.00;
 
 vx =
 direction * speed;
 
 vy =
-owned.fastBall ? -1.35 : -1.18;
+owned.fastBall ? -1.80 : -1.60;
 
 strong = false;
 
@@ -1834,7 +1827,7 @@ shadow.style.top = (by + 3) + "%";
 function moveBall(){
 
 /* سرعة الحركة محسوبة لكل إطار؛ نضاعفها لتكون واضحة على الهاتف */
-var motionBoost = 2.2;
+var motionBoost = 3.8;
 bx += vx * motionBoost;
 by += vy * motionBoost;
 
