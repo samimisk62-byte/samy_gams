@@ -1276,6 +1276,8 @@ var obstacleCheckFrame = 0;
 
 var redX = 25;
 var blueX = 58;
+var redY = 75;
+var blueY = 75;
 
 var dragging = false;
 var blueDragging = false;
@@ -1600,7 +1602,7 @@ function startOnlinePolling(){
 function currentOnlineSnapshot(){
   return {
     running:gameRunning, paused:paused, bx:bx, by:by, vx:vx, vy:vy,
-    redX:redX, blueX:blueX, redScore:redScore, blueScore:blueScore,
+    redX:redX, blueX:blueX, redY:redY, blueY:blueY, redScore:redScore, blueScore:blueScore,
     timeLeft:timeLeft, stage:stage, round:round,
     redName:document.getElementById("redNameGame").textContent,
     blueName:document.getElementById("blueNameGame").textContent,
@@ -1626,7 +1628,8 @@ async function pollOnlineRoom(){
     var room=rows[0];
     if(onlineRole==="host" && room.guest_id){
       blueX=Number(room.guest_blue_x)||blueX;
-      movePlayer("bluePlayer",blueX);
+      blueY=Number(room.guest_blue_y)||blueY;
+      movePlayer("bluePlayer",blueX,blueY);
       setRoomStatus("🟢 انضم لاعب آخر! رمز الغرفة: "+onlineRoomCode+" — اختر المرحلة واضغط ابدأ المباراة.");
     }
     if(onlineRole==="guest" && room.game_state && room.game_state.running && !gameRunning){
@@ -1669,7 +1672,7 @@ function sendGuestPaddlePosition(){
   if(!onlineMode || onlineRole!=="guest" || !onlineRoomId || onlineSending) return;
   onlineSending=true;
   cloudRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineRoomId),
-    "PATCH",{guest_blue_x:blueX,updated_at:new Date().toISOString()},"return=minimal")
+    "PATCH",{guest_blue_x:blueX,guest_blue_y:blueY,updated_at:new Date().toISOString()},"return=minimal")
     .catch(function(e){console.warn("Paddle sync:",e.message);})
     .finally(function(){onlineSending=false;});
 }
@@ -1679,6 +1682,7 @@ function applyOnlineSnapshot(st){
   bx=Number(st.bx)||bx; by=Number(st.by)||by;
   vx=Number(st.vx)||vx; vy=Number(st.vy)||vy;
   redX=Number(st.redX)||redX; blueX=Number(st.blueX)||blueX;
+  redY=Number(st.redY)||redY; blueY=Number(st.blueY)||blueY;
   redScore=Number(st.redScore)||0; blueScore=Number(st.blueScore)||0;
   if(Number.isFinite(Number(st.timeLeft))) timeLeft=Number(st.timeLeft);
   if(Number.isFinite(Number(st.stage))) stage=Number(st.stage);
@@ -1688,8 +1692,8 @@ function applyOnlineSnapshot(st){
   document.getElementById("time").textContent=timeLeft;
   document.getElementById("stage").textContent=stage;
   document.getElementById("round").textContent=round;
-  movePlayer("redPlayer",redX);
-  movePlayer("bluePlayer",blueX);
+  movePlayer("redPlayer",redX,redY);
+  movePlayer("bluePlayer",blueX,blueY);
   drawBall();
 }
 
@@ -1979,9 +1983,11 @@ document.getElementById("result").style.display = "none";
 
 redX = 25;
 blueX = 58;
+redY = 75;
+blueY = 75;
 
-movePlayer("redPlayer",redX);
-movePlayer("bluePlayer",blueX);
+movePlayer("redPlayer",redX,redY);
+movePlayer("bluePlayer",blueX,blueY);
 
 applySkin();
 applyStageTheme();
@@ -2494,7 +2500,8 @@ var y=((point.y-rect.top)/rect.height)*100-(hPct/2);
 x=Math.max(0,Math.min(50-wPct,x));
 y=Math.max(50,Math.min(100-hPct,y));
 redX=x;
-movePlayer("redPlayer",redX,y);
+redY=y;
+movePlayer("redPlayer",redX,redY);
 }
 function moveBlue(e){
 if(paused||playerCount!==2)return;
@@ -2513,7 +2520,8 @@ var y=((point.y-rect.top)/rect.height)*100-(hPct/2);
 x=Math.max(50,Math.min(100-wPct,x));
 y=Math.max(50,Math.min(100-hPct,y));
 blueX=x;
-movePlayer("bluePlayer",blueX,y);
+blueY=y;
+movePlayer("bluePlayer",blueX,blueY);
 if(onlineMode && onlineRole==="guest") sendGuestPaddlePosition();
 }
 
@@ -2656,9 +2664,11 @@ document.getElementById("time").innerHTML = timeLeft;
 
 redX = 25;
 blueX = 58;
+redY = 75;
+blueY = 75;
 
-movePlayer("redPlayer",redX);
-movePlayer("bluePlayer",blueX);
+movePlayer("redPlayer",redX,redY);
+movePlayer("bluePlayer",blueX,blueY);
 
 serveBall();
 
