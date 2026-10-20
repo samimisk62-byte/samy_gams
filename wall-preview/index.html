@@ -1601,7 +1601,7 @@ timeLeft = roundTime;
 
 document.getElementById("redScore").innerHTML = "0";
 document.getElementById("blueScore").innerHTML = "0";
-document.getElementById("stage").innerHTML = "1";
+document.getElementById("stage").innerHTML = stage;
 document.getElementById("round").innerHTML = "1";
 document.getElementById("time").innerHTML = roundTime;
 
@@ -1796,10 +1796,38 @@ shadow.style.top = (by + 3) + "%";
 
 function moveBall(){
 
+var previousX = bx;
+var previousY = by;
+
 /* سرعة الحركة محسوبة لكل إطار؛ نضاعفها لتكون واضحة على الهاتف */
 var motionBoost = Math.min(3.6 + (stage - 1) * 0.16, 9.0);
 bx += vx * motionBoost;
 by += vy * motionBoost;
+
+/* اصطدام الكرة بالحواجز النشطة في المرحلة */
+var field = document.getElementById("field");
+var fieldRect = field.getBoundingClientRect();
+var obstacles = document.querySelectorAll("#field .obstacle");
+obstacles.forEach(function(obstacle){
+  if(obstacle.style.display === "none") return;
+  var r = obstacle.getBoundingClientRect();
+  if(!r.width || !r.height || !fieldRect.width || !fieldRect.height) return;
+  var left = ((r.left - fieldRect.left) / fieldRect.width) * 100;
+  var right = ((r.right - fieldRect.left) / fieldRect.width) * 100;
+  var top = ((r.top - fieldRect.top) / fieldRect.height) * 100;
+  var bottom = ((r.bottom - fieldRect.top) / fieldRect.height) * 100;
+  if(bx >= left - 1.5 && bx <= right + 1.5 && by >= top - 1.5 && by <= bottom + 1.5){
+    if(previousX < left - 1.5 || previousX > right + 1.5){
+      vx = previousX < left ? -Math.abs(vx) : Math.abs(vx);
+      bx = previousX < left ? left - 1.6 : right + 1.6;
+    }else{
+      vy = previousY < top ? -Math.abs(vy) : Math.abs(vy);
+      by = previousY < top ? top - 1.6 : bottom + 1.6;
+    }
+    playWall();
+    document.getElementById("message").innerHTML = "🪵 الكرة ارتدت من الحاجز!";
+  }
+});
 
 /* منع التصاق الكرة أو توقفها بسبب سرعة تقترب من الصفر */
 var minHorizontal = 0.12 + Math.min(stage - 1, 60) * 0.008;
@@ -2349,39 +2377,27 @@ startMusic();
 
 function applyStageTheme(){
 
-var field =
-document.getElementById("field");
-
+var field = document.getElementById("field");
 field.className = "";
 
-if(stage === 2){
-field.classList.add("stage2");
-}
+if(stage === 2) field.classList.add("stage2");
+if(stage === 3) field.classList.add("stage3");
+if(stage >= 4) field.classList.add("stage4");
 
-if(stage === 3){
-field.classList.add("stage3");
-}
+/* الحواجز تظهر بالتدريج مع تقدم المرحلة */
+var obstacles = document.querySelectorAll("#field .obstacle");
+obstacles.forEach(function(obstacle,index){
+  var visible = (stage >= 2 && index === 0) ||
+                (stage >= 3 && index === 1) ||
+                (stage >= 4 && index === 2);
+  obstacle.style.display = visible ? "block" : "none";
+});
 
-if(stage >= 4){
-field.classList.add("stage4");
-}
-
-var ball =
-document.getElementById("ball");
-
+var ball = document.getElementById("ball");
 ball.className = "";
-
-if(stage === 2){
-ball.classList.add("gold");
-}
-
-if(stage === 3){
-ball.classList.add("orange");
-}
-
-if(stage >= 4){
-ball.classList.add("green");
-}
+if(stage === 2) ball.classList.add("gold");
+if(stage === 3) ball.classList.add("orange");
+if(stage >= 4) ball.classList.add("green");
 
 }
 
