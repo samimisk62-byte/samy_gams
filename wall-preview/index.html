@@ -4419,16 +4419,13 @@ field.style.touchAction = "none";
 
 /* يبدأ السحب من أي مكان داخل الملعب، وليس من فوق المضرب فقط */
 field.addEventListener("pointerdown", function(e){
-  if(!gameRunning || paused) return;
+  if(!gameRunning || paused || !e.isPrimary || activeRacketPointer !== null) return;
 
   var rect = field.getBoundingClientRect();
   activeRacketSide = onlineMode ? (onlineRole === "guest" ? "blue" : "red") : ((playerCount === 2 && e.clientX >= rect.left + rect.width / 2) ? "blue" : "red");
   activeRacketPointer = e.pointerId;
 
-  try {
-    field.setPointerCapture(e.pointerId);
-  } catch(err) {}
-
+  /* لا نعتمد على Pointer Capture؛ بعض متصفحات أندرويد قد تترك السحب عالقًا */
   if(activeRacketSide === "blue") {
     if(playerCount === 2) moveBlue(e);
   } else {
@@ -4438,9 +4435,9 @@ field.addEventListener("pointerdown", function(e){
   if(e.cancelable) e.preventDefault();
 }, {passive:false});
 
-/* استقبال الحركة على النافذة أيضًا حتى لا يتوقف المضرب إذا خرج الإصبع قليلًا عن الملعب */
+/* يتحرك المضرب فقط أثناء وجود إصبع فعلي مضغوط */
 window.addEventListener("pointermove", function(e){
-  if(activeRacketPointer !== e.pointerId || paused || !gameRunning) return;
+  if(activeRacketPointer !== e.pointerId || paused || !gameRunning || !e.isPrimary) return;
 
   if(activeRacketSide === "blue") {
     if(playerCount === 2) moveBlue(e);
@@ -4456,7 +4453,10 @@ function releaseRacketPointer(e){
 }
 window.addEventListener("pointerup", releaseRacketPointer);
 window.addEventListener("pointercancel", releaseRacketPointer);
-field.addEventListener("lostpointercapture", releaseRacketPointer);
+window.addEventListener("blur", function(){ activeRacketPointer = null; });
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden) activeRacketPointer = null;
+});
 
 /* احتياط للمتصفحات القديمة التي لا تدعم Pointer Events */
 if(!window.PointerEvent){
