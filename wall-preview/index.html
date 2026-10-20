@@ -1276,6 +1276,13 @@ var musicTimer = null;
 var userEmail = "";
 var accessUntil = 0;
 
+/* ربط رصيد المتجر بحساب Supabase دون التأثير على التخزين المحلي */
+var cloudWalletReady = false;
+var cloudUserId = "";
+var cloudWalletSaveTimer = null;
+var cloudWalletSaving = false;
+var cloudWalletSaveAgain = false;
+
 var owned = {
 redPaddle:false,
 bluePaddle:false,
@@ -1350,6 +1357,11 @@ rewardedStages:rewardedStages
 );
 
 }catch(e){}
+
+/* الحفظ السحابي يعمل بعد تحميل رصيد الحساب فقط */
+if(cloudWalletReady){
+  scheduleCloudWalletSave();
+}
 
 }
 
@@ -3210,11 +3222,14 @@ function saveAuth(){
 
 try{
 
+var oldAuth = JSON.parse(localStorage.getItem(AUTH_KEY) || "{}");
 localStorage.setItem(
 AUTH_KEY,
 JSON.stringify({
 email:userEmail,
-accessUntil:accessUntil
+accessUntil:accessUntil,
+access_token:oldAuth.access_token || "",
+refresh_token:oldAuth.refresh_token || ""
 })
 );
 
@@ -3350,6 +3365,136 @@ return data;
 }
 
 /* =========================================
+محفظة اللاعب السحابية — مرتبطة بمعرّف الحساب
+========================================= */
+
+function storedAuth(){
+  try { return JSON.parse(localStorage.getItem(AUTH_KEY) || "{}"); }
+  catch(e) { return {}; }
+}
+
+async function cloudRequest(path, method, body, prefer){
+  var auth = storedAuth();
+  if(!auth.access_token) throw new Error("سجّل الدخول أولًا.");
+  var headers = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": "Bearer " + auth.access_token,
+    "Content-Type": "application/json"
+  };
+  if(prefer) headers["Prefer"] = prefer;
+  var response = await fetch(SUPABASE_URL + path, {
+    method: method || "GET",
+    headers: headers,
+    body: body ? JSON.stringify(body) : undefined
+  });
+  var raw = await response.text();
+  var data = null;
+  try { data = raw ? JSON.parse(raw) : null; } catch(e) { data = {raw:raw}; }
+  if(!response.ok) {
+    throw new Error((data && (data.message || data.msg || data.error)) || "تعذر حفظ رصيد الحساب.");
+  }
+  return data;
+}
+
+function scheduleCloudWalletSave(){
+  if(!cloudWalletReady || !cloudUserId) return;
+  if(cloudWalletSaveTimer) clearTimeout(cloudWalletSaveTimer);
+  cloudWalletSaveTimer = setTimeout(saveCloudWallet, 700);
+}
+
+async function saveCloudWallet(){
+  if(!cloudWalletReady || !cloudUserId) return;
+  if(cloudWalletSaving){ cloudWalletSaveAgain = true; return; }
+  cloudWalletSaving = true;
+  try{
+    var payload = {
+      coins: Math.max(0, Math.floor(Number(coins) || 0)),
+      owned: owned,
+      selected_skin: selectedSkin,
+      unlocked_stage: Math.max(1, Math.floor(Number(unlockedStage) || 1)),
+      rewarded_stages: rewardedStages,
+      updated_at: new Date().toISOString()
+    };
+    await cloudRequest(
+      "/rest/v1/wall_player_wallets?user_id=eq." + encodeURIComponent(cloudUserId),
+      "PATCH",
+      payload,
+      "return=minimal"
+    );
+  }catch(e){
+    console.warn("Cloud wallet save:", e.message);
+  }finally{
+    cloudWalletSaving = false;
+    if(cloudWalletSaveAgain){
+      cloudWalletSaveAgain = false;
+      saveCloudWallet();
+    }
+  }
+}
+
+async function syncCloudWallet(){
+  var auth = storedAuth();
+  if(!auth.access_token || !userEmail) return false;
+  cloudWalletReady = false;
+  cloudUserId = "";
+  try{
+    var user = await cloudRequest("/auth/v1/user", "GET");
+    if(!user || !user.id) throw new Error("تعذر تحديد الحساب الحالي.");
+    cloudUserId = user.id;
+
+    var rows = await cloudRequest(
+      "/rest/v1/wall_player_wallets?user_id=eq." + encodeURIComponent(cloudUserId) + "&select=*",
+      "GET"
+    );
+
+    if(Array.isArray(rows) && rows.length){
+      var w = rows[0];
+      coins = Number.isFinite(Number(w.coins)) ? Number(w.coins) : coins;
+      owned = Object.assign(owned, w.owned || {});
+      selectedSkin = w.selected_skin || selectedSkin;
+      unlockedStage = Math.max(1, Number(w.unlocked_stage) || 1);
+      rewardedStages = Array.isArray(w.rewarded_stages) ? w.rewarded_stages : rewardedStages;
+    }else{
+      await cloudRequest(
+        "/rest/v1/wall_player_wallets",
+        "POST",
+        {
+          user_id: cloudUserId,
+          coins: Math.max(0, Math.floor(Number(coins) || 0)),
+          owned: owned,
+          selected_skin: selectedSkin,
+          unlocked_stage: Math.max(1, Math.floor(Number(unlockedStage) || 1)),
+          rewarded_stages: rewardedStages
+        },
+        "return=minimal"
+      );
+    }
+
+    cloudWalletReady = true;
+    updateCoins();
+    applyPurchasedLooks();
+    applySkin();
+    renderStore();
+    renderStages();
+    renderTrophies();
+    try{
+      localStorage.setItem(DATA_KEY, JSON.stringify({
+        coins:coins, owned:owned, selectedSkin:selectedSkin,
+        unlockedStage:unlockedStage, rewardedStages:rewardedStages
+      }));
+    }catch(e){}
+    return true;
+  }catch(e){
+    cloudWalletReady = false;
+    cloudUserId = "";
+    console.warn("Cloud wallet load:", e.message);
+    var msg = document.getElementById("accountMessage");
+    if(msg) msg.innerHTML += "<br>⚠️ تعذر مزامنة رصيد المتجر الآن؛ سيظل الحفظ المحلي يعمل.";
+    return false;
+  }
+}
+
+/* =========================================
 تسجيل الدخول
 ========================================= */
 
@@ -3416,6 +3561,7 @@ msg.innerHTML =
 "✅ تم تسجيل الدخول. يمكنك الآن تشغيل اللعبة.";
 
 await checkAccess();
+await syncCloudWallet();
 
 }catch(e){
 
@@ -3494,6 +3640,7 @@ updateAccountUI();
 
 msg.innerHTML =
 "✅ تم إنشاء الحساب وتسجيل الدخول.";
+await syncCloudWallet();
 
 }else{
 
@@ -3780,6 +3927,8 @@ body:"{}"
 }catch(e){}
 
 clearAuth();
+cloudWalletReady = false;
+cloudUserId = "";
 
 document.getElementById("accountMessage").innerHTML =
 "تم تسجيل الخروج.";
@@ -4046,6 +4195,10 @@ applyPurchasedLooks();
 renderStages();
 loadAuth();
 applySkin();
+/* استعادة الرصيد المرتبط بالحساب إذا كانت الجلسة ما زالت صالحة */
+if(storedAuth().access_token && userEmail){
+  setTimeout(syncCloudWallet, 500);
+}
 renderStore();
 renderTrophies();
 
