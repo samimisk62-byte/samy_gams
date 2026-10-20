@@ -1182,6 +1182,10 @@ filter:none !important;
 <button id="home" type="button">
 🏠 القائمة
 </button>
+<button id="zoomOut" type="button" aria-label="تصغير الملعب">➖ تصغير</button>
+<strong id="zoomLabel" style="display:inline-block;min-width:55px">100%</strong>
+<button id="zoomIn" type="button" aria-label="تكبير الملعب">➕ تكبير</button>
+<button id="zoomReset" type="button" aria-label="إرجاع حجم الملعب">↩️ عادي</button>
 
 </div>
 
@@ -1273,6 +1277,8 @@ var bonusLastHit = ""; // يحدد آخر من ضرب الكرة: اللاعب �
 var bonusGems = [];
 var bonusSpawnAt = 0;
 var obstacleCheckFrame = 0;
+var zoomLevel = 1;
+var lastBonusUpdateAt = 0;
 
 var redX = 25;
 var blueX = 58;
@@ -2233,10 +2239,13 @@ function moveBall(){
 var previousX = bx;
 var previousY = by;
 
-updateBonusEvent();
-
-/* سرعة الحركة محسوبة لكل إطار؛ نضاعفها لتكون واضحة على الهاتف */
-var motionBoost = Math.min(3.6 + (stage - 1) * 0.16, 9.0);
+/* تحديث المكافآت على فترات قصيرة لتقليل الحمل على الهاتف */
+if(Date.now() - lastBonusUpdateAt >= 100){
+  updateBonusEvent();
+  lastBonusUpdateAt = Date.now();
+}
+/* سرعة أهدأ قليلًا لتسهيل متابعة الكرة على الهاتف */
+var motionBoost = Math.min(2.7 + (stage - 1) * 0.10, 6.5);
 bx += vx * motionBoost;
 by += vy * motionBoost;
 
@@ -2477,6 +2486,14 @@ var p=document.getElementById(id);if(!p)return;
 if(typeof x==="number")p.style.left=x+"%";
 if(typeof y==="number")p.style.top=y+"%";
 }
+function setFieldZoom(next){
+  zoomLevel = Math.max(0.82, Math.min(1.18, Math.round(next * 100) / 100));
+  var field = document.getElementById("field");
+  if(field) field.style.transform = "translateZ(0) scale(" + zoomLevel + ")";
+  var label = document.getElementById("zoomLabel");
+  if(label) label.textContent = Math.round(zoomLevel * 100) + "%";
+}
+
 function getPointer(e){
 if(e.touches&&e.touches.length)return{x:e.touches[0].clientX,y:e.touches[0].clientY};
 if(e.changedTouches&&e.changedTouches.length)return{x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY};
@@ -2491,8 +2508,8 @@ var field=document.getElementById("field");
 var player=document.getElementById("redPlayer");
 var rect=field.getBoundingClientRect();
 var pr=player.getBoundingClientRect();
-var wPct=(pr.width/rect.width)*100;
-var hPct=(pr.height/rect.height)*100;
+var wPct=(player.offsetWidth/field.clientWidth)*100;
+var hPct=(player.offsetHeight/field.clientHeight)*100;
 var x=((point.x-rect.left)/rect.width)*100-(wPct/2);
 var y=((point.y-rect.top)/rect.height)*100-(hPct/2);
 
@@ -2511,8 +2528,8 @@ var field=document.getElementById("field");
 var player=document.getElementById("bluePlayer");
 var rect=field.getBoundingClientRect();
 var pr=player.getBoundingClientRect();
-var wPct=(pr.width/rect.width)*100;
-var hPct=(pr.height/rect.height)*100;
+var wPct=(player.offsetWidth/field.clientWidth)*100;
+var hPct=(player.offsetHeight/field.clientHeight)*100;
 var x=((point.x-rect.left)/rect.width)*100-(wPct/2);
 var y=((point.y-rect.top)/rect.height)*100-(hPct/2);
 
@@ -4377,6 +4394,9 @@ document.getElementById("restart")
 
 document.getElementById("home")
 .addEventListener("click",showMenu);
+document.getElementById("zoomIn").addEventListener("click",function(){setFieldZoom(zoomLevel + 0.06);});
+document.getElementById("zoomOut").addEventListener("click",function(){setFieldZoom(zoomLevel - 0.06);});
+document.getElementById("zoomReset").addEventListener("click",function(){setFieldZoom(1);});
 
 document.getElementById("resultNext")
 .addEventListener("click",nextRound);
