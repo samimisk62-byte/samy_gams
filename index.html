@@ -269,6 +269,7 @@ let messageTimer = null;
 let recoveryAccessToken = null;
 let selectedGameCode = null;
 let currentOrderId = null;
+let platformIsOwner = false;
 
 function $(id){
   return document.getElementById(id);
@@ -754,7 +755,11 @@ async function checkGameAccess(gameCode){
     if(!response.ok)return false;
     const result=await readResponse(response);const data=result.data;if(!data)return false;
     const list=Array.isArray(data)?data:(Array.isArray(data.access)?data.access:null);
-    if(list)return list.some(function(item){if(!item||item.game_code!==gameCode)return false;if(item.owner===true)return true;if(item.active!==true)return false;return !item.expires_at||new Date(item.expires_at).getTime()>Date.now();});
+    if(list){
+      if(list.some(function(item){return item&&item.owner===true;}))platformIsOwner=true;
+      return list.some(function(item){if(!item||item.game_code!==gameCode)return false;if(item.owner===true)return true;if(item.active!==true)return false;return !item.expires_at||new Date(item.expires_at).getTime()>Date.now();});
+    }
+    if(data.owner===true)platformIsOwner=true;
     return (data.game_code===gameCode&&(data.owner===true||data.active===true))||data.has_access===true||data.is_active===true||data.active===true;
   }catch(e){return false;}
 }
@@ -780,6 +785,7 @@ function openSubscription(gameCode,gameName){
   $("subscriptionPanel").style.display="block";$("subscriptionPanel").scrollIntoView({behavior:"smooth",block:"start"});
 }
 async function createSubscriptionOrder(){
+  if(platformIsOwner){showMessage("حساب مالك المنصة لا يحتاج إلى إنشاء طلب اشتراك.");return;}
   if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا.");return;}if(!selectedGameCode){showMessage("اختر لعبة أولًا.");return;}
   const button=$("createOrderBtn");
   if(button.disabled)return;
@@ -882,9 +888,13 @@ async function openGame(button){
   const allowed=await checkGameAccess(gameCode);if(!allowed){showMessage("🔒 لا يوجد اشتراك فعال للعبة "+(GAME_NAMES[gameCode]||gameCode)+". اضغط اشتراك / تجديد أولًا.");return;}window.location.href=url;
 }
 async function refreshAccess(){
-  if(!session?.access_token)return;const codes=Object.keys(GAME_NAMES);let activeCount=0;
-  for(const code of codes){const allowed=await checkGameAccess(code);if(allowed)activeCount++;const status=document.querySelector('[data-status-for="' + code + '"]');if(status)status.textContent=allowed?"🟢 الاشتراك فعال":"🟡 لا يوجد اشتراك فعال";}
-  $("accountStatus").textContent=activeCount?"🟢 لديك اشتراك فعال في "+activeCount+" لعبة":"🟡 لا توجد اشتراكات نشطة حاليًا";await loadMyOrders();
+  if(!session?.access_token)return;
+  platformIsOwner=false;
+  const codes=Object.keys(GAME_NAMES);let activeCount=0;
+  for(const code of codes){const allowed=await checkGameAccess(code);if(allowed)activeCount++;const status=document.querySelector('[data-status-for="' + code + '"]');if(status)status.textContent=allowed?(platformIsOwner?"🟢 متاحة مجانًا لمالك المنصة":"🟢 الاشتراك فعال"):"🟡 لا يوجد اشتراك فعال";}
+  document.querySelectorAll("[data-subscribe-game]").forEach(function(button){button.style.display=platformIsOwner?"none":"";});
+  $("accountStatus").textContent=platformIsOwner?"🟢 حساب مالك المنصة: الألعاب الأربع متاحة مجانًا":(activeCount?"🟢 لديك اشتراك فعال في "+activeCount+" لعبة":"🟡 لا توجد اشتراكات نشطة حاليًا");
+  await loadMyOrders();
 }
 
 /* إظهار وإخفاء النماذج */
