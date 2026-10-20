@@ -433,6 +433,35 @@ transform:rotate(17deg);
 background:linear-gradient(180deg,#f7d7ff 0%,#ce65ff 45%,#7625c8 100%);
 box-shadow:0 0 8px rgba(206,101,255,.9),0 0 17px rgba(118,37,200,.6);
 }
+.o4{
+left:12%;top:43%;width:16%;height:10px;
+background:linear-gradient(180deg,#d7ffe8 0%,#31d98a 45%,#07834d 100%);
+box-shadow:0 0 8px rgba(49,217,138,.9),0 0 16px rgba(7,131,77,.6);
+}
+.o5{
+left:69%;top:29%;width:17%;height:10px;
+background:linear-gradient(180deg,#ffe0ec 0%,#ff6699 45%,#c2185b 100%);
+box-shadow:0 0 8px rgba(255,102,153,.9),0 0 16px rgba(194,24,91,.6);
+}
+.o6{
+left:42%;top:72%;width:15%;height:10px;
+background:linear-gradient(180deg,#e2e0ff 0%,#8880ff 45%,#3730a3 100%);
+box-shadow:0 0 8px rgba(136,128,255,.9),0 0 16px rgba(55,48,163,.6);
+}
+/* من المرحلة الخامسة تتحرك الحواجز بشكل مستقل */
+.obstacle.moving{animation-duration:3.4s;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate}
+.obstacle.o1.moving{animation-name:barrierOne}
+.obstacle.o2.moving{animation-name:barrierTwo}
+.obstacle.o3.moving{animation-name:barrierThree}
+.obstacle.o4.moving{animation-name:barrierFour}
+.obstacle.o5.moving{animation-name:barrierFive}
+.obstacle.o6.moving{animation-name:barrierSix}
+@keyframes barrierOne{from{left:22%;top:32%}to{left:39%;top:39%}}
+@keyframes barrierTwo{from{left:57%;top:42%}to{left:68%;top:55%}}
+@keyframes barrierThree{from{left:27%;top:58%}to{left:43%;top:66%}}
+@keyframes barrierFour{from{left:10%;top:40%}to{left:23%;top:49%}}
+@keyframes barrierFive{from{left:66%;top:26%}to{left:76%;top:36%}}
+@keyframes barrierSix{from{left:38%;top:69%}to{left:51%;top:75%}}
 
 #buttons{
 position:absolute;
@@ -1034,6 +1063,9 @@ filter:none !important;
 <div class="obstacle o1"></div>
 <div class="obstacle o2"></div>
 <div class="obstacle o3"></div>
+<div class="obstacle o4"></div>
+<div class="obstacle o5"></div>
+<div class="obstacle o6"></div>
 
 <div id="redPlayer" class="player">
 <div class="head"></div>
@@ -2404,13 +2436,25 @@ if(stage === 2) field.classList.add("stage2");
 if(stage === 3) field.classList.add("stage3");
 if(stage >= 4) field.classList.add("stage4");
 
-/* الحواجز تظهر بالتدريج مع تقدم المرحلة */
+/* المراحل 1 إلى 4: حواجز ثابتة قليلة. من المرحلة 5: عدد متغير وحركة */
 var obstacles = document.querySelectorAll("#field .obstacle");
+var activeCount = 0;
+if(stage === 2) activeCount = 1;
+else if(stage === 3) activeCount = 2;
+else if(stage === 4) activeCount = 3;
+else if(stage >= 5){
+  /* دورة متغيرة: قليل، متوسط، كثير، لا حواجز، ثم تتكرر */
+  var barrierCounts = [2,3,5,0,1,4];
+  activeCount = barrierCounts[(stage - 5) % barrierCounts.length];
+}
 obstacles.forEach(function(obstacle,index){
-  var visible = (stage >= 2 && index === 0) ||
-                (stage >= 3 && index === 1) ||
-                (stage >= 4 && index === 2);
+  obstacle.classList.remove("moving");
+  obstacle.style.animationDuration = Math.max(1.8, 3.8 - Math.min(stage - 5, 12) * 0.12) + "s";
+  var visible = index < activeCount;
   obstacle.style.display = visible ? "block" : "none";
+  if(visible && stage >= 5){
+    obstacle.classList.add("moving");
+  }
 });
 
 var ball = document.getElementById("ball");
