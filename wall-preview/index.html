@@ -219,15 +219,7 @@ color:#ffe89a;
 
 /* ================= اللعبة ================= */
 
-#game{
-display:none;
-position:relative;
-width:100%;
-height:100dvh;
-min-height:320px;
-background:#397e40;
-overflow:hidden;
-}
+#game{display:none;position:relative;width:100%;height:100dvh;min-height:360px;background:linear-gradient(145deg,#0d2634,#183e4a 55%,#081923);overflow:hidden;perspective:1000px;}
 
 #top{
 position:absolute;
@@ -255,18 +247,7 @@ color:#55aaff;
 font-weight:bold;
 }
 
-#field{
-position:absolute;
-left:2%;
-right:2%;
-top:59px;
-bottom:76px;
-background:#4d9b4f;
-border:4px solid #fff;
-border-radius:15px;
-overflow:hidden;
-touch-action:none;
-}
+#field{position:absolute;left:1%;right:1%;top:56px;bottom:62px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 38px),linear-gradient(135deg,#267b46 0%,#0e5b35 48%,#247b46 100%);border:5px solid #e9f3f0;border-radius:18px;overflow:hidden;touch-action:none;box-shadow:inset 0 0 0 3px rgba(0,0,0,.25),inset 0 0 30px rgba(0,0,0,.35),0 12px 24px rgba(0,0,0,.45);transform:translateZ(0);}
 
 #field.stage2{
 background:#2f7f9e;
@@ -329,51 +310,16 @@ left:2%;
 right:2%;
 }
 
-.player{
-position:absolute;
-width:78px;
-height:108px;
-bottom:19%;
-z-index:10;
-touch-action:none;
-user-select:none;
-}
-
-#redPlayer{
-left:25%;
-}
-
-#bluePlayer{
-left:58%;
-}
+.player{position:absolute;width:48px;height:64px;top:68%;z-index:10;touch-action:none;user-select:none;cursor:grab;}
+#redPlayer{left:23%;top:68%;}
+#bluePlayer{left:72%;top:24%;}
 
 .head,.body{
 display:none;
 }
 
-.paddle{
-position:absolute;
-width:19px;
-height:25px;
-border-radius:48% 48% 45% 45%;
-background:radial-gradient(ellipse at 32% 25%,#ff7777 0%,#e9232d 45%,#8e101a 100%);
-border:2px solid #e9d4bb;
-z-index:3;
-box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),0 2px 4px rgba(0,0,0,.4);
-}
-.paddle:before{
-content:"";
-position:absolute;
-width:6px;
-height:15px;
-left:50%;
-top:20px;
-transform:translateX(-50%);
-border-radius:2px 2px 4px 4px;
-background:linear-gradient(90deg,#9b6034,#e5b47c 45%,#8b512a);
-border:1px solid #704321;
-box-shadow:0 1px 2px rgba(0,0,0,.35);
-}
+.paddle{position:absolute;left:50%;top:50%;width:27px;height:35px;transform:translate(-50%,-50%) rotate(-18deg);border-radius:48% 48% 44% 44%;background:radial-gradient(ellipse at 30% 22%,#ff8b8b 0%,#ed2834 42%,#9d101c 100%);border:2px solid #f3e4d2;z-index:3;box-shadow:inset 0 0 0 2px rgba(255,255,255,.17),inset 0 -3px 5px rgba(0,0,0,.25),0 3px 6px rgba(0,0,0,.55);}
+.paddle:before{content:"";position:absolute;width:9px;height:22px;left:50%;top:27px;transform:translateX(-50%);border-radius:2px 2px 5px 5px;background:linear-gradient(90deg,#70401f,#d9a56b 45%,#8b512a);border:1px solid #704321;box-shadow:0 2px 3px rgba(0,0,0,.4);}
 #bluePlayer .paddle{
 background:radial-gradient(ellipse at 32% 25%,#777,#252525 48%,#050505 100%);
 }
@@ -394,10 +340,10 @@ transform:rotate(25deg);
 position:absolute;
 left:50%;
 top:70%;
-width:9px;
-height:9px;
-margin-left:-4.5px;
-margin-top:-4.5px;
+width:10px;
+height:10px;
+margin-left:-5px;
+margin-top:-5px;
 border-radius:50%;
 background:radial-gradient(circle at 30% 25%,#f5ff9b 0%,#cce83b 48%,#86a91c 100%);
 border:1px solid rgba(90,115,18,.7);
@@ -2006,103 +1952,34 @@ movePlayer("bluePlayer",blueX);
 تحريك اللاعبين
 ========================================= */
 
-function movePlayer(id,x){
-
-var p =
-document.getElementById(id);
-
-if(p){
-p.style.left = x + "%";
+function movePlayer(id,x,y){
+var p=document.getElementById(id);if(!p)return;
+if(typeof x==="number")p.style.left=x+"%";
+if(typeof y==="number")p.style.top=y+"%";
 }
-
-}
-
-function getPointerX(e){
-
-if(e.touches && e.touches.length){
-return e.touches[0].clientX;
-}
-
-if(e.changedTouches && e.changedTouches.length){
-return e.changedTouches[0].clientX;
-}
-
-return e.clientX;
-
+function getPointer(e){
+if(e.touches&&e.touches.length)return{x:e.touches[0].clientX,y:e.touches[0].clientY};
+if(e.changedTouches&&e.changedTouches.length)return{x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY};
+return{x:e.clientX,y:e.clientY};
 }
 
 function moveRed(e){
-
-if(!gameRunning || paused){
-return;
+if(!gameRunning||paused)return;
+var point=getPointer(e);if(typeof point.x!=="number"||typeof point.y!=="number")return;
+var rect=document.getElementById("field").getBoundingClientRect();
+var x=((point.x-rect.left)/rect.width)*100-2.5;
+var y=((point.y-rect.top)/rect.height)*100-4;
+x=Math.max(3,Math.min(44,x));y=Math.max(4,Math.min(90,y));
+redX=x;movePlayer("redPlayer",redX,y);
 }
-
-var clientX = getPointerX(e);
-
-if(typeof clientX !== "number"){
-return;
-}
-
-var rect =
-document.getElementById("field")
-.getBoundingClientRect();
-
-var x =
-((clientX - rect.left) / rect.width) * 100;
-
-x -= 7;
-
-if(x < 7){
-x = 7;
-}
-
-if(x > 44){
-x = 44;
-}
-
-redX = x;
-
-movePlayer("redPlayer",redX);
-
-}
-
 function moveBlue(e){
-
-if(!gameRunning || paused){
-return;
-}
-
-if(playerCount !== 2){
-return;
-}
-
-var clientX = getPointerX(e);
-
-if(typeof clientX !== "number"){
-return;
-}
-
-var rect =
-document.getElementById("field")
-.getBoundingClientRect();
-
-var x =
-((clientX - rect.left) / rect.width) * 100;
-
-x -= 7;
-
-if(x < 50){
-x = 50;
-}
-
-if(x > 85){
-x = 85;
-}
-
-blueX = x;
-
-movePlayer("bluePlayer",blueX);
-
+if(!gameRunning||paused||playerCount!==2)return;
+var point=getPointer(e);if(typeof point.x!=="number"||typeof point.y!=="number")return;
+var rect=document.getElementById("field").getBoundingClientRect();
+var x=((point.x-rect.left)/rect.width)*100-2.5;
+var y=((point.y-rect.top)/rect.height)*100-4;
+x=Math.max(51,Math.min(94,x));y=Math.max(4,Math.min(90,y));
+blueX=x;movePlayer("bluePlayer",blueX,y);
 }
 
 /* =========================================
