@@ -308,30 +308,20 @@ from{transform:translateX(-42px) translateY(-5px) rotate(-8deg)}
 to{transform:translateX(42px) translateY(7px) rotate(8deg)}
 }
 
-/* جوهرة مكافأة مفاجئة تظهر أثناء اللعب */
-#bonusGem{
-position:absolute;
-display:none;
-left:50%;
-top:40%;
-transform:translate(-50%,-50%);
-width:42px;
-height:42px;
-align-items:center;
-justify-content:center;
-font-size:29px;
-border-radius:50%;
-background:radial-gradient(circle,rgba(255,255,255,.95),rgba(250,204,21,.5) 58%,rgba(250,204,21,.08));
-border:2px solid rgba(255,245,157,.95);
-box-shadow:0 0 12px #fde047,0 0 25px rgba(250,204,21,.8);
-z-index:9;
-pointer-events:none;
+/* جواهر مكافآت متعددة بألوان وأشكال وقيم مختلفة */
+.bonusGem{
+position:absolute;display:none;left:50%;top:70%;
+transform:translate(-50%,-50%);width:42px;height:42px;
+align-items:center;justify-content:center;font-size:28px;
+border-radius:50%;z-index:9;pointer-events:none;
 animation:gemPulse .7s ease-in-out infinite alternate;
+filter:drop-shadow(0 0 7px currentColor);
 }
-@keyframes gemPulse{
-from{scale:.88;filter:brightness(1)}
-to{scale:1.12;filter:brightness(1.5)}
-}
+.bonusGem.redGem{color:#ff5555;background:radial-gradient(circle,#fff,#ff5555 55%,#8b0000);border:2px solid #ff9b9b;box-shadow:0 0 14px #ff3030,0 0 25px #ff303088}
+.bonusGem.blueGem{color:#53baff;background:radial-gradient(circle,#fff,#39a9ff 55%,#073c9c);border:2px solid #9cddff;box-shadow:0 0 14px #39a9ff,0 0 25px #1685ff88}
+.bonusGem.yellowGem{color:#ffe45c;background:radial-gradient(circle,#fff,#ffe45c 55%,#c47b00);border:2px solid #fff1a0;box-shadow:0 0 14px #ffe45c,0 0 25px #ffd00088}
+.bonusGem.greenGem{color:#7cff9c;background:radial-gradient(circle,#fff,#4be477 55%,#087a35);border:2px solid #b8ffc9;box-shadow:0 0 14px #4be477,0 0 25px #13c45b88}
+@keyframes gemPulse{from{scale:.88;filter:brightness(1)}to{scale:1.12;filter:brightness(1.5)}}
 
 #floor{
 position:absolute;
@@ -1155,7 +1145,7 @@ filter:none !important;
 
 <div id="ballShadow"></div>
 
-<div id="bonusGem" aria-label="جوهرة المكافأة">💎</div>
+
 
 <div id="ball"></div>
 
@@ -1270,9 +1260,9 @@ var vy = -.70;
 var strong = false;
 var bonusActive = false;
 var bonusLastHit = ""; // يحدد آخر من ضرب الكرة: اللاعب أو الكمبيوتر
-var obstacleCheckFrame = 0;
+var bonusGems = [];
 var bonusSpawnAt = 0;
-var bonusExpiresAt = 0;
+var obstacleCheckFrame = 0;
 
 var redX = 25;
 var blueX = 58;
@@ -1722,10 +1712,9 @@ blueScore = 0;
 
 stage = selectedStage;
 bonusActive = false;
-bonusSpawnAt = Date.now() + 7000 + Math.random() * 5000;
-bonusExpiresAt = 0;
-var bonusGemStart = document.getElementById("bonusGem");
-if(bonusGemStart) bonusGemStart.style.display = "none";
+bonusGems.forEach(function(g){ if(g.el && g.el.parentNode) g.el.parentNode.removeChild(g.el); });
+bonusGems = [];
+bonusSpawnAt = Date.now() + 5000 + Math.random() * 4000;
 round = 1;
 stageRoundCount = 0;
 roundStartRedScore = 0;
@@ -1859,8 +1848,8 @@ ballFrame=requestAnimationFrame(animateBall);
 function stopGameTimers(){
 
 bonusActive = false;
-var bonusGemStop = document.getElementById("bonusGem");
-if(bonusGemStop) bonusGemStop.style.display = "none";
+bonusGems.forEach(function(g){ if(g.el && g.el.parentNode) g.el.parentNode.removeChild(g.el); });
+bonusGems = [];
 
 if(gameTimer !== null){
 clearInterval(gameTimer);
@@ -1937,41 +1926,64 @@ shadow.style.top = (by + 3) + "%";
 ========================================= */
 
 function updateBonusEvent(){
-  var gem = document.getElementById("bonusGem");
-  if(!gem) return;
   var now = Date.now();
+  var field = document.getElementById("field");
+  if(!field) return;
 
-  if(bonusActive && now >= bonusExpiresAt){
-    bonusActive = false;
-    gem.style.display = "none";
-    bonusSpawnAt = now + 5000 + Math.random() * 7000;
-  }
-
-  if(!bonusActive && now >= bonusSpawnAt){
-    bonusActive = true;
-    bonusExpiresAt = now + 6500;
-    gem.style.left = (18 + Math.random() * 64) + "%";
-    gem.style.top = (64 + Math.random() * 18) + "%";
-    gem.style.display = "flex";
-    document.getElementById("message").innerHTML = "✨ مفاجأة! التقط جوهرة المكافأة بالكرة!";
-  }
-
-  /* موضع الجوهرة معروف كنسبة مئوية؛ نتجنب قياس عناصر الصفحة في كل إطار */
-  if(bonusActive && bonusLastHit === "player"){
-    var gx = parseFloat(gem.style.left) || 50;
-    var gy = parseFloat(gem.style.top) || 40;
-    if(Math.abs(bx-gx) < 5.5 && Math.abs(by-gy) < 7){
-      bonusActive = false;
-      gem.style.display = "none";
-      var prize = 25 + Math.min(stage, 25);
-      coins += prize;
-      saveData();
-      updateCoins();
-      document.getElementById("message").innerHTML = "💎 ممتاز! حصلت على +" + prize + " عملة مفاجأة!";
-      playScore();
-      bonusSpawnAt = now + 9000 + Math.random() * 9000;
+  /* الجواهر تعيش 12 ثانية بدلًا من 6.5، ويمكن ظهور أكثر من واحدة معًا */
+  for(var i=bonusGems.length-1;i>=0;i--){
+    var g = bonusGems[i];
+    if(now >= g.expiresAt){
+      if(g.el.parentNode) g.el.parentNode.removeChild(g.el);
+      bonusGems.splice(i,1);
     }
   }
+  bonusActive = bonusGems.length > 0;
+
+  if(now >= bonusSpawnAt && bonusGems.length < 4){
+    var types = [
+      {cls:"redGem",icon:"❤️",value:20,name:"الحمراء"},
+      {cls:"blueGem",icon:"🔷",value:35,name:"الزرقاء"},
+      {cls:"yellowGem",icon:"⭐",value:50,name:"الصفراء"},
+      {cls:"greenGem",icon:"💚",value:75,name:"الخضراء"}
+    ];
+    var count = 1 + Math.floor(Math.random()*3);
+    var available = types.slice();
+    for(var n=0;n<count && bonusGems.length<4;n++){
+      var pick = available.splice(Math.floor(Math.random()*available.length),1)[0];
+      var el = document.createElement("div");
+      el.className = "bonusGem " + pick.cls;
+      el.textContent = pick.icon;
+      el.setAttribute("aria-label",pick.name + " مكافأة " + pick.value + " عملة");
+      var x = 12 + Math.random()*76;
+      var y = 64 + Math.random()*18;
+      el.style.left = x + "%";
+      el.style.top = y + "%";
+      el.style.display = "flex";
+      field.appendChild(el);
+      bonusGems.push({el:el,x:x,y:y,value:pick.value,name:pick.name,expiresAt:now+12000});
+    }
+    bonusActive = bonusGems.length > 0;
+    document.getElementById("message").innerHTML = "💎 جواهر متعددة! اجمعها بالكرة — كل لون له مكافأة مختلفة!";
+    bonusSpawnAt = now + 5000 + Math.random()*5000;
+  }
+
+  /* الالتقاط للاعب الأحمر فقط كما كان، مع مكافأة مستقلة لكل جوهرة */
+  if(bonusLastHit === "player"){
+    for(var j=bonusGems.length-1;j>=0;j--){
+      var gem = bonusGems[j];
+      if(Math.abs(bx-gem.x)<5.5 && Math.abs(by-gem.y)<7){
+        if(gem.el.parentNode) gem.el.parentNode.removeChild(gem.el);
+        bonusGems.splice(j,1);
+        coins += gem.value;
+        saveData();
+        updateCoins();
+        document.getElementById("message").innerHTML = "🎉 التقطت الجوهرة " + gem.name + "! +" + gem.value + " عملة للمتجر";
+        playScore();
+      }
+    }
+  }
+  bonusActive = bonusGems.length > 0;
 }
 
 /* =========================================
@@ -2489,7 +2501,7 @@ if(stageRoundCount >= 3){
       if(stage >= 100 && stage % 50 === 0) reward += 1000;
       coins += reward;
       rewardedStages.push(stage);
-      stageSummary = "<br><br>🎁 مكافأة الفوز: +" + reward + " عملة!";
+      stageSummary = "<br><br>🎁 مكافأة الفوز بالمرحلة " + stage + ": +" + reward + " عملة!<br>🛒 استخدم العملات في المتجر لشراء المضارب والكرات وتطوير الملعب.";
     }else{
       stageSummary = "<br><br>🏆 فزت بهذه المرحلة من قبل! لا توجد مكافأة مكررة.";
     }
