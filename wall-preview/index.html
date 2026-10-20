@@ -1269,6 +1269,7 @@ var vy = -.70;
 
 var strong = false;
 var bonusActive = false;
+var bonusLastHit = ""; // يحدد آخر من ضرب الكرة: اللاعب أو الكمبيوتر
 var bonusSpawnAt = 0;
 var bonusExpiresAt = 0;
 
@@ -1958,7 +1959,7 @@ function updateBonusEvent(){
     if(rect.width && rect.height && gemRect.width && gemRect.height){
       var gx = ((gemRect.left + gemRect.width/2 - rect.left) / rect.width) * 100;
       var gy = ((gemRect.top + gemRect.height/2 - rect.top) / rect.height) * 100;
-      if(Math.abs(bx-gx) < 5.5 && Math.abs(by-gy) < 7){
+      if(bonusLastHit === "player" && Math.abs(bx-gx) < 5.5 && Math.abs(by-gy) < 7){
         bonusActive = false;
         gem.style.display = "none";
         var prize = 25 + Math.min(stage, 25);
@@ -2082,6 +2083,7 @@ if(Math.abs(vx) < 0.28){vx = (Math.random() < 0.5 ? -0.28 : 0.28);}
 
 playPaddle();
 
+bonusLastHit = "player";
 document.getElementById("message").innerHTML =
 "🟥 ضربة الأحمر";
 
@@ -2113,6 +2115,7 @@ if(Math.abs(vx) < 0.28){vx = (Math.random() < 0.5 ? -0.28 : 0.28);}
 
 playPaddle();
 
+bonusLastHit = "computer";
 document.getElementById("message").innerHTML =
 "🟦 ضربة الأزرق";
 
