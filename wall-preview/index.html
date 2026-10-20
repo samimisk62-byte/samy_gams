@@ -1621,7 +1621,12 @@ async function pollOnlineRoom(){
     if(!Array.isArray(rows)||!rows[0]) return;
     var room=rows[0];
     if(onlineRole==="host" && room.guest_id){
-      setRoomStatus("🟢 انضم لاعب آخر! رمز الغرفة: "+onlineRoomCode+" — يمكنك بدء المباراة.");
+      blueX=Number(room.guest_blue_x)||blueX;
+      movePlayer("bluePlayer",blueX);
+      setRoomStatus("🟢 انضم لاعب آخر! رمز الغرفة: "+onlineRoomCode+" — اختر المرحلة واضغط ابدأ المباراة.");
+    }
+    if(onlineRole==="guest" && room.game_state && room.game_state.running && !gameRunning){
+      beginGuestGame(room.game_state);
     }
     if(onlineRole==="guest" && room.game_state && room.game_state.at && room.game_state.at>onlineLastSnapshotAt){
       onlineLastSnapshotAt=room.game_state.at;
@@ -1631,6 +1636,38 @@ async function pollOnlineRoom(){
       setRoomStatus("انتهت المباراة.");
     }
   }catch(e){console.warn("Room poll:",e.message);}
+}
+
+function beginGuestGame(st){
+  if(onlineRole!=="guest" || gameRunning) return;
+  playerCount=2;
+  stage=Number(st.stage)||1;
+  round=Number(st.round)||1;
+  roundTime=Number(st.timeLeft)||60;
+  timeLeft=roundTime;
+  document.getElementById("redNameGame").textContent=st.redName||"الأحمر";
+  document.getElementById("blueNameGame").textContent=st.blueName||"الأزرق";
+  document.getElementById("menu").style.display="none";
+  document.getElementById("stages").style.display="none";
+  document.getElementById("game").style.display="block";
+  document.getElementById("game").classList.add("running");
+  document.getElementById("result").style.display="none";
+  gameRunning=true;
+  paused=false;
+  applyStageTheme();
+  applyOnlineSnapshot(st);
+  startClock();
+  startBall();
+  setRoomStatus("🟢 متصل بالمباراة. أنت اللاعب الأزرق.");
+}
+
+function sendGuestPaddlePosition(){
+  if(!onlineMode || onlineRole!=="guest" || !onlineRoomId || onlineSending) return;
+  onlineSending=true;
+  cloudRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineRoomId),
+    "PATCH",{guest_blue_x:blueX,updated_at:new Date().toISOString()},"return=minimal")
+    .catch(function(e){console.warn("Paddle sync:",e.message);})
+    .finally(function(){onlineSending=false;});
 }
 
 function applyOnlineSnapshot(st){
@@ -2468,6 +2505,7 @@ x=Math.max(50,Math.min(100-wPct,x));
 y=Math.max(50,Math.min(100-hPct,y));
 blueX=x;
 movePlayer("bluePlayer",blueX,y);
+if(onlineMode && onlineRole==="guest") sendGuestPaddlePosition();
 }
 
 /* =========================================
@@ -4295,7 +4333,7 @@ field.addEventListener("pointerdown", function(e){
   if(!gameRunning || paused) return;
 
   var rect = field.getBoundingClientRect();
-  activeRacketSide = (playerCount === 2 && e.clientX >= rect.left + rect.width / 2) ? "blue" : "red";
+  activeRacketSide = onlineMode ? (onlineRole === "guest" ? "blue" : "red") : ((playerCount === 2 && e.clientX >= rect.left + rect.width / 2) ? "blue" : "red");
   activeRacketPointer = e.pointerId;
 
   try {
