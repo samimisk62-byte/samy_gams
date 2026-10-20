@@ -312,7 +312,7 @@ right:2%;
 
 .player{position:absolute;width:48px;height:64px;top:68%;z-index:10;touch-action:none;user-select:none;cursor:grab;}
 #redPlayer{left:23%;top:68%;}
-#bluePlayer{left:72%;top:24%;}
+#bluePlayer{left:72%;top:68%;}
 
 .head,.body{
 display:none;
@@ -1964,7 +1964,7 @@ return{x:e.clientX,y:e.clientY};
 }
 
 function moveRed(e){
-if(!gameRunning||paused)return;
+if(paused)return;
 var point=getPointer(e);if(typeof point.x!=="number"||typeof point.y!=="number")return;
 var rect=document.getElementById("field").getBoundingClientRect();
 var x=((point.x-rect.left)/rect.width)*100-2.5;
@@ -1973,7 +1973,7 @@ x=Math.max(3,Math.min(44,x));y=Math.max(4,Math.min(90,y));
 redX=x;movePlayer("redPlayer",redX,y);
 }
 function moveBlue(e){
-if(!gameRunning||paused||playerCount!==2)return;
+if(paused||playerCount!==2)return;
 var point=getPointer(e);if(typeof point.x!=="number"||typeof point.y!=="number")return;
 var rect=document.getElementById("field").getBoundingClientRect();
 var x=((point.x-rect.left)/rect.width)*100-2.5;
@@ -3735,7 +3735,7 @@ field.addEventListener("pointerdown",function(e){
  e.preventDefault();
 },{passive:false});
 field.addEventListener("pointermove",function(e){
- if(activeRacketPointer!==e.pointerId||!gameRunning||paused)return;
+ if(activeRacketPointer!==e.pointerId||paused)return;
  if(activeRacketSide==="blue") moveBlue(e); else moveRed(e);
  e.preventDefault();
 },{passive:false});
@@ -3745,6 +3745,26 @@ function releaseRacketPointer(e){
 field.addEventListener("pointerup",releaseRacketPointer);
 field.addEventListener("pointercancel",releaseRacketPointer);
 field.addEventListener("lostpointercapture",releaseRacketPointer);
+
+/* دعم لمس مباشر موثوق على الهاتف، مع اختيار نصف الملعب لكل لاعب */
+var touchRacketSide="red";
+field.addEventListener("touchstart",function(e){
+ if(paused)return;
+ var t=e.touches[0]; if(!t)return;
+ var rect=field.getBoundingClientRect();
+ touchRacketSide=(playerCount===2 && t.clientX>rect.left+rect.width/2)?"blue":"red";
+ if(touchRacketSide==="blue")moveBlue(t);else moveRed(t);
+ if(e.cancelable)e.preventDefault();
+},{passive:false,capture:true});
+field.addEventListener("touchmove",function(e){
+ if(paused)return;
+ var t=e.touches[0];if(!t)return;
+ if(touchRacketSide==="blue")moveBlue(t);else moveRed(t);
+ if(e.cancelable)e.preventDefault();
+},{passive:false,capture:true});
+field.addEventListener("touchend",function(e){
+ if(e.cancelable)e.preventDefault();
+},{passive:false,capture:true});
 
 /* =========================================
 التهيئة
