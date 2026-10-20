@@ -275,6 +275,39 @@ radial-gradient(circle at 50% 50%,rgba(255,255,255,.08),transparent 55%);
 #field.milestone100{filter:saturate(1.6);box-shadow:inset 0 0 0 5px #e879f9,inset 0 0 36px #d946ef,0 0 22px rgba(217,70,239,.75)}
 
 
+/* زعيم خاص في المرحلتين 50 و100 وما بعدهما كل 50 مرحلة */
+#bossTarget{
+position:absolute;
+display:none;
+left:50%;
+top:25%;
+width:58px;
+height:58px;
+margin-left:-29px;
+align-items:center;
+justify-content:center;
+font-size:32px;
+border-radius:50%;
+border:3px solid #ffe082;
+background:radial-gradient(circle,#fff7b2 0%,#ff9f1c 45%,#7f1d1d 100%);
+box-shadow:0 0 12px #ffcf5a,0 0 28px rgba(255,159,28,.85),inset 0 0 10px #fff;
+z-index:8;
+animation:bossFloat 1.8s ease-in-out infinite alternate;
+pointer-events:none;
+}
+#field.bossStage #bossTarget{display:flex}
+#field.legendaryBoss #bossTarget{
+width:72px;height:72px;margin-left:-36px;font-size:42px;
+border-color:#f0abfc;
+background:radial-gradient(circle,#fff 0%,#e879f9 38%,#581c87 100%);
+box-shadow:0 0 16px #f0abfc,0 0 36px #c026d3,inset 0 0 12px #fff;
+animation-duration:1.15s;
+}
+@keyframes bossFloat{
+from{transform:translateX(-42px) translateY(-5px) rotate(-8deg)}
+to{transform:translateX(42px) translateY(7px) rotate(8deg)}
+}
+
 #floor{
 position:absolute;
 inset:0;
@@ -1074,6 +1107,8 @@ filter:none !important;
 <div id="redNet" class="net"></div>
 <div id="blueNet" class="net"></div>
 
+<div id="bossTarget" aria-label="زعيم المرحلة">👑</div>
+
 <div class="obstacle o1"></div>
 <div class="obstacle o2"></div>
 <div class="obstacle o3"></div>
@@ -1708,7 +1743,7 @@ gameRunning = true;
 paused = false;
 
 document.getElementById("pause").innerHTML = "⏸️ إيقاف";
-document.getElementById("message").innerHTML = "⚽ بدأت المباراة";
+document.getElementById("message").innerHTML = stage >= 100 && stage % 50 === 0 ? "👑 دخلت تحدي الزعيم الأسطوري! مكافأة خاصة تنتظرك!" : stage === 50 ? "🔥 زعيم المرحلة 50 ظهر! اهزمه لتحصل على مكافأة إضافية!" : "⚽ بدأت المباراة";
 
 startClock();
 startBall();
@@ -1894,6 +1929,25 @@ obstacles.forEach(function(obstacle){
     document.getElementById("message").innerHTML = "🪵 الكرة ارتدت من الحاجز!";
   }
 });
+
+/* اصطدام الكرة بزعيم المرحلة 50 أو الزعيم الأسطوري في 100 وما بعدها */
+var boss = document.getElementById("bossTarget");
+if(boss && boss.style.display !== "none" && (stage === 50 || (stage >= 100 && stage % 50 === 0))){
+  var bossRect = boss.getBoundingClientRect();
+  if(bossRect.width && bossRect.height && fieldRect.width && fieldRect.height){
+    var bossLeft = ((bossRect.left - fieldRect.left) / fieldRect.width) * 100;
+    var bossRight = ((bossRect.right - fieldRect.left) / fieldRect.width) * 100;
+    var bossTop = ((bossRect.top - fieldRect.top) / fieldRect.height) * 100;
+    var bossBottom = ((bossRect.bottom - fieldRect.top) / fieldRect.height) * 100;
+    if(bx >= bossLeft - 2 && bx <= bossRight + 2 && by >= bossTop - 2 && by <= bossBottom + 2){
+      vy = by < (bossTop + bossBottom) / 2 ? -Math.abs(vy) : Math.abs(vy);
+      vx = (bx < (bossLeft + bossRight) / 2 ? -1 : 1) * Math.max(Math.abs(vx),0.45);
+      bx = bx < (bossLeft + bossRight) / 2 ? bossLeft - 2.5 : bossRight + 2.5;
+      playWall();
+      document.getElementById("message").innerHTML = stage >= 100 ? "👑 ضربة على الزعيم الأسطوري! واصل التحدي!" : "🔥 أصبت زعيم المرحلة 50! ممتاز!";
+    }
+  }
+}
 
 /* منع التصاق الكرة أو توقفها بسبب سرعة تقترب من الصفر */
 var minHorizontal = 0.12 + Math.min(stage - 1, 60) * 0.008;
@@ -2342,6 +2396,8 @@ if(stageRoundCount >= 3){
     unlockedStage = Math.max(unlockedStage, stage + 1);
     if(rewardedStages.indexOf(stage) === -1){
       var reward = 50 + stage * 20;
+      if(stage === 50) reward += 250;
+      if(stage >= 100 && stage % 50 === 0) reward += 1000;
       coins += reward;
       rewardedStages.push(stage);
       stageSummary = "<br><br>🎁 مكافأة الفوز: +" + reward + " عملة!";
@@ -2457,6 +2513,8 @@ if(stage >= 30) field.classList.add("stage30plus");
 if(stage >= 40 && stage % 10 === 0) field.classList.add("milestone40");
 if(stage >= 50 && stage % 10 === 0) field.classList.add("milestone50");
 if(stage >= 100 && stage % 10 === 0) field.classList.add("milestone100");
+if(stage === 50 || (stage >= 100 && stage % 50 === 0)) field.classList.add("bossStage");
+if(stage >= 100 && stage % 50 === 0) field.classList.add("legendaryBoss");
 
 /* بعد المرحلة 30: عدد الحواجز يتغير أكثر، من الصفر إلى ستة */
 var obstacles = document.querySelectorAll("#field .obstacle");
