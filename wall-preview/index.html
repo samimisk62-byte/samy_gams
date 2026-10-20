@@ -1588,7 +1588,7 @@ function stopOnlinePolling(){
 function startOnlinePolling(){
   stopOnlinePolling();
   onlinePollTimer=setInterval(pollOnlineRoom,700);
-  onlineSnapshotTimer=setInterval(sendOnlineSnapshot,180);
+  onlineSnapshotTimer=setInterval(sendOnlineSnapshot,400);
   pollOnlineRoom();
 }
 
@@ -1603,7 +1603,7 @@ function currentOnlineSnapshot(){
   };
 }
 
-async function sendOnlineSnapshot(){
+async async function sendOnlineSnapshot(){
   if(!onlineMode || onlineRole!=="host" || !onlineRoomId || onlineSending || !gameRunning) return;
   onlineSending=true;
   try{
@@ -1613,7 +1613,7 @@ async function sendOnlineSnapshot(){
   finally{onlineSending=false;}
 }
 
-async function pollOnlineRoom(){
+async async function pollOnlineRoom(){
   if(!onlineMode || !onlineRoomId) return;
   try{
     var rows=await cloudRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineRoomId)+"&select=*","GET");
