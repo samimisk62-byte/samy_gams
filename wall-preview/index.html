@@ -308,6 +308,31 @@ from{transform:translateX(-42px) translateY(-5px) rotate(-8deg)}
 to{transform:translateX(42px) translateY(7px) rotate(8deg)}
 }
 
+/* جوهرة مكافأة مفاجئة تظهر أثناء اللعب */
+#bonusGem{
+position:absolute;
+display:none;
+left:50%;
+top:40%;
+transform:translate(-50%,-50%);
+width:42px;
+height:42px;
+align-items:center;
+justify-content:center;
+font-size:29px;
+border-radius:50%;
+background:radial-gradient(circle,rgba(255,255,255,.95),rgba(250,204,21,.5) 58%,rgba(250,204,21,.08));
+border:2px solid rgba(255,245,157,.95);
+box-shadow:0 0 12px #fde047,0 0 25px rgba(250,204,21,.8);
+z-index:9;
+pointer-events:none;
+animation:gemPulse .7s ease-in-out infinite alternate;
+}
+@keyframes gemPulse{
+from{scale:.88;filter:brightness(1)}
+to{scale:1.12;filter:brightness(1.5)}
+}
+
 #floor{
 position:absolute;
 inset:0;
@@ -1130,6 +1155,8 @@ filter:none !important;
 
 <div id="ballShadow"></div>
 
+<div id="bonusGem" aria-label="جوهرة المكافأة">💎</div>
+
 <div id="ball"></div>
 
 <div id="message">
@@ -1241,6 +1268,9 @@ var vx = .35;
 var vy = -.70;
 
 var strong = false;
+var bonusActive = false;
+var bonusSpawnAt = 0;
+var bonusExpiresAt = 0;
 
 var redX = 25;
 var blueX = 58;
@@ -1689,6 +1719,11 @@ redScore = 0;
 blueScore = 0;
 
 stage = selectedStage;
+bonusActive = false;
+bonusSpawnAt = Date.now() + 7000 + Math.random() * 5000;
+bonusExpiresAt = 0;
+var bonusGemStart = document.getElementById("bonusGem");
+if(bonusGemStart) bonusGemStart.style.display = "none";
 round = 1;
 stageRoundCount = 0;
 roundStartRedScore = 0;
@@ -1821,6 +1856,10 @@ ballFrame=requestAnimationFrame(animateBall);
 
 function stopGameTimers(){
 
+bonusActive = false;
+var bonusGemStop = document.getElementById("bonusGem");
+if(bonusGemStop) bonusGemStop.style.display = "none";
+
 if(gameTimer !== null){
 clearInterval(gameTimer);
 gameTimer = null;
@@ -1892,6 +1931,49 @@ shadow.style.top = (by + 3) + "%";
 }
 
 /* =========================================
+المفاجآت والمكافآت أثناء اللعب
+========================================= */
+
+function updateBonusEvent(){
+  var gem = document.getElementById("bonusGem");
+  if(!gem) return;
+  var now = Date.now();
+  if(bonusActive && now >= bonusExpiresAt){
+    bonusActive = false;
+    gem.style.display = "none";
+    bonusSpawnAt = now + 5000 + Math.random() * 7000;
+  }
+  if(!bonusActive && now >= bonusSpawnAt){
+    bonusActive = true;
+    bonusExpiresAt = now + 6500;
+    gem.style.left = (18 + Math.random() * 64) + "%";
+    gem.style.top = (22 + Math.random() * 42) + "%";
+    gem.style.display = "flex";
+    document.getElementById("message").innerHTML = "✨ مفاجأة! التقط جوهرة المكافأة بالكرة!";
+  }
+  if(bonusActive){
+    var field = document.getElementById("field");
+    var rect = field.getBoundingClientRect();
+    var gemRect = gem.getBoundingClientRect();
+    if(rect.width && rect.height && gemRect.width && gemRect.height){
+      var gx = ((gemRect.left + gemRect.width/2 - rect.left) / rect.width) * 100;
+      var gy = ((gemRect.top + gemRect.height/2 - rect.top) / rect.height) * 100;
+      if(Math.abs(bx-gx) < 5.5 && Math.abs(by-gy) < 7){
+        bonusActive = false;
+        gem.style.display = "none";
+        var prize = 25 + Math.min(stage, 25);
+        coins += prize;
+        saveData();
+        updateCoins();
+        document.getElementById("message").innerHTML = "💎 ممتاز! حصلت على +" + prize + " عملة مفاجأة!";
+        playScore();
+        bonusSpawnAt = now + 9000 + Math.random() * 9000;
+      }
+    }
+  }
+}
+
+/* =========================================
 حركة الكرة
 ========================================= */
 
@@ -1899,6 +1981,8 @@ function moveBall(){
 
 var previousX = bx;
 var previousY = by;
+
+updateBonusEvent();
 
 /* سرعة الحركة محسوبة لكل إطار؛ نضاعفها لتكون واضحة على الهاتف */
 var motionBoost = Math.min(3.6 + (stage - 1) * 0.16, 9.0);
