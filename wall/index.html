@@ -1786,7 +1786,7 @@ vx =
 direction * speed;
 
 vy =
--((owned.fastBall ? 0.90 : 0.75) + Math.min(stage - 1, 20) * 0.035);
+-((owned.fastBall ? 1.00 : 0.84) + Math.min(stage - 1, 20) * 0.038);
 
 strong = false;
 
@@ -1827,7 +1827,7 @@ shadow.style.top = (by + 3) + "%";
 function moveBall(){
 
 /* سرعة الحركة محسوبة لكل إطار؛ نضاعفها لتكون واضحة على الهاتف */
-var motionBoost = Math.min(2.0 + (stage - 1) * 0.12, 4.0);
+var motionBoost = Math.min(2.25 + (stage - 1) * 0.12, 4.1);
 bx += vx * motionBoost;
 by += vy * motionBoost;
 
