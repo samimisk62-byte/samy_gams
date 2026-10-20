@@ -1603,7 +1603,7 @@ function currentOnlineSnapshot(){
   };
 }
 
-async async function sendOnlineSnapshot(){
+async function sendOnlineSnapshot(){
   if(!onlineMode || onlineRole!=="host" || !onlineRoomId || onlineSending || !gameRunning) return;
   onlineSending=true;
   try{
@@ -1613,7 +1613,7 @@ async async function sendOnlineSnapshot(){
   finally{onlineSending=false;}
 }
 
-async async function pollOnlineRoom(){
+async function pollOnlineRoom(){
   if(!onlineMode || !onlineRoomId) return;
   try{
     var rows=await cloudRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineRoomId)+"&select=*","GET");
