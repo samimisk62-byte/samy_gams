@@ -1537,6 +1537,11 @@ async function createOnlineRoom(){
   }
   setRoomStatus("⏳ جاري إنشاء الغرفة...");
   try{
+    if(!cloudUserId){
+      var currentUser = await cloudRequest("/auth/v1/user","GET");
+      if(!currentUser || !currentUser.id) throw new Error("تعذر تحديد الحساب. افتح الحساب وسجّل الدخول من جديد.");
+      cloudUserId = currentUser.id;
+    }
     var code=String(Math.floor(100000+Math.random()*900000));
     var name=(document.getElementById("redNameInput").value||"الأحمر").trim().slice(0,40);
     var rows=await cloudRequest("/rest/v1/wall_online_rooms","POST",{
@@ -3589,7 +3594,32 @@ function storedAuth(){
   catch(e) { return {}; }
 }
 
-async function cloudRequest(path, method, body, prefer){
+var cloudRefreshPromise = null;
+
+async function refreshStoredSession(){
+  if(cloudRefreshPromise) return cloudRefreshPromise;
+  cloudRefreshPromise = (async function(){
+    var auth = storedAuth();
+    if(!auth.refresh_token) throw new Error("انتهت جلسة الدخول. افتح الحساب وسجّل الدخول من جديد.");
+    var data = await supabaseRequest("/auth/v1/token?grant_type=refresh_token", {
+      method:"POST",
+      body:JSON.stringify({refresh_token:auth.refresh_token})
+    });
+    if(!data || !data.access_token) throw new Error("انتهت جلسة الدخول. افتح الحساب وسجّل الدخول من جديد.");
+    auth.access_token = data.access_token;
+    auth.refresh_token = data.refresh_token || auth.refresh_token;
+    auth.email = auth.email || userEmail || "";
+    auth.accessUntil = Number(auth.accessUntil || accessUntil || 0);
+    localStorage.setItem(AUTH_KEY, JSON.stringify(auth));
+    userEmail = auth.email;
+    updateAccountUI();
+    return auth;
+  })();
+  try { return await cloudRefreshPromise; }
+  finally { cloudRefreshPromise = null; }
+}
+
+async function cloudRequest(path, method, body, prefer, alreadyRetried){
   var auth = storedAuth();
   if(!auth.access_token) throw new Error("سجّل الدخول أولًا.");
   var headers = {
@@ -3607,7 +3637,12 @@ async function cloudRequest(path, method, body, prefer){
   var data = null;
   try { data = raw ? JSON.parse(raw) : null; } catch(e) { data = {raw:raw}; }
   if(!response.ok) {
-    throw new Error((data && (data.message || data.msg || data.error)) || "تعذر حفظ رصيد الحساب.");
+    var errorText = (data && (data.message || data.msg || data.error_description || data.error)) || "تعذر حفظ رصيد الحساب.";
+    if(!alreadyRetried && response.status === 401 && /jwt|expired|token/i.test(String(errorText))){
+      await refreshStoredSession();
+      return await cloudRequest(path, method, body, prefer, true);
+    }
+    throw new Error(errorText);
   }
   return data;
 }
