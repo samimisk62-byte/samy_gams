@@ -1967,12 +1967,14 @@ if(blueX > target){
 blueX -= speed;
 }
 
+var bluePlayerWidth=document.getElementById("bluePlayer").getBoundingClientRect().width;
+var fieldWidth=document.getElementById("field").getBoundingClientRect().width;
+var blueMax=100-(bluePlayerWidth/fieldWidth*100);
 if(blueX < 50){
 blueX = 50;
 }
-
-if(blueX > 84){
-blueX = 84;
+if(blueX > blueMax){
+blueX = blueMax;
 }
 
 movePlayer("bluePlayer",blueX);
@@ -1996,21 +1998,43 @@ return{x:e.clientX,y:e.clientY};
 
 function moveRed(e){
 if(paused)return;
-var point=getPointer(e);if(typeof point.x!=="number"||typeof point.y!=="number")return;
-var rect=document.getElementById("field").getBoundingClientRect();
-var x=((point.x-rect.left)/rect.width)*100-2.5;
+var point=getPointer(e);
+if(typeof point.x!=="number"||typeof point.y!=="number")return;
+
+var field=document.getElementById("field");
+var player=document.getElementById("redPlayer");
+var rect=field.getBoundingClientRect();
+var playerWidth=player.getBoundingClientRect().width;
+var halfLimit=50-(playerWidth/rect.width*100);
+
+/* الأحمر لا يتجاوز خط المنتصف ولا يتخطى خط الحائط الأول */
+var x=((point.x-rect.left)/rect.width)*100-(playerWidth/rect.width*50);
 var y=((point.y-rect.top)/rect.height)*100-4;
-x=Math.max(3,Math.min(44,x));y=Math.max(4,Math.min(90,y));
-redX=x;movePlayer("redPlayer",redX,y);
+x=Math.max(1,Math.min(halfLimit,x));
+y=Math.max(13,Math.min(82,y));
+
+redX=x;
+movePlayer("redPlayer",redX,y);
 }
 function moveBlue(e){
 if(paused||playerCount!==2)return;
-var point=getPointer(e);if(typeof point.x!=="number"||typeof point.y!=="number")return;
-var rect=document.getElementById("field").getBoundingClientRect();
-var x=((point.x-rect.left)/rect.width)*100-2.5;
+var point=getPointer(e);
+if(typeof point.x!=="number"||typeof point.y!=="number")return;
+
+var field=document.getElementById("field");
+var player=document.getElementById("bluePlayer");
+var rect=field.getBoundingClientRect();
+var playerWidth=player.getBoundingClientRect().width;
+var maxLeft=100-(playerWidth/rect.width*100);
+
+/* الأزرق لا يتجاوز خط المنتصف ولا يتخطى خط الحائط الأول */
+var x=((point.x-rect.left)/rect.width)*100-(playerWidth/rect.width*50);
 var y=((point.y-rect.top)/rect.height)*100-4;
-x=Math.max(51,Math.min(94,x));y=Math.max(4,Math.min(90,y));
-blueX=x;movePlayer("bluePlayer",blueX,y);
+x=Math.max(50,Math.min(maxLeft,x));
+y=Math.max(13,Math.min(82,y));
+
+blueX=x;
+movePlayer("bluePlayer",blueX,y);
 }
 
 /* =========================================
