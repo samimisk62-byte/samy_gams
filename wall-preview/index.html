@@ -2505,15 +2505,12 @@ if(paused)return;
 var point=getPointer(e);
 if(typeof point.x!=="number"||typeof point.y!=="number")return;
 var field=document.getElementById("field");
-var player=document.getElementById("redPlayer");
 var rect=field.getBoundingClientRect();
-var pr=player.getBoundingClientRect();
-var wPct=(player.offsetWidth/field.clientWidth)*100;
-var hPct=(player.offsetHeight/field.clientHeight)*100;
+/* الحساب بإحداثيات الملعب الداخلية يمنع اهتزاز المضرب بسبب التكبير */
+var wPct=(48/field.clientWidth)*100;
+var hPct=(64/field.clientHeight)*100;
 var x=((point.x-rect.left)/rect.width)*100-(wPct/2);
 var y=((point.y-rect.top)/rect.height)*100-(hPct/2);
-
-/* الأحمر محصور بالكامل في المربع الأيسر السفلي */
 x=Math.max(0,Math.min(50-wPct,x));
 y=Math.max(50,Math.min(100-hPct,y));
 redX=x;
@@ -2525,15 +2522,11 @@ if(paused||playerCount!==2)return;
 var point=getPointer(e);
 if(typeof point.x!=="number"||typeof point.y!=="number")return;
 var field=document.getElementById("field");
-var player=document.getElementById("bluePlayer");
 var rect=field.getBoundingClientRect();
-var pr=player.getBoundingClientRect();
-var wPct=(player.offsetWidth/field.clientWidth)*100;
-var hPct=(player.offsetHeight/field.clientHeight)*100;
+var wPct=(48/field.clientWidth)*100;
+var hPct=(64/field.clientHeight)*100;
 var x=((point.x-rect.left)/rect.width)*100-(wPct/2);
 var y=((point.y-rect.top)/rect.height)*100-(hPct/2);
-
-/* الأزرق محصور بالكامل في المربع الأيمن السفلي */
 x=Math.max(50,Math.min(100-wPct,x));
 y=Math.max(50,Math.min(100-hPct,y));
 blueX=x;
