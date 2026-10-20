@@ -1270,6 +1270,7 @@ var vy = -.70;
 var strong = false;
 var bonusActive = false;
 var bonusLastHit = ""; // يحدد آخر من ضرب الكرة: اللاعب أو الكمبيوتر
+var obstacleCheckFrame = 0;
 var bonusSpawnAt = 0;
 var bonusExpiresAt = 0;
 
@@ -1939,11 +1940,13 @@ function updateBonusEvent(){
   var gem = document.getElementById("bonusGem");
   if(!gem) return;
   var now = Date.now();
+
   if(bonusActive && now >= bonusExpiresAt){
     bonusActive = false;
     gem.style.display = "none";
     bonusSpawnAt = now + 5000 + Math.random() * 7000;
   }
+
   if(!bonusActive && now >= bonusSpawnAt){
     bonusActive = true;
     bonusExpiresAt = now + 6500;
@@ -1952,24 +1955,21 @@ function updateBonusEvent(){
     gem.style.display = "flex";
     document.getElementById("message").innerHTML = "✨ مفاجأة! التقط جوهرة المكافأة بالكرة!";
   }
-  if(bonusActive){
-    var field = document.getElementById("field");
-    var rect = field.getBoundingClientRect();
-    var gemRect = gem.getBoundingClientRect();
-    if(rect.width && rect.height && gemRect.width && gemRect.height){
-      var gx = ((gemRect.left + gemRect.width/2 - rect.left) / rect.width) * 100;
-      var gy = ((gemRect.top + gemRect.height/2 - rect.top) / rect.height) * 100;
-      if(bonusLastHit === "player" && Math.abs(bx-gx) < 5.5 && Math.abs(by-gy) < 7){
-        bonusActive = false;
-        gem.style.display = "none";
-        var prize = 25 + Math.min(stage, 25);
-        coins += prize;
-        saveData();
-        updateCoins();
-        document.getElementById("message").innerHTML = "💎 ممتاز! حصلت على +" + prize + " عملة مفاجأة!";
-        playScore();
-        bonusSpawnAt = now + 9000 + Math.random() * 9000;
-      }
+
+  /* موضع الجوهرة معروف كنسبة مئوية؛ نتجنب قياس عناصر الصفحة في كل إطار */
+  if(bonusActive && bonusLastHit === "player"){
+    var gx = parseFloat(gem.style.left) || 50;
+    var gy = parseFloat(gem.style.top) || 40;
+    if(Math.abs(bx-gx) < 5.5 && Math.abs(by-gy) < 7){
+      bonusActive = false;
+      gem.style.display = "none";
+      var prize = 25 + Math.min(stage, 25);
+      coins += prize;
+      saveData();
+      updateCoins();
+      document.getElementById("message").innerHTML = "💎 ممتاز! حصلت على +" + prize + " عملة مفاجأة!";
+      playScore();
+      bonusSpawnAt = now + 9000 + Math.random() * 9000;
     }
   }
 }
@@ -1993,7 +1993,9 @@ by += vy * motionBoost;
 /* اصطدام الكرة بالحواجز النشطة في المرحلة */
 var field = document.getElementById("field");
 var fieldRect = field.getBoundingClientRect();
-var obstacles = document.querySelectorAll("#field .obstacle");
+/* فحص الحواجز المتحركة كل إطارين لتقليل الضغط على الهاتف */
+var obstacles = (typeof obstacleCheckFrame === "undefined" || (++obstacleCheckFrame % 2 === 0))
+  ? document.querySelectorAll("#field .obstacle") : [];
 obstacles.forEach(function(obstacle){
   if(obstacle.style.display === "none") return;
   var r = obstacle.getBoundingClientRect();
