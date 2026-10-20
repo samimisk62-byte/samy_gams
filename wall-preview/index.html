@@ -1411,8 +1411,7 @@ for(var i=1;i<=Math.max(30,unlockedStage+10);i++){
 }
 
 function showStageSelect(){
-stopGameTimers();
-stopMusic();
+if(gameRunning){ stopGameTimers(); } else { stopMusic(); }
 document.getElementById("game").style.display = "none";
 renderStages();
 showScreen("stages");
@@ -1887,6 +1886,11 @@ checkOrientation,
 ========================================= */
 
 async function startGame(){
+
+if(onlineMode && onlineRole==="guest"){
+  setRoomStatus("⏳ أنت اللاعب الأزرق. انتظر المضيف ليختار المرحلة ويبدأ المباراة.");
+  return;
+}
 
 if(
 ACCESS_REQUIRED &&
