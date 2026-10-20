@@ -2000,19 +2000,18 @@ function moveRed(e){
 if(paused)return;
 var point=getPointer(e);
 if(typeof point.x!=="number"||typeof point.y!=="number")return;
-
 var field=document.getElementById("field");
 var player=document.getElementById("redPlayer");
 var rect=field.getBoundingClientRect();
-var playerWidth=player.getBoundingClientRect().width;
-var halfLimit=50-(playerWidth/rect.width*100);
+var pr=player.getBoundingClientRect();
+var wPct=(pr.width/rect.width)*100;
+var hPct=(pr.height/rect.height)*100;
+var x=((point.x-rect.left)/rect.width)*100-(wPct/2);
+var y=((point.y-rect.top)/rect.height)*100-(hPct/2);
 
-/* الأحمر لا يتجاوز خط المنتصف ولا يتخطى خط الحائط الأول */
-var x=((point.x-rect.left)/rect.width)*100-(playerWidth/rect.width*50);
-var y=((point.y-rect.top)/rect.height)*100-4;
-x=Math.max(1,Math.min(halfLimit,x));
-y=Math.max(13,Math.min(82,y));
-
+/* الأحمر محصور بالكامل في المربع الأيسر السفلي */
+x=Math.max(0,Math.min(50-wPct,x));
+y=Math.max(50,Math.min(100-hPct,y));
 redX=x;
 movePlayer("redPlayer",redX,y);
 }
@@ -2020,19 +2019,18 @@ function moveBlue(e){
 if(paused||playerCount!==2)return;
 var point=getPointer(e);
 if(typeof point.x!=="number"||typeof point.y!=="number")return;
-
 var field=document.getElementById("field");
 var player=document.getElementById("bluePlayer");
 var rect=field.getBoundingClientRect();
-var playerWidth=player.getBoundingClientRect().width;
-var maxLeft=100-(playerWidth/rect.width*100);
+var pr=player.getBoundingClientRect();
+var wPct=(pr.width/rect.width)*100;
+var hPct=(pr.height/rect.height)*100;
+var x=((point.x-rect.left)/rect.width)*100-(wPct/2);
+var y=((point.y-rect.top)/rect.height)*100-(hPct/2);
 
-/* الأزرق لا يتجاوز خط المنتصف ولا يتخطى خط الحائط الأول */
-var x=((point.x-rect.left)/rect.width)*100-(playerWidth/rect.width*50);
-var y=((point.y-rect.top)/rect.height)*100-4;
-x=Math.max(50,Math.min(maxLeft,x));
-y=Math.max(13,Math.min(82,y));
-
+/* الأزرق محصور بالكامل في المربع الأيمن السفلي */
+x=Math.max(50,Math.min(100-wPct,x));
+y=Math.max(50,Math.min(100-hPct,y));
 blueX=x;
 movePlayer("bluePlayer",blueX,y);
 }
