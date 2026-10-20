@@ -1237,7 +1237,7 @@ grid.innerHTML = "";
 document.getElementById("unlockedStageLabel").textContent = unlockedStage;
 document.getElementById("stageCoinsLabel").textContent = coins;
 var digits = "٠١٢٣٤٥٦٧٨٩";
-for(var i=1;i<=30;i++){
+for(var i=1;i<=Math.max(30,unlockedStage+10);i++){
   var btn=document.createElement("button");
   btn.type="button";
   btn.className="stageCard"+(i>unlockedStage?" locked":"");
@@ -1750,13 +1750,13 @@ var direction =
 Math.random() > .5 ? 1 : -1;
 
 var speed =
-(owned.fastBall ? 0.58 : 0.48) + Math.min(stage - 1, 20) * 0.025;
+(owned.fastBall ? 0.58 : 0.48) + Math.min(stage - 1, 60) * 0.025;
 
 vx =
 direction * speed;
 
 vy =
--((owned.fastBall ? 1.00 : 0.84) + Math.min(stage - 1, 20) * 0.038);
+-((owned.fastBall ? 1.00 : 0.84) + Math.min(stage - 1, 60) * 0.038);
 
 strong = false;
 
@@ -1797,13 +1797,13 @@ shadow.style.top = (by + 3) + "%";
 function moveBall(){
 
 /* سرعة الحركة محسوبة لكل إطار؛ نضاعفها لتكون واضحة على الهاتف */
-var motionBoost = Math.min(2.25 + (stage - 1) * 0.12, 4.1);
+var motionBoost = Math.min(2.25 + (stage - 1) * 0.12, 7.5);
 bx += vx * motionBoost;
 by += vy * motionBoost;
 
 /* منع التصاق الكرة أو توقفها بسبب سرعة تقترب من الصفر */
-var minHorizontal = 0.12 + Math.min(stage - 1, 20) * 0.008;
-var minVertical = 0.30 + Math.min(stage - 1, 20) * 0.015;
+var minHorizontal = 0.12 + Math.min(stage - 1, 60) * 0.008;
+var minVertical = 0.30 + Math.min(stage - 1, 60) * 0.015;
 if(Math.abs(vx) < minHorizontal){vx = (vx < 0 ? -1 : 1) * minHorizontal;}
 if(Math.abs(vy) < minVertical){vy = (vy < 0 ? -1 : 1) * minVertical;}
 
