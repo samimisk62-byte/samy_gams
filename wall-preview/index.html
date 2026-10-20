@@ -3619,9 +3619,29 @@ async function refreshStoredSession(){
   finally { cloudRefreshPromise = null; }
 }
 
+function tokenNeedsRefresh(token){
+  try{
+    var parts = String(token || "").split(".");
+    if(parts.length < 2) return true;
+    var payload = parts[1].replace(/-/g,"+").replace(/_/g,"/");
+    while(payload.length % 4) payload += "=";
+    var claims = JSON.parse(atob(payload));
+    return !claims.exp || Number(claims.exp) <= Math.floor(Date.now()/1000) + 60;
+  }catch(e){ return true; }
+}
+
 async function cloudRequest(path, method, body, prefer, alreadyRetried){
   var auth = storedAuth();
   if(!auth.access_token) throw new Error("سجّل الدخول أولًا.");
+  /* جدّد الجلسة قبل إرسال الطلب إذا كان رمز الدخول منتهيًا أو أوشك على الانتهاء */
+  if(!alreadyRetried && tokenNeedsRefresh(auth.access_token)){
+    try{
+      await refreshStoredSession();
+      return await cloudRequest(path, method, body, prefer, true);
+    }catch(refreshError){
+      throw new Error("انتهت جلسة الدخول. افتح 👤 الحساب وسجّل الدخول بالبريد وكلمة المرور الحاليين، ثم جرّب إنشاء الغرفة مجددًا. التفاصيل: " + refreshError.message);
+    }
+  }
   var headers = {
     "apikey": SUPABASE_KEY,
     "Authorization": "Bearer " + auth.access_token,
