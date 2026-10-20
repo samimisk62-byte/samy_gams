@@ -401,14 +401,16 @@ transform:rotate(25deg);
 position:absolute;
 left:50%;
 top:70%;
-width:27px;
-height:27px;
-margin-left:-13px;
-margin-top:-13px;
+width:29px;
+height:29px;
+margin-left:-14px;
+margin-top:-14px;
 border-radius:50%;
 background:#fff;
 border:3px solid #222;
-z-index:30;
+z-index:35;
+visibility:visible;
+will-change:left,top;
 box-shadow:0 2px 5px rgba(0,0,0,.5);
 }
 
@@ -1745,7 +1747,7 @@ computerMove();
 }
 
 },
-25
+16
 );
 
 }
@@ -1785,13 +1787,13 @@ var direction =
 Math.random() > .5 ? 1 : -1;
 
 var speed =
-owned.fastBall ? .50 : .40;
+owned.fastBall ? .68 : .56;
 
 vx =
 direction * speed;
 
 vy =
-owned.fastBall ? -.95 : -.78;
+owned.fastBall ? -1.12 : -.96;
 
 strong = false;
 
@@ -1801,14 +1803,24 @@ drawBall();
 
 function drawBall(){
 
-var ball =
-document.getElementById("ball");
+var ball = document.getElementById("ball");
+var shadow = document.getElementById("ballShadow");
 
+if(!Number.isFinite(bx) || !Number.isFinite(by)){
+  bx = 50;
+  by = 70;
+  vx = .56;
+  vy = -.96;
+}
+
+/* إبقاء الكرة دائمًا داخل الملعب ومرئية بعد ارتداد الحائط */
+bx = Math.max(3, Math.min(97, bx));
+by = Math.max(7, Math.min(91, by));
+ball.style.visibility = "visible";
+ball.style.display = "block";
 ball.style.left = bx + "%";
 ball.style.top = by + "%";
-
-var shadow =
-document.getElementById("ballShadow");
+ball.style.transform = "translateZ(0)";
 
 shadow.style.left = (bx - 1) + "%";
 shadow.style.top = (by + 3) + "%";
@@ -1840,9 +1852,9 @@ playBall();
 
 }
 
-if(by <= 8 && vy < 0){
+if(by <= 9 && vy < 0){
 
-by = 8;
+by = 9;
 vy = Math.abs(vy);
 
 playWall();
@@ -1873,8 +1885,8 @@ if(strong){
 
 vy =
 owned.strongPaddle
-? -1.55
-: -1.35;
+? -1.75
+: -1.50;
 
 strong = false;
 
