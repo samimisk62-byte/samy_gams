@@ -387,31 +387,51 @@ white-space:nowrap;
 font-size:13px;
 }
 
+/* حواجز مضيئة وليست بلاطات بنية */
 .obstacle{
 position:absolute;
-height:30px;
-border-radius:7px;
-background:#795548;
-border:3px solid #4e342e;
+display:none;
+height:13px;
+border-radius:999px;
 z-index:6;
+pointer-events:none;
+background:linear-gradient(180deg,#fff9b0 0%,#ffd43b 38%,#f08c00 100%);
+border:2px solid rgba(255,255,255,.9);
+box-shadow:0 0 7px rgba(255,211,59,.9),0 0 16px rgba(255,145,0,.55);
 }
-
+.obstacle:after{
+content:"";
+position:absolute;
+left:8%;
+right:8%;
+top:3px;
+height:2px;
+border-radius:99px;
+background:rgba(255,255,255,.8);
+}
 .o1{
-left:34%;
-top:30%;
-width:17%;
+left:25%;
+top:35%;
+width:20%;
+transform:rotate(-13deg);
 }
-
 .o2{
-left:49%;
+left:56%;
 top:48%;
-width:18%;
+width:17%;
+height:12px;
+transform:rotate(55deg);
+background:linear-gradient(180deg,#c9fbff 0%,#39d8ff 45%,#0878d1 100%);
+box-shadow:0 0 8px rgba(57,216,255,.95),0 0 17px rgba(8,120,209,.6);
 }
-
 .o3{
-left:30%;
-top:65%;
-width:15%;
+left:31%;
+top:61%;
+width:21%;
+height:11px;
+transform:rotate(17deg);
+background:linear-gradient(180deg,#f7d7ff 0%,#ce65ff 45%,#7625c8 100%);
+box-shadow:0 0 8px rgba(206,101,255,.9),0 0 17px rgba(118,37,200,.6);
 }
 
 #buttons{
