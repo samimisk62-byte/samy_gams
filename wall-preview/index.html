@@ -4408,87 +4408,83 @@ document.getElementById("stagesBack")
 .addEventListener("click",showMenu);
 
 /* =========================================
-تحكم موحد وثابت بالمضارب
+تحكم مباشر باللمس على أندرويد + الفأرة
 ========================================= */
-
 var field = document.getElementById("field");
 var activeRacketPointer = null;
 var activeRacketSide = "red";
-
+var activeTouchId = null;
+var activeTouchSide = "red";
 field.style.touchAction = "none";
 
-/* يبدأ السحب من أي مكان داخل الملعب، وليس من فوق المضرب فقط */
-field.addEventListener("pointerdown", function(e){
-  if(!gameRunning || paused || !e.isPrimary || activeRacketPointer !== null) return;
-
+function chooseRacketSide(clientX) {
   var rect = field.getBoundingClientRect();
-  activeRacketSide = onlineMode ? (onlineRole === "guest" ? "blue" : "red") : ((playerCount === 2 && e.clientX >= rect.left + rect.width / 2) ? "blue" : "red");
-  activeRacketPointer = e.pointerId;
-
-  /* لا نعتمد على Pointer Capture؛ بعض متصفحات أندرويد قد تترك السحب عالقًا */
-  if(activeRacketSide === "blue") {
-    if(playerCount === 2) moveBlue(e);
+  return onlineMode ? (onlineRole === "guest" ? "blue" : "red")
+    : ((playerCount === 2 && clientX >= rect.left + rect.width / 2) ? "blue" : "red");
+}
+function moveChosenRacket(side, point) {
+  if(side === "blue") {
+    if(playerCount === 2) moveBlue(point);
   } else {
-    moveRed(e);
+    moveRed(point);
   }
+}
 
+/* لمس الهاتف: استخدم Touch Events مباشرة لتفادي تعليق Pointer Capture */
+field.addEventListener("touchstart", function(e) {
+  if(!gameRunning || paused || activeTouchId !== null || !e.changedTouches.length) return;
+  var t = e.changedTouches[0];
+  activeTouchId = t.identifier;
+  activeTouchSide = chooseRacketSide(t.clientX);
+  moveChosenRacket(activeTouchSide, t);
   if(e.cancelable) e.preventDefault();
 }, {passive:false});
 
-/* يتحرك المضرب فقط أثناء وجود إصبع فعلي مضغوط */
-window.addEventListener("pointermove", function(e){
-  if(activeRacketPointer !== e.pointerId || paused || !gameRunning || !e.isPrimary) return;
-
-  if(activeRacketSide === "blue") {
-    if(playerCount === 2) moveBlue(e);
-  } else {
-    moveRed(e);
+window.addEventListener("touchmove", function(e) {
+  if(activeTouchId === null || paused || !gameRunning) return;
+  for(var i=0;i<e.changedTouches.length;i++) {
+    var t=e.changedTouches[i];
+    if(t.identifier === activeTouchId) {
+      moveChosenRacket(activeTouchSide, t);
+      if(e.cancelable) e.preventDefault();
+      break;
+    }
   }
-
-  if(e.cancelable) e.preventDefault();
 }, {passive:false});
 
-function releaseRacketPointer(e){
-  if(activeRacketPointer === e.pointerId) activeRacketPointer = null;
-}
-window.addEventListener("pointerup", releaseRacketPointer);
-window.addEventListener("pointercancel", releaseRacketPointer);
-window.addEventListener("blur", function(){ activeRacketPointer = null; });
-document.addEventListener("visibilitychange", function(){
-  if(document.hidden) activeRacketPointer = null;
-});
-
-/* احتياط للمتصفحات القديمة التي لا تدعم Pointer Events */
-if(!window.PointerEvent){
-  var fallbackTouchSide = "red";
-
-  field.addEventListener("touchstart", function(e){
-    if(!gameRunning || paused || !e.touches.length) return;
-    var t = e.touches[0];
-    var rect = field.getBoundingClientRect();
-    fallbackTouchSide = (playerCount === 2 && t.clientX >= rect.left + rect.width / 2) ? "blue" : "red";
-    if(fallbackTouchSide === "blue") {
-      if(playerCount === 2) moveBlue(t);
-    } else {
-      moveRed(t);
+function releaseActiveTouch(e) {
+  if(activeTouchId === null) return;
+  if(!e || !e.changedTouches) { activeTouchId=null; return; }
+  for(var i=0;i<e.changedTouches.length;i++) {
+    if(e.changedTouches[i].identifier === activeTouchId) {
+      activeTouchId=null;
+      break;
     }
-    if(e.cancelable) e.preventDefault();
-  }, {passive:false});
-
-  field.addEventListener("touchmove", function(e){
-    if(!gameRunning || paused || !e.touches.length) return;
-    var t = e.touches[0];
-    if(fallbackTouchSide === "blue") {
-      if(playerCount === 2) moveBlue(t);
-    } else {
-      moveRed(t);
-    }
-    if(e.cancelable) e.preventDefault();
-  }, {passive:false});
-  field.addEventListener("touchend", function(e){
-    if(e.cancelable) e.preventDefault();
-  }, {passive:false});
+  }
 }
+window.addEventListener("touchend", releaseActiveTouch, {passive:false});
+window.addEventListener("touchcancel", releaseActiveTouch, {passive:false});
+
+/* دعم الفأرة على الكمبيوتر دون تداخل مع لمس الهاتف */
+field.addEventListener("pointerdown", function(e) {
+  if(e.pointerType === "touch" || !gameRunning || paused || activeRacketPointer !== null) return;
+  activeRacketPointer=e.pointerId;
+  activeRacketSide=chooseRacketSide(e.clientX);
+  moveChosenRacket(activeRacketSide,e);
+  if(e.cancelable) e.preventDefault();
+}, {passive:false});
+window.addEventListener("pointermove", function(e) {
+  if(e.pointerType === "touch" || activeRacketPointer !== e.pointerId || paused || !gameRunning) return;
+  moveChosenRacket(activeRacketSide,e);
+  if(e.cancelable) e.preventDefault();
+}, {passive:false});
+function releaseRacketPointer(e) {
+  if(activeRacketPointer === e.pointerId) activeRacketPointer=null;
+}
+window.addEventListener("pointerup",releaseRacketPointer);
+window.addEventListener("pointercancel",releaseRacketPointer);
+window.addEventListener("blur",function(){activeRacketPointer=null;activeTouchId=null;});
+document.addEventListener("visibilitychange",function(){if(document.hidden){activeRacketPointer=null;activeTouchId=null;}});
 
 /* =========================================
 التهيئة
