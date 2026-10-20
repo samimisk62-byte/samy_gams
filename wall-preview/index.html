@@ -3721,6 +3721,31 @@ endTouch();
 }
 );
 
+/* تحكم موحد باللمس والسحب: يحرك المضرب في الاتجاهين داخل نصف ملعبه */
+var activeRacketPointer=null;
+var activeRacketSide="red";
+field.style.touchAction="none";
+field.addEventListener("pointerdown",function(e){
+ if(!gameRunning||paused)return;
+ var rect=field.getBoundingClientRect();
+ activeRacketSide=(playerCount===2 && e.clientX>rect.left+rect.width/2)?"blue":"red";
+ activeRacketPointer=e.pointerId;
+ try{field.setPointerCapture(e.pointerId);}catch(err){}
+ if(activeRacketSide==="blue") moveBlue(e); else moveRed(e);
+ e.preventDefault();
+},{passive:false});
+field.addEventListener("pointermove",function(e){
+ if(activeRacketPointer!==e.pointerId||!gameRunning||paused)return;
+ if(activeRacketSide==="blue") moveBlue(e); else moveRed(e);
+ e.preventDefault();
+},{passive:false});
+function releaseRacketPointer(e){
+ if(activeRacketPointer===e.pointerId){activeRacketPointer=null;}
+}
+field.addEventListener("pointerup",releaseRacketPointer);
+field.addEventListener("pointercancel",releaseRacketPointer);
+field.addEventListener("lostpointercapture",releaseRacketPointer);
+
 /* =========================================
 التهيئة
 ========================================= */
