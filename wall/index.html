@@ -1152,6 +1152,8 @@ var selectedStage = 1;
 var stageChosen = false;
 var unlockedStage = 1;
 var stageRoundCount = 0;
+var roundStartRedScore = 0;
+var roundStartBlueScore = 0;
 var stageRoundWins = 0;
 var stageRoundLosses = 0;
 var stageWon = false;
@@ -1281,8 +1283,12 @@ for(var i=1;i<=30;i++){
 }
 
 function showStageSelect(){
+stopGameTimers();
+stopMusic();
+document.getElementById("game").style.display = "none";
 renderStages();
 showScreen("stages");
+unlockLandscape();
 }
 
 function updateCoins(){
@@ -1611,6 +1617,8 @@ blueScore = 0;
 stage = selectedStage;
 round = 1;
 stageRoundCount = 0;
+roundStartRedScore = 0;
+roundStartBlueScore = 0;
 stageRoundWins = 0;
 stageRoundLosses = 0;
 stageWon = false;
@@ -2283,11 +2291,13 @@ document.getElementById("blueNameGame").innerHTML;
 
 var winner;
 stageRoundCount++;
-if(redScore > blueScore){
-winner = "🏆 الفائز: " + redName;
+var roundRedPoints = redScore - roundStartRedScore;
+var roundBluePoints = blueScore - roundStartBlueScore;
+if(roundRedPoints > roundBluePoints){
+winner = "🏆 الفائز بالجولة: " + redName;
 stageRoundWins++;
-}else if(blueScore > redScore){
-winner = "🏆 الفائز: " + blueName;
+}else if(roundBluePoints > roundRedPoints){
+winner = "🏆 الفائز بالجولة: " + blueName;
 stageRoundLosses++;
 }else{
 winner = "🤝 تعادل";
@@ -2352,6 +2362,8 @@ if(stageRoundCount >= 3){
   selectedStage = stage;
   round = 1;
   stageRoundCount = 0;
+  roundStartRedScore = 0;
+  roundStartBlueScore = 0;
   stageRoundWins = 0;
   stageRoundLosses = 0;
   stageWon = false;
@@ -2359,8 +2371,13 @@ if(stageRoundCount >= 3){
   blueScore = 0;
   document.getElementById("redScore").innerHTML = "0";
   document.getElementById("blueScore").innerHTML = "0";
+  document.getElementById("stage").innerHTML = stage;
+  showStageSelect();
+  return;
 }else{
   round++;
+  roundStartRedScore = redScore;
+  roundStartBlueScore = blueScore;
 }
 
 document.getElementById("round").innerHTML = round;
