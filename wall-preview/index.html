@@ -260,6 +260,20 @@ background:#6b7f3d;
 #field.stage4{
 background:#70573c;
 }
+/* أجواء خاصة للمراحل المتقدمة */
+#field.stage30plus{
+background:radial-gradient(circle at 20% 25%,rgba(74,222,255,.24),transparent 30%),radial-gradient(circle at 80% 75%,rgba(192,132,252,.22),transparent 32%),linear-gradient(135deg,#142b55,#25345f 48%,#351c4b);
+}
+#field.stage30plus #floor{
+background:
+linear-gradient(to right,transparent 49.5%,rgba(255,255,255,.9) 49.5%,rgba(255,255,255,.9) 50.5%,transparent 50.5%),
+linear-gradient(to bottom,transparent 49.5%,rgba(255,255,255,.9) 49.5%,rgba(255,255,255,.9) 50.5%,transparent 50.5%),
+radial-gradient(circle at 50% 50%,rgba(255,255,255,.08),transparent 55%);
+}
+#field.milestone40{filter:saturate(1.3);box-shadow:inset 0 0 0 4px #53e7ff,inset 0 0 28px #53e7ff,0 0 16px rgba(83,231,255,.6)}
+#field.milestone50{filter:saturate(1.45);box-shadow:inset 0 0 0 4px #ffcf5a,inset 0 0 30px #ff9f1c,0 0 18px rgba(255,159,28,.65)}
+#field.milestone100{filter:saturate(1.6);box-shadow:inset 0 0 0 5px #e879f9,inset 0 0 36px #d946ef,0 0 22px rgba(217,70,239,.75)}
+
 
 #floor{
 position:absolute;
@@ -2412,6 +2426,10 @@ gameRunning = true;
 paused = false;
 
 document.getElementById("message").innerHTML =
+stage >= 100 && stage % 10 === 0 ? "👑 مفاجأة أسطورية! المرحلة " + stage :
+stage >= 50 && stage % 10 === 0 ? "🔥 تحدي النخبة! المرحلة " + stage :
+stage >= 30 && stage % 10 === 0 ? "✨ مرحلة مفاجآت خاصة: " + stage :
+stage >= 30 ? "🚀 المرحلة المتقدمة " + stage + " — ترقّب المفاجآت!" :
 "⚽ الجولة " + round + " بدأت";
 
 startClock();
@@ -2435,33 +2453,38 @@ field.className = "";
 if(stage === 2) field.classList.add("stage2");
 if(stage === 3) field.classList.add("stage3");
 if(stage >= 4) field.classList.add("stage4");
+if(stage >= 30) field.classList.add("stage30plus");
+if(stage >= 40 && stage % 10 === 0) field.classList.add("milestone40");
+if(stage >= 50 && stage % 10 === 0) field.classList.add("milestone50");
+if(stage >= 100 && stage % 10 === 0) field.classList.add("milestone100");
 
-/* المراحل 1 إلى 4: حواجز ثابتة قليلة. من المرحلة 5: عدد متغير وحركة */
+/* بعد المرحلة 30: عدد الحواجز يتغير أكثر، من الصفر إلى ستة */
 var obstacles = document.querySelectorAll("#field .obstacle");
 var activeCount = 0;
 if(stage === 2) activeCount = 1;
 else if(stage === 3) activeCount = 2;
 else if(stage === 4) activeCount = 3;
-else if(stage >= 5){
-  /* دورة متغيرة: قليل، متوسط، كثير، لا حواجز، ثم تتكرر */
+else if(stage >= 5 && stage < 30){
   var barrierCounts = [2,3,5,0,1,4];
   activeCount = barrierCounts[(stage - 5) % barrierCounts.length];
+}else if(stage >= 30){
+  var advancedCounts = [0,3,1,5,2,6,0,4,1,6,2,5,3,0,6,4];
+  activeCount = advancedCounts[(stage - 30) % advancedCounts.length];
 }
 obstacles.forEach(function(obstacle,index){
   obstacle.classList.remove("moving");
-  obstacle.style.animationDuration = Math.max(1.8, 3.8 - Math.min(stage - 5, 12) * 0.12) + "s";
+  obstacle.style.animationDuration = Math.max(1.35, 3.8 - Math.min(Math.max(stage - 5,0), 20) * 0.11) + "s";
   var visible = index < activeCount;
   obstacle.style.display = visible ? "block" : "none";
-  if(visible && stage >= 5){
-    obstacle.classList.add("moving");
-  }
+  if(visible && stage >= 5) obstacle.classList.add("moving");
 });
 
 var ball = document.getElementById("ball");
 ball.className = "";
 if(stage === 2) ball.classList.add("gold");
 if(stage === 3) ball.classList.add("orange");
-if(stage >= 4) ball.classList.add("green");
+if(stage >= 4 && stage < 30) ball.classList.add("green");
+if(stage >= 30) ball.classList.add(stage % 10 === 0 ? "gold" : "green");
 
 }
 
