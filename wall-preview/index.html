@@ -779,6 +779,32 @@ filter:none !important;
 <button id="buyWall" type="button">شراء</button>
 </div>
 
+<div class="storeItem">
+🟡 كرة ذهبية —
+<span class="price">120 💰</span><br>
+<button id="buyGoldBall" type="button">شراء</button>
+</div>
+<div class="storeItem">
+🔵 كرة زرقاء —
+<span class="price">100 💰</span><br>
+<button id="buyBlueBall" type="button">شراء</button>
+</div>
+<div class="storeItem">
+🟦 أرضية ملعب زرقاء —
+<span class="price">250 💰</span><br>
+<button id="buyBlueCourt" type="button">شراء</button>
+</div>
+<div class="storeItem">
+🟪 أرضية ملعب بنفسجية —
+<span class="price">300 💰</span><br>
+<button id="buyPurpleCourt" type="button">شراء</button>
+</div>
+<div class="storeItem">
+🟨 أرضية ملعب ذهبية —
+<span class="price">450 💰</span><br>
+<button id="buyGoldCourt" type="button">شراء</button>
+</div>
+
 <button id="backStore" type="button">↩️ رجوع</button>
 
 </div>
@@ -1133,7 +1159,12 @@ bluePaddle:false,
 fastBall:false,
 strongPaddle:false,
 goldPaddle:false,
-wallUpgrade:false
+wallUpgrade:false,
+goldBall:false,
+blueBall:false,
+blueCourt:false,
+purpleCourt:false,
+goldCourt:false
 };
 
 var selectedSkin = "red";
@@ -2448,7 +2479,12 @@ bluePaddle:150,
 fastBall:200,
 strongPaddle:250,
 goldPaddle:400,
-wallUpgrade:300
+wallUpgrade:300,
+goldBall:120,
+blueBall:100,
+blueCourt:250,
+purpleCourt:300,
+goldCourt:450
 
 };
 
@@ -2472,11 +2508,34 @@ return;
 
 coins -= price;
 owned[name] = true;
+applyPurchasedLooks();
 
 saveData();
 updateCoins();
 renderStore();
 
+}
+
+function applyPurchasedLooks(){
+var ball=document.getElementById("ball");
+var field=document.getElementById("field");
+if(ball){
+ if(owned.goldBall){ball.style.background="radial-gradient(circle at 30% 25%,#fff8b0 0%,#ffc928 48%,#a66b00 100%)";ball.style.borderColor="#8b6200";}
+ else if(owned.blueBall){ball.style.background="radial-gradient(circle at 30% 25%,#d9f5ff 0%,#42b8ff 48%,#0752a0 100%)";ball.style.borderColor="#073c78";}
+ else {ball.style.background="radial-gradient(circle at 30% 25%,#f5ff9b 0%,#cce83b 48%,#86a91c 100%)";ball.style.borderColor="rgba(90,115,18,.7)";}
+}
+if(field){
+ if(owned.goldCourt)field.style.background="repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 2px,transparent 2px 38px),linear-gradient(135deg,#b98a16,#f0cf52 48%,#8b6410)";
+ else if(owned.purpleCourt)field.style.background="repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 2px,transparent 2px 38px),linear-gradient(135deg,#7440a0,#4b267d 48%,#9d69c5)";
+ else if(owned.blueCourt)field.style.background="repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 2px,transparent 2px 38px),linear-gradient(135deg,#176ab0,#064678 48%,#2b8bd0)";
+ else field.style.background="repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 38px),linear-gradient(135deg,#267b46 0%,#0e5b35 48%,#247b46 100%)";
+}
+var red=document.querySelector("#redPlayer .paddle");
+var blue=document.querySelector("#bluePlayer .paddle");
+if(red&&owned.goldPaddle)red.style.background="radial-gradient(ellipse at 30% 22%,#fff1a6 0%,#e3b629 42%,#815900 100%)";
+if(blue&&owned.goldPaddle)blue.style.background="radial-gradient(ellipse at 30% 22%,#fff1a6 0%,#e3b629 42%,#815900 100%)";
+if(red&&owned.redPaddle&&!owned.goldPaddle)red.style.background="radial-gradient(ellipse at 30% 22%,#ff9b9b 0%,#f13b3b 42%,#8e101a 100%)";
+if(blue&&owned.bluePaddle&&!owned.goldPaddle)blue.style.background="radial-gradient(ellipse at 30% 22%,#a8dcff 0%,#1976d2 42%,#073b78 100%)";
 }
 
 function renderStore(){
@@ -2488,7 +2547,12 @@ bluePaddle:"buyBluePaddle",
 fastBall:"buyFastBall",
 strongPaddle:"buyStrongPaddle",
 goldPaddle:"buyGoldPaddle",
-wallUpgrade:"buyWall"
+wallUpgrade:"buyWall",
+goldBall:"buyGoldBall",
+blueBall:"buyBlueBall",
+blueCourt:"buyBlueCourt",
+purpleCourt:"buyPurpleCourt",
+goldCourt:"buyGoldCourt"
 
 };
 
@@ -3529,9 +3593,12 @@ buyItem("goldPaddle");
 });
 
 document.getElementById("buyWall")
-.addEventListener("click",function(){
-buyItem("wallUpgrade");
-});
+.addEventListener("click",function(){buyItem("wallUpgrade");});
+document.getElementById("buyGoldBall").addEventListener("click",function(){buyItem("goldBall");});
+document.getElementById("buyBlueBall").addEventListener("click",function(){buyItem("blueBall");});
+document.getElementById("buyBlueCourt").addEventListener("click",function(){buyItem("blueCourt");});
+document.getElementById("buyPurpleCourt").addEventListener("click",function(){buyItem("purpleCourt");});
+document.getElementById("buyGoldCourt").addEventListener("click",function(){buyItem("goldCourt");});
 
 /* الملابس */
 
@@ -3771,6 +3838,7 @@ field.addEventListener("touchend",function(e){
 ========================================= */
 
 loadData();
+applyPurchasedLooks();
 renderStages();
 loadAuth();
 applySkin();
