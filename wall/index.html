@@ -67,7 +67,10 @@ text-align:center;
 .stageTop{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .stageGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px auto;max-width:620px;}
 .stageCard{margin:0;padding:12px 4px;min-height:76px;border:2px solid #4c7184;background:#243946;border-radius:12px;}
+.stageCard.selected{border:3px solid #ffd84d;background:#176b54;box-shadow:0 0 10px #ffd84d55;}
 .stageCard.locked{opacity:.55;background:#18232b;}
+#stagePrevPage,#stageNextPage{min-width:120px;background:#176b8a;}
+#openStageButton{margin-bottom:18px;}
 .stageCard strong{display:block;font-size:22px;margin-bottom:5px;}
 .stageCard small{display:block;font-size:12px;}
 .stageCard:disabled{cursor:not-allowed;}
@@ -688,8 +691,14 @@ filter:none !important;
     <h2>🏆 مراحل الحائط الصعب</h2>
   </div>
   <p class="small">افتح المرحلة الأولى، وافز بها لفتح المرحلة التالية. تقدمك محفوظ على هذا الجهاز.</p>
-  <div class="box">⭐ المرحلة المفتوحة: <strong id="unlockedStageLabel">1</strong>　💰 العملات: <strong id="stageCoinsLabel">500</strong></div>
+  <div class="box">⭐ أعلى مرحلة مفتوحة: <strong id="unlockedStageLabel">1</strong>　💰 العملات: <strong id="stageCoinsLabel">500</strong></div>
+  <div class="box">المرحلة المختارة: <strong id="selectedStageLabel">١</strong></div>
   <div id="stageGrid" class="stageGrid"></div>
+  <div class="menuButtons">
+    <button id="stagePrevPage" type="button">⬅ السابق</button>
+    <button id="stageNextPage" type="button">NEXT ➡</button>
+  </div>
+  <button id="openStageButton" class="start" type="button">OPEN — فتح المرحلة</button>
 </div>
 
 <!-- ================= القائمة ================= -->
@@ -1260,29 +1269,46 @@ rewardedStages:rewardedStages
 
 }
 
+var stagePage = 0;
+var STAGES_PER_PAGE = 20;
+
+function arabicNumber(n){
+return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[Number(d)];});
+}
+
 function renderStages(){
 var grid = document.getElementById("stageGrid");
 if(!grid) return;
 grid.innerHTML = "";
-document.getElementById("unlockedStageLabel").textContent = unlockedStage;
+document.getElementById("unlockedStageLabel").textContent = arabicNumber(unlockedStage);
 document.getElementById("stageCoinsLabel").textContent = coins;
-var digits = "٠١٢٣٤٥٦٧٨٩";
-for(var i=1;i<=30;i++){
+document.getElementById("selectedStageLabel").textContent = arabicNumber(selectedStage);
+var first = stagePage * STAGES_PER_PAGE + 1;
+var last = first + STAGES_PER_PAGE - 1;
+for(var i=first;i<=last;i++){
   var btn=document.createElement("button");
   btn.type="button";
-  btn.className="stageCard"+(i>unlockedStage?" locked":"");
+  btn.className="stageCard"+(i>unlockedStage?" locked":"")+(i===selectedStage?" selected":"");
   btn.disabled=i>unlockedStage;
   var title=document.createElement("strong");
-  title.textContent=String(i).replace(/[0-9]/g,function(d){return digits[Number(d)];});
+  title.textContent=arabicNumber(i);
   var detail=document.createElement("small");
-  detail.textContent=i>unlockedStage?"🔒 مغلقة":(i===unlockedStage?"🔓 مفتوحة — اضغط فتح":"✅ تم فتحها");
+  detail.textContent=i>unlockedStage?"🔒 مغلقة":(i===unlockedStage?"🔓 مفتوحة":"✅ تم فتحها");
   btn.appendChild(title);
   btn.appendChild(detail);
   if(i<=unlockedStage){
-    btn.addEventListener("click",(function(n){return function(){selectedStage=n;stageChosen=true;startGame();};})(i));
+    btn.addEventListener("click",(function(n){return function(){
+      selectedStage=n;
+      stageChosen=false;
+      renderStages();
+    };})(i));
   }
   grid.appendChild(btn);
 }
+document.getElementById("stagePrevPage").disabled = stagePage===0;
+document.getElementById("stagePrevPage").style.opacity = stagePage===0?".45":"1";
+document.getElementById("stageNextPage").disabled = false;
+document.getElementById("stageNextPage").style.opacity = "1";
 }
 
 function showStageSelect(){
@@ -3732,6 +3758,15 @@ document.getElementById("resultHome")
 
 document.getElementById("stagesBack")
 .addEventListener("click",showMenu);
+
+document.getElementById("stagePrevPage").addEventListener("click",function(){
+if(stagePage>0){stagePage--;renderStages();}
+});
+document.getElementById("stageNextPage").addEventListener("click",function(){
+stagePage++;
+renderStages();
+});
+document.getElementById("openStageButton").addEventListener("click",openSelectedStage);
 
 /* =========================================
 لمس الأحمر
