@@ -207,6 +207,17 @@ background:#3a2d10;
 color:#ffe89a;
 }
 
+/* ================= خريطة المراحل ================= */
+#stages{max-width:760px;margin:0 auto;}
+.stageTop{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.stageGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px auto;max-width:620px;}
+.stageCard{margin:0;padding:12px 4px;min-height:76px;border:2px solid #4c7184;background:#243946;border-radius:12px;}
+.stageCard.selected{border:3px solid #ffd84d;background:#176b54;box-shadow:0 0 10px #ffd84d55;}
+.stageCard.locked{opacity:.55;background:#18232b;}
+#stagePrevPage,#stageNextPage{min-width:120px;background:#176b8a;}
+#openStageButton{margin-bottom:18px;}
+@media(max-width:420px){.stageGrid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+
 /* ================= اللعبة ================= */
 
 #game{
@@ -668,6 +679,23 @@ filter:none !important;
 
 <body>
 
+<!-- ================= خريطة المراحل ================= -->
+<div id="stages" class="screen">
+  <div class="stageTop">
+    <button id="stagesBack" type="button">✕ رجوع</button>
+    <h2>🏆 مراحل الحائط الصعب</h2>
+  </div>
+  <p class="small">اختر مرحلة مفتوحة واضغط OPEN. كلما أنهيت ٣ جولات تفتح المرحلة التالية. تقدمك محفوظ على هذا الجهاز.</p>
+  <div class="box">⭐ أعلى مرحلة مفتوحة: <strong id="unlockedStageLabel">١</strong>　💰 العملات: <strong id="stageCoinsLabel">500</strong></div>
+  <div class="box">المرحلة المختارة: <strong id="selectedStageLabel">١</strong></div>
+  <div id="stageGrid" class="stageGrid"></div>
+  <div class="menuButtons">
+    <button id="stagePrevPage" type="button">⬅ السابق</button>
+    <button id="stageNextPage" type="button">NEXT ➡</button>
+  </div>
+  <button id="openStageButton" class="start" type="button">OPEN — فتح المرحلة</button>
+</div>
+
 <!-- ================= القائمة ================= -->
 
 <div id="menu" class="screen">
@@ -1126,6 +1154,11 @@ var blueScore = 0;
 var stage = 1;
 var round = 1;
 var timeLeft = 60;
+var selectedStage = 1;
+var stageChosen = false;
+var unlockedStage = 1;
+var stagePage = 0;
+var STAGES_PER_PAGE = 20;
 
 var gameRunning = false;
 var paused = false;
@@ -1191,6 +1224,10 @@ owned = Object.assign(owned,data.owned);
 if(data.selectedSkin){
 selectedSkin = data.selectedSkin;
 }
+if(Number.isInteger(data.unlockedStage) && data.unlockedStage>=1){
+unlockedStage=data.unlockedStage;
+}
+selectedStage=Math.min(unlockedStage,Math.max(1,Number(data.selectedStage)||1));
 
 }catch(e){}
 
@@ -1207,12 +1244,58 @@ DATA_KEY,
 JSON.stringify({
 coins:coins,
 owned:owned,
-selectedSkin:selectedSkin
+selectedSkin:selectedSkin,
+unlockedStage:unlockedStage,
+selectedStage:selectedStage
 })
 );
 
 }catch(e){}
 
+}
+
+function arabicNumber(n){
+return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[Number(d)];});
+}
+
+function renderStages(){
+var grid=document.getElementById("stageGrid");
+if(!grid)return;
+grid.innerHTML="";
+document.getElementById("unlockedStageLabel").textContent=arabicNumber(unlockedStage);
+document.getElementById("stageCoinsLabel").textContent=coins;
+document.getElementById("selectedStageLabel").textContent=arabicNumber(selectedStage);
+var first=stagePage*STAGES_PER_PAGE+1;
+for(var i=first;i<first+STAGES_PER_PAGE;i++){
+ var b=document.createElement("button");
+ b.type="button";
+ b.className="stageCard"+(i>unlockedStage?" locked":"")+(i===selectedStage?" selected":"");
+ b.disabled=i>unlockedStage;
+ var title=document.createElement("strong");title.textContent=arabicNumber(i);
+ var detail=document.createElement("small");detail.textContent=i>unlockedStage?"🔒 مغلقة":(i===unlockedStage?"🔓 مفتوحة":"✅ تم فتحها");
+ b.appendChild(title);b.appendChild(detail);
+ if(i<=unlockedStage)b.addEventListener("click",(function(n){return function(){selectedStage=n;saveData();renderStages();};})(i));
+ grid.appendChild(b);
+}
+document.getElementById("stagePrevPage").disabled=stagePage===0;
+document.getElementById("stagePrevPage").style.opacity=stagePage===0?".45":"1";
+document.getElementById("stageNextPage").disabled=false;
+document.getElementById("stageNextPage").style.opacity="1";
+}
+
+function showStageSelect(){
+stopGameTimers();stopMusic();
+document.getElementById("game").style.display="none";
+stageChosen=false;
+renderStages();
+showScreen("stages");
+unlockLandscape();
+}
+
+function openSelectedStage(){
+if(selectedStage<1||selectedStage>unlockedStage){alert("المرحلة مغلقة. أكمل المرحلة السابقة أولًا.");return;}
+stageChosen=true;
+startGame();
 }
 
 function updateCoins(){
@@ -1530,10 +1613,15 @@ return;
 
 }
 
+if(!stageChosen){
+showStageSelect();
+return;
+}
+
 redScore = 0;
 blueScore = 0;
 
-stage = 1;
+stage = selectedStage;
 round = 1;
 
 timeLeft = roundTime;
@@ -2238,10 +2326,13 @@ document.getElementById("result").style.display = "none";
 round++;
 
 if(round > 3){
-
 round = 1;
-stage++;
-
+unlockedStage = Math.max(unlockedStage,stage+1);
+selectedStage = unlockedStage;
+saveData();
+renderStages();
+showStageSelect();
+return;
 }
 
 document.getElementById("round").innerHTML = round;
@@ -3466,7 +3557,11 @@ document.getElementById("ballButton").addEventListener("click",ballToggle);
 document.getElementById("crowdButton").addEventListener("click",crowdToggle);
 document.getElementById("effectButton").addEventListener("click",effectToggle);
 
-document.getElementById("startButton").addEventListener("click",startGame);
+document.getElementById("startButton").addEventListener("click",function(){stageChosen=false;showStageSelect();});
+document.getElementById("stagesBack").addEventListener("click",showMenu);
+document.getElementById("stagePrevPage").addEventListener("click",function(){if(stagePage>0){stagePage--;renderStages();}});
+document.getElementById("stageNextPage").addEventListener("click",function(){stagePage++;renderStages();});
+document.getElementById("openStageButton").addEventListener("click",openSelectedStage);
 
 document.getElementById("storeButton").addEventListener("click",showStore);
 document.getElementById("clothesButton").addEventListener("click",showClothes);
