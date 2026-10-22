@@ -330,74 +330,52 @@ left:2%;
 right:2%;
 }
 
+/* اللاعبون يظهرون كمضارب تنس طاولة بدل الشخصيات */
 .player{
 position:absolute;
-width:78px;
-height:108px;
+width:58px;
+height:64px;
 bottom:19%;
 z-index:10;
 touch-action:none;
 user-select:none;
 }
-
-#redPlayer{
-left:25%;
-}
-
-#bluePlayer{
-left:58%;
-}
-
-.head{
-position:absolute;
-left:20px;
-top:0;
-width:38px;
-height:38px;
-border-radius:50%;
-background:#efb27b;
-border:3px solid #633e28;
-}
-
-.body{
-position:absolute;
-left:12px;
-bottom:0;
-width:54px;
-height:70px;
-border-radius:19px 19px 10px 10px;
-}
-
-#redPlayer .body{
-background:#e53935;
-}
-
-#bluePlayer .body{
-background:#1976d2;
-}
-
+#redPlayer{left:25%;}
+#bluePlayer{left:58%;}
+.head,.body{display:none;}
 .paddle{
 position:absolute;
-width:29px;
+width:43px;
 height:43px;
 border-radius:50%;
-background:#9b633d;
-border:4px solid #e7c19c;
+background:radial-gradient(circle at 32% 27%,#ff7777 0,#e32232 58%,#8e101d 100%);
+border:3px solid #f5d9a9;
 z-index:3;
+box-shadow:0 2px 4px #17252b99;
 }
-
+.paddle:after{
+content:"";
+position:absolute;
+width:12px;
+height:27px;
+left:12px;
+top:32px;
+border-radius:3px 3px 6px 6px;
+background:linear-gradient(90deg,#b87a45,#f0c48b,#9a5c30);
+border:1px solid #75451f;
+}
 #redPlayer .paddle{
-right:-18px;
-top:37px;
+left:5px;
+top:0;
 transform:rotate(-25deg);
 }
-
 #bluePlayer .paddle{
-left:-18px;
-top:37px;
+left:5px;
+top:0;
+background:radial-gradient(circle at 32% 27%,#444 0,#17191c 58%,#050607 100%);
 transform:rotate(25deg);
 }
-
+/* كرة تنس عادية بلونها الأصفر المخضر مع خط الانحناء */
 #ball{
 position:absolute;
 left:50%;
@@ -407,23 +385,23 @@ height:27px;
 margin-left:-13px;
 margin-top:-13px;
 border-radius:50%;
-background:#fff;
-border:3px solid #222;
+background:radial-gradient(circle at 30% 25%,#f5ff9b 0,#c9ec42 46%,#91bd20 100%) !important;
+border:1px solid #789d19;
 z-index:30;
-box-shadow:0 2px 5px rgba(0,0,0,.5);
+box-shadow:inset -3px -3px 5px #527a1777,0 2px 5px rgba(0,0,0,.5);
+overflow:hidden;
 }
-
-#ball.gold{
-background:#ffd83d;
+#ball:after{
+content:"";
+position:absolute;
+inset:3px 7px;
+border:2px solid rgba(255,255,220,.95);
+border-left-color:transparent;
+border-right-color:transparent;
+border-radius:50%;
+transform:rotate(35deg);
 }
-
-#ball.orange{
-background:#ff8a25;
-}
-
-#ball.green{
-background:#72e06b;
-}
+#ball.gold,#ball.orange,#ball.green{background:radial-gradient(circle at 30% 25%,#f5ff9b 0,#c9ec42 46%,#91bd20 100%) !important;}
 
 #ballShadow{
 position:absolute;
@@ -1071,7 +1049,7 @@ filter:none !important;
 <div id="ball"></div>
 
 <div id="message">
-⚽ جاهز — اضغط ابدأ المباراة
+🎾 جاهز — اضغط ابدأ المباراة
 </div>
 
 </div>
@@ -1669,7 +1647,7 @@ gameRunning = true;
 paused = false;
 
 document.getElementById("pause").innerHTML = "⏸️ إيقاف";
-document.getElementById("message").innerHTML = "⚽ بدأت المباراة";
+document.getElementById("message").innerHTML = "🎾 بدأت المباراة";
 
 startClock();
 startBall();
