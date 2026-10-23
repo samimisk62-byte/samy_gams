@@ -1960,7 +1960,7 @@ Math.abs(bx - (blueX + 7)) < 17
 by = 63;
 /* الكمبيوتر يختار مهارة دفاعية أو هجومية حسب مستوى الصعوبة */
 if(playerCount===1){
-  var aiChance=difficulty==="hard"?.72:(difficulty==="medium"?.38:.12);
+  var aiChance=difficulty === "hard" ? 0.72 : (difficulty === "medium" ? 0.38 : 0.12);
   if(Math.random()<aiChance){
     var aiPick=Math.random();
     if(aiPick<.42){strongBlue=true;spinReadyBlue=false;guardBlue=false;}
