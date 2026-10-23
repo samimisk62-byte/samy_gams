@@ -2401,6 +2401,8 @@ for(var i=0;i<obstacles.length;i++){
 function hitStageObstacles(){
 var field=document.getElementById("field");
 var fr=field.getBoundingClientRect();
+if(!fr.width || !fr.height)return;
+var radius=9;
 var px=fr.left + fr.width*(bx/100);
 var py=fr.top + fr.height*(by/100);
 var obstacles=field.querySelectorAll(".obstacle");
@@ -2408,15 +2410,31 @@ for(var i=0;i<obstacles.length;i++){
  var ob=obstacles[i];
  if(ob.style.display==="none")continue;
  var r=ob.getBoundingClientRect();
- if(px>=r.left-7 && px<=r.right+7 && py>=r.top-7 && py<=r.bottom+7){
-   if(vy>0){
-     by=Math.max(10,((r.top-fr.top)/fr.height)*100-2);
+ /* حدود الحاجز موسعة بنصف قطر الكرة */
+ var left=r.left-radius, right=r.right+radius;
+ var top=r.top-radius, bottom=r.bottom+radius;
+ if(px>=left && px<=right && py>=top && py<=bottom){
+   /* أخرج الكرة بالكامل من الحاجز من أقرب جهة، حتى لا تظل عالقة داخله */
+   var dl=Math.abs(px-left), dr=Math.abs(right-px);
+   var dt=Math.abs(py-top), db=Math.abs(bottom-py);
+   var min=Math.min(dl,dr,dt,db);
+   if(min===dl){
+     bx=((r.left-fr.left-radius-1)/fr.width)*100;
+     vx=-Math.abs(vx);
+   }else if(min===dr){
+     bx=((r.right-fr.left+radius+1)/fr.width)*100;
+     vx=Math.abs(vx);
+   }else if(min===dt){
+     by=((r.top-fr.top-radius-1)/fr.height)*100;
+     vy=-Math.abs(vy);
    }else{
-     by=Math.min(88,((r.bottom-fr.top)/fr.height)*100+2);
+     by=((r.bottom-fr.top+radius+1)/fr.height)*100;
+     vy=Math.abs(vy);
    }
-   vy=-vy;
+   bx=Math.max(2,Math.min(98,bx));
+   by=Math.max(5,Math.min(91,by));
    playWall();
-   document.getElementById("message").innerHTML="🧱 اصطدمت الكرة بالحاجز!";
+   document.getElementById("message").innerHTML="🧱 ارتدت الكرة من الحاجز";
    return;
  }
 }
