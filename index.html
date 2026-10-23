@@ -204,11 +204,11 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 
 <div class="game">
 <div class="gameIcon">🃏</div>
-<h3>العشرة - لعبة الإثارة</h3>
+<h3>لعبة الـ٦ ورقات</h3>
 <p>لعبة كوتشينة متعددة اللاعبين، مع أنظمة لعب مختلفة.</p>
 <div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
 <div class="accessStatus" data-status-for="alashra">🔄 حالة الاشتراك: جاري الفحص</div>
-<button class="orange" data-subscribe-game="alashra" data-game-name="العشرة">💳 اشتراك / تجديد</button>
+<button class="orange" data-subscribe-game="alashra" data-game-name="لعبة الـ٦ ورقات">💳 اشتراك / تجديد</button>
 <button class="green" data-game="alashra" data-url="https://samimisk62-byte.github.io/Alashra-Gam/">▶️ تشغيل اللعبة</button>
 </div>
 
@@ -786,7 +786,7 @@ async function checkGameAccess(gameCode){
     return (data.game_code===gameCode&&(data.owner===true||data.active===true))||data.has_access===true||data.is_active===true||data.active===true;
   }catch(e){return false;}
 }
-const GAME_NAMES={al7aet:"الحائط الصعب",alashra:"العشرة",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
+const GAME_NAMES={al7aet:"الحائط الصعب",alashra:"لعبة الـ٦ ورقات",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
 function pendingOrderStorageKey(gameCode){
   return "platform_pending_order_" + (session?.user?.id || "user") + "_" + gameCode;
 }
