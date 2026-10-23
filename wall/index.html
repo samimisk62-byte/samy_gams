@@ -473,6 +473,7 @@ font-size:13px;
 }
 
 .obstacle{
+display:none !important;
 position:absolute;
 height:30px;
 border-radius:7px;
@@ -1021,7 +1022,7 @@ filter:none !important;
 <p>👆 حرّك اللاعب بالسحب.</p>
 <p>🤖 الكمبيوتر يتحرك تلقائيًا.</p>
 <p>💥 التسديدة القوية تزيد سرعة الكرة.</p>
-<p>🧱 الحواجز تعيق اللاعب والكرة تمر من خلالها.</p>
+<p>🎾 الملعب مفتوح بدون حواجز في جميع المراحل.</p>
 <p>🏆 كل مرحلة تحتوي على 3 جولات.</p>
 
 <button id="backRules" type="button">↩️ رجوع</button>
@@ -2054,9 +2055,7 @@ if(Math.abs(ballSpin) > 0.002){
 bx += vx;
 by += vy;
 
-/* تحريك الحواجز المتحركة وفحص اصطدام الكرة بها */
-moveStageObstacles();
-hitStageObstacles();
+/* تم تعطيل الحواجز بالكامل بناءً على طلب اللاعب */
 
 /* مانع تعليق الكرة: حافظ على سرعة دنيا حتى لا تتوقف داخل الملعب
    بعد اصطدام دقيق بمنتصف المضرب أو بحاجز. */
@@ -2702,7 +2701,7 @@ startMusic();
 function setupStageObstacles(){
 var field = document.getElementById("field");
 var obstacles = field.querySelectorAll(".obstacle");
-var count = stage===1 ? 0 : (stage===2 ? 1 : (stage===3 ? 2 : 3));
+var count = 0;
 for(var i=0;i<obstacles.length;i++){
  var ob=obstacles[i];
  ob.style.display = i<count ? "block" : "none";
@@ -2716,12 +2715,7 @@ for(var i=0;i<obstacles.length;i++){
  }
 }
 var msg = document.getElementById("message");
-if(stage===1){msg.innerHTML="🟢 المرحلة الأولى: تدريب بدون حواجز";}
-else if(stage===2){msg.innerHTML="🧱 المرحلة الثانية: حاجز ثابت واحد";}
-else if(stage===3){msg.innerHTML="🟠 المرحلة الثالثة: حواجز ثابتة ومتحركة";}
-else if(stage<8){msg.innerHTML="⚠️ انتبه للحاجز المتحرك!";}
-else if(stage<15){msg.innerHTML="🔥 تحدي أسرع وحواجز أكثر حركة";}
-else{msg.innerHTML="💥 تحدي متقدم: كل الحواجز تتحرك";}
+msg.innerHTML="🎾 اللعب بدون حواجز — الملعب مفتوح في كل المراحل";
 }
 
 function moveStageObstacles(){
