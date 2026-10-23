@@ -479,6 +479,10 @@ background:#d83238;
 #strongBlue{
 background:#176bc0;
 }
+#spinRed{background:#9b2630;}
+#spinBlue{background:#145d9d;}
+#guardRed{background:#a55a24;}
+#guardBlue{background:#237b72;}
 #strong:disabled,#strongBlue:disabled{
 opacity:.6;
 filter:grayscale(.45);
@@ -1077,8 +1081,12 @@ filter:none !important;
 🟥 💥 تسديدة الأحمر
 </button>
 <button id="strongBlue" type="button">
-🟦 💥 تسديدة الأزرق
+🟦 🔥 ضربة ساحقة للأزرق
 </button>
+<button id="spinRed" type="button">🟥 🌀 التفاف الأحمر</button>
+<button id="spinBlue" type="button">🟦 🌀 التفاف الأزرق</button>
+<button id="guardRed" type="button">🟥 🛡️ صد الأحمر</button>
+<button id="guardBlue" type="button">🟦 🛡️ صد الأزرق</button>
 
 <button id="pause" type="button">
 ⏸️ إيقاف
@@ -1172,6 +1180,11 @@ var vy = -.70;
 
 var strong = false;
 var strongBlue = false;
+var spinReadyRed = false;
+var spinReadyBlue = false;
+var guardRed = false;
+var guardBlue = false;
+var ballSpin = 0;
 
 var redX = 25;
 var blueX = 58;
@@ -1798,6 +1811,12 @@ vx = direction * speed;
 vy = (owned.fastBall ? -.95 : -.78) * stageBoost;
 
 strong = false;
+strongBlue = false;
+spinReadyRed = false;
+spinReadyBlue = false;
+guardRed = false;
+guardBlue = false;
+ballSpin = 0;
 drawBall();
 
 }
@@ -1824,6 +1843,12 @@ shadow.style.top = (by + 3) + "%";
 
 function moveBall(){
 
+/* انحناء تدريجي للكرة أثناء الضربة الملتفة */
+if(Math.abs(ballSpin) > 0.002){
+  vx += ballSpin;
+  vx = Math.max(-1.8,Math.min(1.8,vx));
+  ballSpin *= 0.985;
+}else{ballSpin = 0;}
 bx += vx;
 by += vy;
 
@@ -1871,13 +1896,22 @@ var redImpact = (bx - (redX + 7)) / 15;
 redImpact = Math.max(-1,Math.min(1,redImpact));
 vy = -Math.max(.82,Math.abs(vy));
 vx = redImpact * 1.05;
-if(strong){
-  vy = -(owned.strongPaddle ? 1.75 : 1.5);
-  vx = Math.max(-1.45,Math.min(1.45,vx * 1.35));
-  strong = false;
-  document.getElementById("message").innerHTML = "💥 تسديدة حمراء قوية!";
+if(guardRed){
+  guardRed = false; strong = false; ballSpin = 0;
+  vy = -Math.max(.9,Math.abs(vy)*.92);
+  vx = Math.max(-1.25,Math.min(1.25,redImpact*1.25));
+  document.getElementById("message").innerHTML = "🛡️ صدّ الأحمر الضربة بنجاح!";
+}else if(strong){
+  vy = -(owned.strongPaddle ? 2.05 : 1.85);
+  vx = Math.max(-1.65,Math.min(1.65,vx * 1.4));
+  strong = false; ballSpin = 0;
+  document.getElementById("message").innerHTML = "🔥 ضربة ساحقة حمراء!";
 }else{
-  document.getElementById("message").innerHTML = "🟥 ضربة الأحمر";
+  if(spinReadyRed){
+    ballSpin = redImpact >= 0 ? -.075 : .075;
+    spinReadyRed = false;
+    document.getElementById("message").innerHTML = "🌀 ضربة حمراء ملتفة!";
+  }else{ballSpin = 0; document.getElementById("message").innerHTML = "🟥 ضربة الأحمر";}
 }
 playPaddle();
 }
@@ -1894,13 +1928,22 @@ var blueImpact = (bx - (blueX + 7)) / 15;
 blueImpact = Math.max(-1,Math.min(1,blueImpact));
 vy = -Math.max(.82,Math.abs(vy));
 vx = blueImpact * 1.05;
-if(strongBlue){
-  vy = -(owned.strongPaddle ? 1.75 : 1.5);
-  vx = Math.max(-1.45,Math.min(1.45,vx * 1.35));
-  strongBlue = false;
-  document.getElementById("message").innerHTML = "💥 تسديدة زرقاء قوية!";
+if(guardBlue){
+  guardBlue = false; strongBlue = false; ballSpin = 0;
+  vy = -Math.max(.9,Math.abs(vy)*.92);
+  vx = Math.max(-1.25,Math.min(1.25,blueImpact*1.25));
+  document.getElementById("message").innerHTML = "🛡️ صدّ الأزرق الضربة بنجاح!";
+}else if(strongBlue){
+  vy = -(owned.strongPaddle ? 2.05 : 1.85);
+  vx = Math.max(-1.65,Math.min(1.65,vx * 1.4));
+  strongBlue = false; ballSpin = 0;
+  document.getElementById("message").innerHTML = "🔥 ضربة ساحقة زرقاء!";
 }else{
-  document.getElementById("message").innerHTML = "🟦 ضربة الأزرق";
+  if(spinReadyBlue){
+    ballSpin = blueImpact >= 0 ? -.075 : .075;
+    spinReadyBlue = false;
+    document.getElementById("message").innerHTML = "🌀 ضربة زرقاء ملتفة!";
+  }else{ballSpin = 0; document.getElementById("message").innerHTML = "🟦 ضربة الأزرق";}
 }
 playPaddle();
 }
@@ -2188,18 +2231,31 @@ playEffect();
 }
 
 function strongBlueHit(){
-
-if(!gameRunning || paused || playerCount !== 2){
-return;
+if(!gameRunning || paused || playerCount !== 2){return;}
+strongBlue = true;
+document.getElementById("message").innerHTML = "🟦 الضربة الساحقة للأزرق جاهزة! اضرب الكرة بالمضرب";
+playEffect();
 }
 
-strongBlue = true;
-
-document.getElementById("message").innerHTML =
-"🟦 التسديدة القوية للأزرق جاهزة";
-
-playEffect();
-
+function spinRedHit(){
+if(!gameRunning || paused || playerCount !== 2){return;}
+spinReadyRed=true; guardRed=false;
+document.getElementById("message").innerHTML="🟥 الالتفاف جاهز: حرّك المضرب واضرب الكرة"; playEffect();
+}
+function spinBlueHit(){
+if(!gameRunning || paused || playerCount !== 2){return;}
+spinReadyBlue=true; guardBlue=false;
+document.getElementById("message").innerHTML="🟦 الالتفاف جاهز: حرّك المضرب واضرب الكرة"; playEffect();
+}
+function guardRedHit(){
+if(!gameRunning || paused || playerCount !== 2){return;}
+guardRed=true; spinReadyRed=false;
+document.getElementById("message").innerHTML="🟥 الدرع جاهز! صدّ الكرة عند وصولها للمضرب"; playEffect();
+}
+function guardBlueHit(){
+if(!gameRunning || paused || playerCount !== 2){return;}
+guardBlue=true; spinReadyBlue=false;
+document.getElementById("message").innerHTML="🟦 الدرع جاهز! صدّ الكرة عند وصولها للمضرب"; playEffect();
 }
 
 /* =========================================
@@ -3815,6 +3871,10 @@ document.getElementById("strong")
 
 document.getElementById("strongBlue")
 .addEventListener("click",strongBlueHit);
+document.getElementById("spinRed").addEventListener("click",spinRedHit);
+document.getElementById("spinBlue").addEventListener("click",spinBlueHit);
+document.getElementById("guardRed").addEventListener("click",guardRedHit);
+document.getElementById("guardBlue").addEventListener("click",guardBlueHit);
 
 document.getElementById("pause")
 .addEventListener("click",pauseGame);
