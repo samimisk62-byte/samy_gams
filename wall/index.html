@@ -1107,7 +1107,7 @@ filter:none !important;
 ========================================= */
 
 var ACCESS_REQUIRED = true;
-var TEST_LOGIN_UNLOCK = true;
+var TEST_LOGIN_UNLOCK = false;
 
 var SUPABASE_URL =
 "https://auptwgjiivhglxtdjlnd.supabase.co";
@@ -1577,7 +1577,7 @@ async function startGame(){
 
 if(
 ACCESS_REQUIRED &&
-!accessUntil &&
+(!accessUntil || accessUntil <= Date.now()) &&
 !TEST_LOGIN_UNLOCK
 ){
 
@@ -1588,7 +1588,7 @@ return;
 
 if(
 ACCESS_REQUIRED &&
-!accessUntil &&
+(!accessUntil || accessUntil <= Date.now()) &&
 TEST_LOGIN_UNLOCK &&
 !userEmail
 ){
@@ -2989,11 +2989,17 @@ function saveAuth(){
 
 try{
 
+var previous = JSON.parse(
+localStorage.getItem(AUTH_KEY) || "{}"
+);
+
 localStorage.setItem(
 AUTH_KEY,
 JSON.stringify({
 email:userEmail,
-accessUntil:accessUntil
+accessUntil:accessUntil,
+access_token:previous.access_token || "",
+refresh_token:previous.refresh_token || ""
 })
 );
 
@@ -3443,14 +3449,14 @@ return true;
 }
 
 accessText.innerHTML =
-"🧪 لا يوجد اشتراك مؤكد حاليًا — وضع التجربة فعال.";
+"🔒 لا يوجد اشتراك فعال لهذه اللعبة. اشترك ثم انتظر اعتماد الدفع.";
 
 return false;
 
 }catch(e){
 
 accessText.innerHTML =
-"🧪 تعذر فحص الاشتراك — وضع التجربة فعال.";
+"⚠️ تعذر التحقق من الاشتراك الآن. تأكد من اتصال الإنترنت ثم أعد المحاولة.";
 
 return false;
 
