@@ -476,6 +476,17 @@ padding:4px;
 #strong{
 background:#d83238;
 }
+#strongBlue{
+background:#176bc0;
+}
+#strong:disabled,#strongBlue:disabled{
+opacity:.6;
+filter:grayscale(.45);
+}
+#strong,#strongBlue{
+min-width:120px;
+font-weight:bold;
+}
 
 #pause{
 background:#e29b16;
@@ -1063,7 +1074,10 @@ filter:none !important;
 <div id="buttons">
 
 <button id="strong" type="button">
-💥 تسديدة قوية
+🟥 💥 تسديدة الأحمر
+</button>
+<button id="strongBlue" type="button">
+🟦 💥 تسديدة الأزرق
 </button>
 
 <button id="pause" type="button">
@@ -1157,6 +1171,7 @@ var vx = .35;
 var vy = -.70;
 
 var strong = false;
+var strongBlue = false;
 
 var redX = 25;
 var blueX = 58;
@@ -1879,10 +1894,10 @@ var blueImpact = (bx - (blueX + 7)) / 15;
 blueImpact = Math.max(-1,Math.min(1,blueImpact));
 vy = -Math.max(.82,Math.abs(vy));
 vx = blueImpact * 1.05;
-if(strong){
+if(strongBlue){
   vy = -(owned.strongPaddle ? 1.75 : 1.5);
   vx = Math.max(-1.45,Math.min(1.45,vx * 1.35));
-  strong = false;
+  strongBlue = false;
   document.getElementById("message").innerHTML = "💥 تسديدة زرقاء قوية!";
 }else{
   document.getElementById("message").innerHTML = "🟦 ضربة الأزرق";
@@ -2159,14 +2174,29 @@ blueDragging = false;
 
 function strongHit(){
 
-if(!gameRunning || paused){
+if(!gameRunning || paused || playerCount !== 2){
 return;
 }
 
 strong = true;
 
 document.getElementById("message").innerHTML =
-"💥 التسديدة القوية جاهزة";
+"🟥 التسديدة القوية للأحمر جاهزة";
+
+playEffect();
+
+}
+
+function strongBlueHit(){
+
+if(!gameRunning || paused || playerCount !== 2){
+return;
+}
+
+strongBlue = true;
+
+document.getElementById("message").innerHTML =
+"🟦 التسديدة القوية للأزرق جاهزة";
 
 playEffect();
 
@@ -3782,6 +3812,9 @@ document.getElementById("logoutButton")
 
 document.getElementById("strong")
 .addEventListener("click",strongHit);
+
+document.getElementById("strongBlue")
+.addEventListener("click",strongBlueHit);
 
 document.getElementById("pause")
 .addEventListener("click",pauseGame);
