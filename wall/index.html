@@ -62,6 +62,10 @@ min-height:100%;
 padding:8px;
 text-align:center;
 }
+#stages{
+min-height:100dvh;
+box-sizing:border-box;
+}
 
 #menu{
 display:block;
@@ -1459,7 +1463,7 @@ for(var i=first;i<first+STAGES_PER_PAGE;i++){
  var title=document.createElement("strong");title.textContent=arabicNumber(i);
  var detail=document.createElement("small");detail.textContent=i>unlockedStage?"🔒 مغلقة":(i===unlockedStage?"🔓 مفتوحة":"✅ تم فتحها");
  b.appendChild(title);b.appendChild(detail);
- if(i<=unlockedStage)b.addEventListener("click",(function(n){return function(){selectedStage=n;saveData();renderStages();};})(i));
+ if(i<=unlockedStage)b.addEventListener("click",(function(n){return function(){selectedStage=n;saveData();renderStages();openSelectedStage();};})(i));
  grid.appendChild(b);
 }
 document.getElementById("stagePrevPage").disabled=stagePage===0;
@@ -1475,6 +1479,7 @@ stageChosen=false;
 renderStages();
 showScreen("stages");
 unlockLandscape();
+window.scrollTo(0,0);
 }
 
 function openSelectedStage(){
@@ -1841,6 +1846,7 @@ document.getElementById("blueNameGame").innerHTML = blueName;
 
 document.getElementById("menu").style.display = "none";
 document.getElementById("game").style.display = "block";
+window.scrollTo(0,0);
 document.getElementById("game").classList.add("running");
 
 document.getElementById("result").style.display = "none";
