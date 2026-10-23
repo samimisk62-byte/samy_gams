@@ -1169,6 +1169,7 @@ var musicTimer = null;
 
 var userEmail = "";
 var accessUntil = 0;
+var ownerAccess = false;
 
 var owned = {
 redPaddle:false,
@@ -1577,7 +1578,7 @@ async function startGame(){
 
 if(
 ACCESS_REQUIRED &&
-(!accessUntil || accessUntil <= Date.now()) &&
+(!ownerAccess && (!accessUntil || accessUntil <= Date.now())) &&
 !TEST_LOGIN_UNLOCK
 ){
 
@@ -1588,7 +1589,7 @@ return;
 
 if(
 ACCESS_REQUIRED &&
-(!accessUntil || accessUntil <= Date.now()) &&
+(!ownerAccess && (!accessUntil || accessUntil <= Date.now())) &&
 TEST_LOGIN_UNLOCK &&
 !userEmail
 ){
@@ -2998,6 +2999,7 @@ AUTH_KEY,
 JSON.stringify({
 email:userEmail,
 accessUntil:accessUntil,
+ownerAccess:ownerAccess,
 access_token:previous.access_token || "",
 refresh_token:previous.refresh_token || ""
 })
@@ -3020,11 +3022,13 @@ userEmail = a.email || "";
 
 accessUntil =
 Number(a.accessUntil || 0);
+ownerAccess = a.ownerAccess === true;
 
 }catch(e){
 
 userEmail = "";
 accessUntil = 0;
+ownerAccess = false;
 
 }
 
@@ -3036,6 +3040,7 @@ function clearAuth(){
 
 userEmail = "";
 accessUntil = 0;
+ownerAccess = false;
 
 try{
 localStorage.removeItem(AUTH_KEY);
@@ -3462,6 +3467,19 @@ until
 ? new Date(until).getTime()
 : 0;
 
+if(found.owner === true){
+
+ownerAccess = true;
+accessUntil = 0;
+saveAuth();
+accessText.innerHTML = "👑 حساب المالك مفعل: يمكنك اللعب دون اشتراك.";
+document.getElementById("accountMessage").innerHTML = "حساب المالك لا يحتاج إلى شراء اشتراك.";
+return true;
+
+}
+
+ownerAccess = false;
+
 if(stamp > Date.now()){
 
 accessUntil = stamp;
@@ -3477,6 +3495,8 @@ return true;
 
 }
 
+ownerAccess = false;
+saveAuth();
 accessText.innerHTML =
 "🔒 لا يوجد اشتراك فعال لهذه اللعبة. اشترك ثم انتظر اعتماد الدفع.";
 
@@ -3549,7 +3569,9 @@ data.payment_method;
 }catch(e){
 
 document.getElementById("accountMessage").innerHTML =
-"❌ " + e.message;
+(e.message && e.message.indexOf("Owner account does not need a subscription") !== -1)
+? "👑 حساب المالك لا يحتاج إلى شراء اشتراك. اضغط فحص الاشتراك لتفعيل الوصول المجاني."
+: "❌ " + e.message;
 
 }
 
