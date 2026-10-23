@@ -1956,7 +1956,7 @@ if(
 vy > 0 &&
 by > 63 &&
 by < 86 &&
-Math.abs(bx - (redX + 7)) < 17
+Math.abs(bx - (redX + 7)) < (owned.redPaddle ? 21 : 17)
 ){
 /* تثبيت الكرة فوق المضرب فور الاصطدام يمنع تكرار الضربة أو التصاق الكرة */
 by = 63;
@@ -1989,7 +1989,7 @@ if(
 vy > 0 &&
 by > 63 &&
 by < 86 &&
-Math.abs(bx - (blueX + 7)) < 17
+Math.abs(bx - (blueX + 7)) < ((playerCount===2 && owned.bluePaddle) ? 21 : 17)
 ){
 /* نفس نظام التصويب والتسديدة القوية للمضرب الأزرق */
 by = 63;
@@ -2104,6 +2104,10 @@ if(vy > 0){
 var lead=difficulty==="hard"?17:(difficulty==="medium"?13:9);
 target = bx + (vx * lead);
 if(difficulty==="hard" && Math.abs(vx)>.5){target += vx*4;}
+/* خداع خفيف: يغيّر موضع الاستعداد قبل الضربة ليصنع زوايا مختلفة،
+   مع إبقاء التوقع الأساسي حتى لا يفقد الكمبيوتر الكرة كثيرًا. */
+if(difficulty==="hard"){target += Math.sin(Date.now()/310)*2.8;}
+else if(difficulty==="medium"){target += Math.sin(Date.now()/430)*1.4;}
 
 }else{
 
