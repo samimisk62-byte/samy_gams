@@ -178,6 +178,32 @@ border-radius:20px 20px 9px 9px;
 .goldSkin{background:#d5a900}
 .blackSkin{background:#222}
 
+/* قائمة اختيار أنواع وألوان المضارب */
+#redPaddleStyle,#bluePaddleStyle{
+width:95%;max-width:360px;padding:11px;margin:9px auto;
+border-radius:10px;border:2px solid #7b9bab;background:#f7fbff;color:#17252b;
+font-size:16px;font-weight:bold;
+}
+.paddleChoicePreview{
+height:65px;display:flex;align-items:center;justify-content:center;
+}
+.paddleChoicePreview span{
+display:block;width:46px;height:46px;border-radius:50%;
+border:4px solid #f5d9a9;position:relative;
+box-shadow:0 0 8px #ffffff55;
+}
+.paddleChoicePreview span:after{
+content:"";position:absolute;width:12px;height:26px;left:13px;top:32px;
+border-radius:3px 3px 6px 6px;background:linear-gradient(90deg,#b87a45,#f0c48b,#9a5c30);
+}
+.paddle-choice-red{background:radial-gradient(circle at 30% 25%,#fff0f0,#ff4545 35%,#b90e20 75%)}
+.paddle-choice-blue{background:radial-gradient(circle at 30% 25%,#e5f6ff,#4daeff 35%,#073064 75%)}
+.paddle-choice-green{background:radial-gradient(circle at 30% 25%,#eaffd9,#65ee65 35%,#08752c 75%)}
+.paddle-choice-gold{background:radial-gradient(circle at 30% 25%,#fff8bd,#ffd84d 38%,#704600 90%)}
+.paddle-choice-black{background:radial-gradient(circle at 30% 25%,#777,#252525 45%,#050505 90%)}
+.paddle-choice-purple{background:radial-gradient(circle at 30% 25%,#f5dcff,#bb67f2 38%,#4b137c 90%)}
+.paddle-choice-cyan{background:radial-gradient(circle at 30% 25%,#e0ffff,#36e5ed 38%,#00616b 90%)}
+
 .rulesBox,
 .accountBox{
 width:96%;
@@ -886,8 +912,37 @@ filter:none !important;
 
 <div id="clothes" class="screen">
 
-<h2>👕 ملابس وأشكال اللاعبين</h2>
-
+<h2>🏓 قائمة اختيار نوع ولون المضارب</h2>
+<p>اختار شكل ولون مضرب كل لاعب، ثم اضغط حفظ الاختيارات.</p>
+<div class="storeItem">
+<strong>🔴 مضرب اللاعب الأحمر</strong><br>
+<select id="redPaddleStyle" aria-label="نوع ولون المضرب الأحمر" onchange="setPaddleChoice('red',this.value)">
+<option value="red">أحمر كلاسيكي</option>
+<option value="blue">أزرق رياضي</option>
+<option value="green">أخضر نيون</option>
+<option value="gold">ذهبي فاخر</option>
+<option value="black">أسود احترافي</option>
+<option value="purple">بنفسجي ملكي</option>
+<option value="cyan">سماوي كهربائي</option>
+</select>
+<div class="paddleChoicePreview" id="redPaddlePreview"><span></span></div>
+</div>
+<div class="storeItem">
+<strong>🔵 مضرب اللاعب الأزرق / الكمبيوتر</strong><br>
+<select id="bluePaddleStyle" aria-label="نوع ولون المضرب الأزرق" onchange="setPaddleChoice('blue',this.value)">
+<option value="blue">أزرق رياضي</option>
+<option value="red">أحمر كلاسيكي</option>
+<option value="green">أخضر نيون</option>
+<option value="gold">ذهبي فاخر</option>
+<option value="black">أسود احترافي</option>
+<option value="purple">بنفسجي ملكي</option>
+<option value="cyan">سماوي كهربائي</option>
+</select>
+<div class="paddleChoicePreview" id="bluePaddlePreview"><span></span></div>
+</div>
+<button id="savePaddleChoices" type="button" onclick="savePaddleChoices()">💾 حفظ اختيارات المضارب</button>
+<hr>
+<h3>👕 ألوان الملابس</h3>
 <div class="skinGrid">
 
 <div class="skin">
@@ -1247,6 +1302,8 @@ wallUpgrade:false
 };
 
 var selectedSkin = "red";
+var selectedRedPaddle = "red";
+var selectedBluePaddle = "blue";
 
 var DATA_KEY = "al7aet_game_data";
 var AUTH_KEY = "al7aet_auth";
@@ -1275,6 +1332,8 @@ owned = Object.assign(owned,data.owned);
 if(data.selectedSkin){
 selectedSkin = data.selectedSkin;
 }
+if(data.selectedRedPaddle) selectedRedPaddle=data.selectedRedPaddle;
+if(data.selectedBluePaddle) selectedBluePaddle=data.selectedBluePaddle;
 tournamentWins = Number(data.tournamentWins)||0;
 completedStages = Number(data.completedStages)||0;
 totalGoals = Number(data.totalGoals)||0;
@@ -1290,17 +1349,51 @@ renderTrophies();
 applyPaddleUpgrades();
 }
 
+function paddleColor(style){
+  var colors={
+    red:"radial-gradient(circle at 30% 25%,#fff0f0,#ff4545 35%,#b90e20 75%)",
+    blue:"radial-gradient(circle at 30% 25%,#e5f6ff,#4daeff 35%,#073064 75%)",
+    green:"radial-gradient(circle at 30% 25%,#eaffd9,#65ee65 35%,#08752c 75%)",
+    gold:"radial-gradient(circle at 30% 25%,#fff8bd,#ffd84d 38%,#704600 90%)",
+    black:"radial-gradient(circle at 30% 25%,#777,#252525 45%,#050505 90%)",
+    purple:"radial-gradient(circle at 30% 25%,#f5dcff,#bb67f2 38%,#4b137c 90%)",
+    cyan:"radial-gradient(circle at 30% 25%,#e0ffff,#36e5ed 38%,#00616b 90%)"
+  };
+  return colors[style]||colors.red;
+}
+function paintPaddle(player,style){
+  var p=document.querySelector("#"+player+" .paddle");
+  if(!p)return;
+  p.style.background=paddleColor(style);
+  p.classList.toggle("upgraded",!!(player==="redPlayer"?(owned.redPaddle||owned.goldPaddle):(owned.bluePaddle||owned.goldPaddle)));
+  p.classList.toggle("gold-upgrade",!!owned.goldPaddle);
+}
 function applyPaddleUpgrades(){
-  var red=document.querySelector("#redPlayer .paddle");
-  var blue=document.querySelector("#bluePlayer .paddle");
-  if(red){
-    red.classList.toggle("upgraded",!!(owned.redPaddle||owned.goldPaddle));
-    red.classList.toggle("gold-upgrade",!!owned.goldPaddle);
-  }
-  if(blue){
-    blue.classList.toggle("upgraded",!!(owned.bluePaddle||owned.goldPaddle));
-    blue.classList.toggle("gold-upgrade",!!owned.goldPaddle);
-  }
+  paintPaddle("redPlayer",selectedRedPaddle);
+  paintPaddle("bluePlayer",selectedBluePaddle);
+  var redSelect=document.getElementById("redPaddleStyle");
+  var blueSelect=document.getElementById("bluePaddleStyle");
+  if(redSelect)redSelect.value=selectedRedPaddle;
+  if(blueSelect)blueSelect.value=selectedBluePaddle;
+  var rp=document.querySelector("#redPaddlePreview span");
+  var bp=document.querySelector("#bluePaddlePreview span");
+  if(rp)rp.style.background=paddleColor(selectedRedPaddle);
+  if(bp)bp.style.background=paddleColor(selectedBluePaddle);
+}
+function setPaddleChoice(player,style){
+  if(player==="red")selectedRedPaddle=style;
+  else selectedBluePaddle=style;
+  applyPaddleUpgrades();
+}
+function savePaddleChoices(){
+  var redSelect=document.getElementById("redPaddleStyle");
+  var blueSelect=document.getElementById("bluePaddleStyle");
+  if(redSelect)selectedRedPaddle=redSelect.value;
+  if(blueSelect)selectedBluePaddle=blueSelect.value;
+  saveData();
+  applyPaddleUpgrades();
+  var b=document.getElementById("savePaddleChoices");
+  if(b){b.textContent="✅ تم حفظ اختيارات المضارب";setTimeout(function(){b.textContent="💾 حفظ اختيارات المضارب";},1800);}
 }
 
 function saveData(){
@@ -1313,6 +1406,8 @@ JSON.stringify({
 coins:coins,
 owned:owned,
 selectedSkin:selectedSkin,
+selectedRedPaddle:selectedRedPaddle,
+selectedBluePaddle:selectedBluePaddle,
 tournamentWins:tournamentWins,
 completedStages:completedStages,
 totalGoals:totalGoals,
@@ -4168,6 +4263,7 @@ endTouch();
 loadData();
 loadAuth();
 applySkin();
+applyPaddleUpgrades();
 renderStore();
 renderTrophies();
 
