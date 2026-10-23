@@ -1912,6 +1912,18 @@ by += vy;
 moveStageObstacles();
 hitStageObstacles();
 
+/* مانع تعليق الكرة: حافظ على سرعة دنيا حتى لا تتوقف داخل الملعب
+   بعد اصطدام دقيق بمنتصف المضرب أو بحاجز. */
+if(Math.abs(vx)<0.16){
+  vx = (vx < 0 ? -1 : 1) * 0.22;
+}
+if(Math.abs(vy)<0.38){
+  vy = (vy < 0 ? -1 : 1) * 0.55;
+}
+/* تصحيح أي خروج غير متوقع عن حدود الملعب */
+bx = Math.max(2,Math.min(98,bx));
+by = Math.max(5,Math.min(92,by));
+
 if(bx <= 3){
 
 bx = 3;
