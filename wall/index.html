@@ -375,6 +375,27 @@ top:0;
 background:radial-gradient(circle at 32% 27%,#444 0,#17191c 58%,#050607 100%);
 transform:rotate(25deg);
 }
+
+/* تطويرات مرئية للمضارب المشتراة دون تغيير حجم الملعب */
+.paddle.upgraded{
+width:47px;
+height:47px;
+border-width:4px;
+box-shadow:0 0 7px rgba(255,220,120,.65),0 2px 4px #17252b99;
+}
+#redPlayer .paddle.upgraded{
+background:radial-gradient(circle at 30% 25%,#fff0f0 0,#ff4545 30%,#c91628 65%,#650914 100%);
+border-color:#ffe6a1;
+}
+#bluePlayer .paddle.upgraded{
+background:radial-gradient(circle at 30% 25%,#e5f6ff 0,#4daeff 30%,#1262bd 65%,#073064 100%);
+border-color:#c8efff;
+}
+.paddle.gold-upgrade{
+background:radial-gradient(circle at 30% 25%,#fff8bd 0,#ffd84d 38%,#c58a00 72%,#704600 100%) !important;
+border-color:#fff2a6 !important;
+box-shadow:0 0 8px rgba(255,210,65,.8),0 2px 4px #17252b99;
+}
 /* كرة تنس عادية بلونها الأصفر المخضر مع خط الانحناء */
 #ball{
 position:absolute;
@@ -1266,6 +1287,20 @@ selectedStage=Math.min(unlockedStage,Math.max(1,Number(data.selectedStage)||1));
 
 updateCoins();
 renderTrophies();
+applyPaddleUpgrades();
+}
+
+function applyPaddleUpgrades(){
+  var red=document.querySelector("#redPlayer .paddle");
+  var blue=document.querySelector("#bluePlayer .paddle");
+  if(red){
+    red.classList.toggle("upgraded",!!(owned.redPaddle||owned.goldPaddle));
+    red.classList.toggle("gold-upgrade",!!owned.goldPaddle);
+  }
+  if(blue){
+    blue.classList.toggle("upgraded",!!(owned.bluePaddle||owned.goldPaddle));
+    blue.classList.toggle("gold-upgrade",!!owned.goldPaddle);
+  }
 }
 
 function saveData(){
@@ -2100,14 +2135,19 @@ speed += .20;
 var target;
 
 if(vy > 0){
-/* يتوقع مكان وصول الكرة بدل مطاردتها فقط */
-var lead=difficulty==="hard"?17:(difficulty==="medium"?13:9);
-target = bx + (vx * lead);
-if(difficulty==="hard" && Math.abs(vx)>.5){target += vx*4;}
-/* خداع خفيف: يغيّر موضع الاستعداد قبل الضربة ليصنع زوايا مختلفة،
-   مع إبقاء التوقع الأساسي حتى لا يفقد الكمبيوتر الكرة كثيرًا. */
-if(difficulty==="hard"){target += Math.sin(Date.now()/310)*2.8;}
-else if(difficulty==="medium"){target += Math.sin(Date.now()/430)*1.4;}
+/* يتوقع نقطة وصول الكرة مع حساب ارتدادها عن جانبي الملعب */
+var lead=difficulty==="hard"?19:(difficulty==="medium"?15:10);
+var predicted=bx+(vx*lead);
+/* عكس التوقع عند تخطي حدود الملعب حتى لا يتحرك الكمبيوتر للجهة الخطأ */
+while(predicted<3 || predicted>97){
+  if(predicted<3) predicted=6-predicted;
+  if(predicted>97) predicted=194-predicted;
+}
+target=predicted;
+/* الكمبيوتر الصعب يتابع الزوايا أسرع، والمتوسط يتحسن دون أن يصبح مثاليًا */
+if(difficulty==="hard" && Math.abs(vx)>.5){target += vx*3;}
+if(difficulty==="hard"){target += Math.sin(Date.now()/360)*1.8;}
+else if(difficulty==="medium"){target += Math.sin(Date.now()/470)*0.9;}
 
 }else{
 
@@ -2812,6 +2852,7 @@ return;
 
 coins -= price;
 owned[name] = true;
+applyPaddleUpgrades();
 
 saveData();
 updateCoins();
