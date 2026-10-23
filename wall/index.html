@@ -3093,11 +3093,13 @@ Object.assign(
 opts.headers || {}
 );
 
-var response =
-await fetch(
-SUPABASE_URL + path,
-opts
-);
+var response;
+try {
+  response = await fetch(SUPABASE_URL + path, opts);
+} catch(fetchError) {
+  throw new Error("تعذر الوصول إلى خادم Supabase. افحص الإنترنت أو افتح اللعبة من جديد. (" +
+    String(fetchError && fetchError.message ? fetchError.message : "Network error") + ")");
+}
 
 var text =
 await response.text();
@@ -3125,7 +3127,9 @@ throw new Error(
 (data && data.msg) ||
 (data && data.message) ||
 (data && data.error_description) ||
-"حدث خطأ في الاتصال"
+(data && data.error) ||
+(data && data.details) ||
+("طلب الخادم فشل (HTTP " + response.status + ")")
 );
 
 }
