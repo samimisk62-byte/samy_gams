@@ -1995,7 +1995,8 @@ Math.abs(bx - (blueX + 7)) < 17
 by = 63;
 /* الكمبيوتر يختار مهارة دفاعية أو هجومية حسب مستوى الصعوبة */
 if(playerCount===1){
-  var aiChance=difficulty === "hard" ? 0.72 : (difficulty === "medium" ? 0.38 : 0.12);
+  /* اجعل الكمبيوتر يستخدم مهاراته بوضوح حسب الصعوبة */
+  var aiChance=difficulty === "hard" ? 1 : (difficulty === "medium" ? 0.85 : 0.65);
   if(Math.random()<aiChance){
     var aiPick=Math.random();
     if(aiPick<.42){strongBlue=true;spinReadyBlue=false;guardBlue=false;}
@@ -2003,29 +2004,33 @@ if(playerCount===1){
     else{guardBlue=true;strongBlue=false;spinReadyBlue=false;}
   }
 }
+var blueHitKind = "hit";
 var blueImpact = (bx - (blueX + 7)) / 15;
 blueImpact = Math.max(-1,Math.min(1,blueImpact));
 vy = -Math.max(.82,Math.abs(vy));
 vx = blueImpact * 1.05;
 if(guardBlue){
+  blueHitKind = "guard";
   guardBlue = false; strongBlue = false; ballSpin = 0;
   vy = -Math.max(.9,Math.abs(vy)*.92);
   vx = Math.max(-1.25,Math.min(1.25,blueImpact*1.25));
   document.getElementById("message").innerHTML = "🛡️ صدّ الأزرق الضربة بنجاح!";
 }else if(strongBlue){
+  blueHitKind = "smash";
   vy = -(owned.strongPaddle ? 2.05 : 1.85);
   vx = Math.max(-1.65,Math.min(1.65,vx * 1.4));
   strongBlue = false; ballSpin = 0;
   document.getElementById("message").innerHTML = "🔥 ضربة ساحقة زرقاء!";
 }else{
   if(spinReadyBlue){
+    blueHitKind = "spin";
     ballSpin = blueImpact >= 0 ? -.075 : .075;
     spinReadyBlue = false;
     document.getElementById("message").innerHTML = "🌀 ضربة زرقاء ملتفة!";
   }else{ballSpin = 0; document.getElementById("message").innerHTML = "🟦 ضربة الأزرق";}
 }
 playPaddle();
-impactEffect(strongBlue?"smash":"hit");
+impactEffect(blueHitKind);
 }
 
 if(by >= 92){
