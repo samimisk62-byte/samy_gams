@@ -451,6 +451,12 @@ left:30%;
 top:65%;
 width:15%;
 }
+.obstacle.moving{
+background:linear-gradient(135deg,#ffca55,#a86b24);
+border-color:#fff0b3;
+box-shadow:0 0 9px #ffca5588;
+}
+.obstacle{transition:background .2s,border-color .2s;}
 
 #buttons{
 position:absolute;
@@ -1611,7 +1617,7 @@ timeLeft = roundTime;
 
 document.getElementById("redScore").innerHTML = "0";
 document.getElementById("blueScore").innerHTML = "0";
-document.getElementById("stage").innerHTML = "1";
+document.getElementById("stage").innerHTML = stage;
 document.getElementById("round").innerHTML = "1";
 document.getElementById("time").innerHTML = roundTime;
 
@@ -1646,6 +1652,7 @@ movePlayer("bluePlayer",blueX);
 
 applySkin();
 applyStageTheme();
+setupStageObstacles();
 serveBall();
 
 gameRunning = true;
@@ -1767,17 +1774,14 @@ by = 70;
 var direction =
 Math.random() > .5 ? 1 : -1;
 
-var speed =
-owned.fastBall ? .50 : .40;
+/* تزداد سرعة الكرة تدريجيًا مع المراحل */
+var stageBoost = 1 + Math.min(Math.max(stage-1,0),40) * 0.018;
+var speed = (owned.fastBall ? .50 : .40) * stageBoost;
 
-vx =
-direction * speed;
-
-vy =
-owned.fastBall ? -.95 : -.78;
+vx = direction * speed;
+vy = (owned.fastBall ? -.95 : -.78) * stageBoost;
 
 strong = false;
-
 drawBall();
 
 }
@@ -1806,6 +1810,10 @@ function moveBall(){
 
 bx += vx;
 by += vy;
+
+/* تحريك الحواجز المتحركة وفحص اصطدام الكرة بها */
+moveStageObstacles();
+hitStageObstacles();
 
 if(bx <= 3){
 
@@ -1929,7 +1937,8 @@ drawBall();
 
 function computerMove(){
 
-var speed = 1.25;
+/* الكمبيوتر يصبح أسرع قليلًا مع تقدم المراحل */
+var speed = 1.25 + Math.min(Math.max(stage-1,0),30) * 0.035;
 
 if(difficulty === "medium"){
 speed = 1.75;
@@ -2326,6 +2335,7 @@ timeLeft = roundTime;
 document.getElementById("time").innerHTML = timeLeft;
 
 applyStageTheme();
+setupStageObstacles();
 serveBall();
 
 gameRunning = true;
@@ -2346,6 +2356,70 @@ startMusic();
 /* =========================================
 المراحل
 ========================================= */
+
+function setupStageObstacles(){
+var field = document.getElementById("field");
+var obstacles = field.querySelectorAll(".obstacle");
+var count = stage===1 ? 0 : (stage===2 ? 1 : (stage===3 ? 2 : 3));
+for(var i=0;i<obstacles.length;i++){
+ var ob=obstacles[i];
+ ob.style.display = i<count ? "block" : "none";
+ ob.classList.remove("moving");
+ ob.dataset.baseLeft = [34,49,30][i] + "";
+ ob.dataset.baseTop = [30,48,65][i] + "";
+ ob.style.left = ob.dataset.baseLeft + "%";
+ ob.style.top = ob.dataset.baseTop + "%";
+ if((stage>=3 && i===2) || (stage>=8 && i===1) || (stage>=15 && i===0)){
+   ob.classList.add("moving");
+ }
+}
+var msg = document.getElementById("message");
+if(stage===1){msg.innerHTML="🟢 المرحلة الأولى: تدريب بدون حواجز";}
+else if(stage===2){msg.innerHTML="🧱 المرحلة الثانية: حاجز ثابت واحد";}
+else if(stage===3){msg.innerHTML="🟠 المرحلة الثالثة: حواجز ثابتة ومتحركة";}
+else if(stage<8){msg.innerHTML="⚠️ انتبه للحاجز المتحرك!";}
+else if(stage<15){msg.innerHTML="🔥 تحدي أسرع وحواجز أكثر حركة";}
+else{msg.innerHTML="💥 تحدي متقدم: كل الحواجز تتحرك";}
+}
+
+function moveStageObstacles(){
+var obstacles = document.querySelectorAll("#field .obstacle.moving");
+var now = Date.now();
+for(var i=0;i<obstacles.length;i++){
+ var ob=obstacles[i];
+ var base=Number(ob.dataset.baseLeft||0);
+ var amplitude = stage>=15 ? 13 : (stage>=8 ? 10 : 7);
+ var speed = 650 - Math.min(stage,30)*8;
+ if(speed<350)speed=350;
+ var left=base + Math.sin(now/speed + i*1.7)*amplitude;
+ left=Math.max(5,Math.min(78,left));
+ ob.style.left=left+"%";
+}
+}
+
+function hitStageObstacles(){
+var field=document.getElementById("field");
+var fr=field.getBoundingClientRect();
+var px=fr.left + fr.width*(bx/100);
+var py=fr.top + fr.height*(by/100);
+var obstacles=field.querySelectorAll(".obstacle");
+for(var i=0;i<obstacles.length;i++){
+ var ob=obstacles[i];
+ if(ob.style.display==="none")continue;
+ var r=ob.getBoundingClientRect();
+ if(px>=r.left-7 && px<=r.right+7 && py>=r.top-7 && py<=r.bottom+7){
+   if(vy>0){
+     by=Math.max(10,((r.top-fr.top)/fr.height)*100-2);
+   }else{
+     by=Math.min(88,((r.bottom-fr.top)/fr.height)*100+2);
+   }
+   vy=-vy;
+   playWall();
+   document.getElementById("message").innerHTML="🧱 اصطدمت الكرة بالحاجز!";
+   return;
+ }
+}
+}
 
 function applyStageTheme(){
 
