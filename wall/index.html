@@ -891,6 +891,20 @@ filter:none !important;
 </div>
 
 <div class="storeItem">
+🎯 مضرب التحكم — يوجّه الكرة بدقة أكبر
+<span class="price">250 💰</span>
+<br>
+<button id="buyControlPaddle" type="button">شراء</button>
+</div>
+
+<div class="storeItem">
+🛡️ مضرب الحماية — مساحة صدّ أكبر ودفاع أقوى
+<span class="price">250 💰</span>
+<br>
+<button id="buyGuardPaddle" type="button">شراء</button>
+</div>
+
+<div class="storeItem">
 🏆 مضرب ذهبي —
 <span class="price">400 💰</span>
 <br>
@@ -1297,6 +1311,8 @@ redPaddle:false,
 bluePaddle:false,
 fastBall:false,
 strongPaddle:false,
+controlPaddle:false,
+guardPaddle:false,
 goldPaddle:false,
 wallUpgrade:false
 };
@@ -2086,18 +2102,18 @@ if(
 vy > 0 &&
 by > 63 &&
 by < 86 &&
-Math.abs(bx - (redX + 7)) < (owned.redPaddle ? 21 : 17)
+Math.abs(bx - (redX + 7)) < (owned.redPaddle ? 21 : 17) + (owned.guardPaddle ? 3 : 0)
 ){
 /* تثبيت الكرة فوق المضرب فور الاصطدام يمنع تكرار الضربة أو التصاق الكرة */
 by = 63;
 var redImpact = (bx - (redX + 7)) / 15;
 redImpact = Math.max(-1,Math.min(1,redImpact));
 vy = -Math.max(.82,Math.abs(vy));
-vx = redImpact * 1.05;
+vx = redImpact * (owned.controlPaddle ? 1.35 : 1.05);
 if(guardRed){
   guardRed = false; strong = false; ballSpin = 0;
   vy = -Math.max(.9,Math.abs(vy)*.92);
-  vx = Math.max(-1.25,Math.min(1.25,redImpact*1.25));
+  vx = Math.max(-1.55,Math.min(1.55,redImpact*(owned.guardPaddle ? 1.55 : 1.25)));
   document.getElementById("message").innerHTML = "🛡️ صدّ الأحمر الضربة بنجاح!";
 }else if(strong){
   vy = -(owned.strongPaddle ? 2.05 : 1.85);
@@ -2111,6 +2127,7 @@ if(guardRed){
     document.getElementById("message").innerHTML = "🌀 ضربة حمراء ملتفة!";
   }else{ballSpin = 0; document.getElementById("message").innerHTML = "🟥 ضربة الأحمر";}
 }
+if(owned.fastBall){vx*=1.08;vy*=1.08;}
 playPaddle();
 impactEffect(strong?"smash":"hit");
 }
@@ -2119,7 +2136,7 @@ if(
 vy > 0 &&
 by > 63 &&
 by < 86 &&
-Math.abs(bx - (blueX + 7)) < ((playerCount===2 && owned.bluePaddle) ? 21 : 17)
+Math.abs(bx - (blueX + 7)) < ((playerCount===2 && owned.bluePaddle) ? 21 : 17) + (owned.guardPaddle ? 3 : 0)
 ){
 /* نفس نظام التصويب والتسديدة القوية للمضرب الأزرق */
 by = 63;
@@ -2138,12 +2155,12 @@ var blueHitKind = "hit";
 var blueImpact = (bx - (blueX + 7)) / 15;
 blueImpact = Math.max(-1,Math.min(1,blueImpact));
 vy = -Math.max(.82,Math.abs(vy));
-vx = blueImpact * 1.05;
+vx = blueImpact * (owned.controlPaddle ? 1.35 : 1.05);
 if(guardBlue){
   blueHitKind = "guard";
   guardBlue = false; strongBlue = false; ballSpin = 0;
   vy = -Math.max(.9,Math.abs(vy)*.92);
-  vx = Math.max(-1.25,Math.min(1.25,blueImpact*1.25));
+  vx = Math.max(-1.55,Math.min(1.55,blueImpact*(owned.guardPaddle ? 1.55 : 1.25)));
   document.getElementById("message").innerHTML = "🛡️ صدّ الأزرق الضربة بنجاح!";
 }else if(strongBlue){
   blueHitKind = "smash";
@@ -2159,6 +2176,7 @@ if(guardBlue){
     document.getElementById("message").innerHTML = "🌀 ضربة زرقاء ملتفة!";
   }else{ballSpin = 0; document.getElementById("message").innerHTML = "🟦 ضربة الأزرق";}
 }
+if(owned.fastBall){vx*=1.08;vy*=1.08;}
 playPaddle();
 impactEffect(blueHitKind);
 }
@@ -2922,6 +2940,8 @@ redPaddle:150,
 bluePaddle:150,
 fastBall:200,
 strongPaddle:250,
+controlPaddle:250,
+guardPaddle:250,
 goldPaddle:400,
 wallUpgrade:300
 
@@ -2963,6 +2983,8 @@ redPaddle:"buyRedPaddle",
 bluePaddle:"buyBluePaddle",
 fastBall:"buyFastBall",
 strongPaddle:"buyStrongPaddle",
+controlPaddle:"buyControlPaddle",
+guardPaddle:"buyGuardPaddle",
 goldPaddle:"buyGoldPaddle",
 wallUpgrade:"buyWall"
 
@@ -4052,6 +4074,16 @@ buyItem("fastBall");
 document.getElementById("buyStrongPaddle")
 .addEventListener("click",function(){
 buyItem("strongPaddle");
+});
+
+document.getElementById("buyControlPaddle")
+.addEventListener("click",function(){
+buyItem("controlPaddle");
+});
+
+document.getElementById("buyGuardPaddle")
+.addEventListener("click",function(){
+buyItem("guardPaddle");
 });
 
 document.getElementById("buyGoldPaddle")
