@@ -1121,6 +1121,8 @@ filter:none !important;
 
 <div id="top">
 
+<button id="exitToStages" type="button" aria-label="الخروج إلى المراحل" style="background:#c62828;color:white;font-weight:bold;padding:7px 10px;border-radius:8px">✕ المراحل</button>
+
 <div class="red">
 🟥 <span id="redNameGame">الأحمر</span>:
 <span id="redScore">0</span>
@@ -1220,7 +1222,7 @@ filter:none !important;
 </button>
 
 <button id="resultHome" type="button">
-🏠 القائمة
+✕ المراحل
 </button>
 
 </div>
@@ -4158,11 +4160,14 @@ document.getElementById("restart")
 document.getElementById("home")
 .addEventListener("click",showMenu);
 
+document.getElementById("exitToStages")
+.addEventListener("click",showStageSelect);
+
 document.getElementById("resultNext")
 .addEventListener("click",nextRound);
 
 document.getElementById("resultHome")
-.addEventListener("click",showMenu);
+.addEventListener("click",showStageSelect);
 
 /* =========================================
 لمس الأحمر
