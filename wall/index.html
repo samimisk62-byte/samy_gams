@@ -380,22 +380,22 @@ transform:rotate(25deg);
 position:absolute;
 left:50%;
 top:70%;
-width:27px;
-height:27px;
-margin-left:-13px;
-margin-top:-13px;
+width:18px;
+height:18px;
+margin-left:-9px;
+margin-top:-9px;
 border-radius:50%;
 background:radial-gradient(circle at 30% 25%,#f5ff9b 0,#c9ec42 46%,#91bd20 100%) !important;
 border:1px solid #789d19;
 z-index:30;
-box-shadow:inset -3px -3px 5px #527a1777,0 2px 5px rgba(0,0,0,.5);
+box-shadow:inset -2px -2px 3px #527a1777,0 2px 4px rgba(0,0,0,.5);
 overflow:hidden;
 }
 #ball:after{
 content:"";
 position:absolute;
-inset:3px 7px;
-border:2px solid rgba(255,255,220,.95);
+inset:2px 5px;
+border:1px solid rgba(255,255,220,.95);
 border-left-color:transparent;
 border-right-color:transparent;
 border-radius:50%;
@@ -741,7 +741,7 @@ filter:none !important;
 </button>
 
 <button id="ballButton" type="button">
-⚽ الكرة: تشغيل
+🎾 صوت الكرة والمضرب: تشغيل
 </button>
 
 <button id="crowdButton" type="button">
@@ -1272,6 +1272,9 @@ unlockLandscape();
 
 function openSelectedStage(){
 if(selectedStage<1||selectedStage>unlockedStage){alert("المرحلة مغلقة. أكمل المرحلة السابقة أولًا.");return;}
+/* تفعيل الصوت من ضغطة المستخدم حتى تسمح به متصفحات الهاتف */
+var ac=getAudio();
+if(ac && ac.state==="suspended"){try{ac.resume();}catch(e){}}
 stageChosen=true;
 startGame();
 }
@@ -1445,6 +1448,8 @@ document.getElementById("musicButton").innerHTML =
 "🎵 الموسيقى: " + (music ? "تشغيل" : "إيقاف");
 
 if(music && gameRunning){
+var ac=getAudio();
+if(ac && ac.state==="suspended"){try{ac.resume();}catch(e){}}
 startMusic();
 }else{
 stopMusic();
@@ -1457,7 +1462,7 @@ function ballToggle(){
 ballSound = !ballSound;
 
 document.getElementById("ballButton").innerHTML =
-"⚽ الكرة: " + (ballSound ? "تشغيل" : "إيقاف");
+"🎾 صوت الكرة والمضرب: " + (ballSound ? "تشغيل" : "إيقاف");
 
 }
 
