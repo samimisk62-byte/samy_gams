@@ -1846,51 +1846,48 @@ document.getElementById("message").innerHTML =
 
 if(
 vy > 0 &&
-by > 64 &&
-by < 85 &&
-Math.abs(bx - (redX + 7)) < 15
+by > 63 &&
+by < 86 &&
+Math.abs(bx - (redX + 7)) < 17
 ){
-
-vy = -Math.abs(vy);
-
-vx =
-(bx - (redX + 7)) * .055;
-
-playPaddle();
-
-document.getElementById("message").innerHTML =
-"🟥 ضربة الأحمر";
-
+/* تثبيت الكرة فوق المضرب فور الاصطدام يمنع تكرار الضربة أو التصاق الكرة */
+by = 63;
+var redImpact = (bx - (redX + 7)) / 15;
+redImpact = Math.max(-1,Math.min(1,redImpact));
+vy = -Math.max(.82,Math.abs(vy));
+vx = redImpact * 1.05;
 if(strong){
-
-vy =
-owned.strongPaddle
-? -1.55
-: -1.35;
-
-strong = false;
-
+  vy = -(owned.strongPaddle ? 1.75 : 1.5);
+  vx = Math.max(-1.45,Math.min(1.45,vx * 1.35));
+  strong = false;
+  document.getElementById("message").innerHTML = "💥 تسديدة حمراء قوية!";
+}else{
+  document.getElementById("message").innerHTML = "🟥 ضربة الأحمر";
 }
-
+playPaddle();
 }
 
 if(
 vy > 0 &&
-by > 64 &&
-by < 85 &&
-Math.abs(bx - (blueX + 7)) < 15
+by > 63 &&
+by < 86 &&
+Math.abs(bx - (blueX + 7)) < 17
 ){
-
-vy = -Math.abs(vy);
-
-vx =
-(bx - (blueX + 7)) * .055;
-
+/* نفس نظام التصويب والتسديدة القوية للمضرب الأزرق */
+by = 63;
+var blueImpact = (bx - (blueX + 7)) / 15;
+blueImpact = Math.max(-1,Math.min(1,blueImpact));
+vy = -Math.max(.82,Math.abs(vy));
+vx = blueImpact * 1.05;
+if(strong){
+  vy = -(owned.strongPaddle ? 1.75 : 1.5);
+  vx = Math.max(-1.45,Math.min(1.45,vx * 1.35));
+  strong = false;
+  document.getElementById("message").innerHTML = "💥 تسديدة زرقاء قوية!";
+}else{
+  document.getElementById("message").innerHTML = "🟦 ضربة الأزرق";
+}
 playPaddle();
-
-document.getElementById("message").innerHTML =
-"🟦 ضربة الأزرق";
-
 }
 
 if(by >= 92){
