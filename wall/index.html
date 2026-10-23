@@ -3134,6 +3134,37 @@ return data;
 
 }
 
+/* تجديد جلسة الدخول تلقائيًا عند انتهاء صلاحية JWT */
+async function authorizedRequest(path, options){
+  var auth = {};
+  try { auth = JSON.parse(localStorage.getItem(AUTH_KEY) || "{}"); } catch(e) {}
+  if(!auth.access_token) throw new Error("انتهت جلسة الدخول. سجّل الخروج ثم ادخل مرة أخرى.");
+  var opts = options || {};
+  opts.headers = Object.assign({}, opts.headers || {}, {
+    "Authorization":"Bearer " + auth.access_token
+  });
+  try {
+    return await supabaseRequest(path, opts);
+  } catch(err) {
+    var message = String(err && err.message || "");
+    if(!/invalid jwt|jwt expired|token is expired|expired token/i.test(message) || !auth.refresh_token) throw err;
+    var refreshed = await supabaseRequest("/auth/v1/token?grant_type=refresh_token", {
+      method:"POST",
+      body:JSON.stringify({refresh_token:auth.refresh_token})
+    });
+    if(!refreshed || !refreshed.access_token) throw new Error("تعذر تجديد جلسة الدخول. سجّل الخروج ثم ادخل مرة أخرى.");
+    auth.access_token = refreshed.access_token;
+    auth.refresh_token = refreshed.refresh_token || auth.refresh_token;
+    auth.email = auth.email || userEmail;
+    auth.accessUntil = accessUntil;
+    localStorage.setItem(AUTH_KEY, JSON.stringify(auth));
+    opts.headers = Object.assign({}, opts.headers || {}, {
+      "Authorization":"Bearer " + auth.access_token
+    });
+    return await supabaseRequest(path, opts);
+  }
+}
+
 /* =========================================
 تسجيل الدخول
 ========================================= */
@@ -3386,16 +3417,10 @@ return false;
 }
 
 var data =
-await supabaseRequest(
+await authorizedRequest(
 "/functions/v1/account-game-access",
 {
 method:"POST",
-
-headers:{
-"Authorization":
-"Bearer " + token
-},
-
 body:"{}"
 }
 );
@@ -3456,7 +3481,8 @@ return false;
 }catch(e){
 
 accessText.innerHTML =
-"⚠️ تعذر التحقق من الاشتراك الآن. تأكد من اتصال الإنترنت ثم أعد المحاولة.";
+"⚠️ تعذر التحقق من الاشتراك: " +
+String(e && e.message ? e.message : "تأكد من الإنترنت ثم أعد المحاولة.");
 
 return false;
 
@@ -3495,16 +3521,10 @@ return;
 try{
 
 var data =
-await supabaseRequest(
+await authorizedRequest(
 "/functions/v1/create-game-order",
 {
 method:"POST",
-
-headers:{
-"Authorization":
-"Bearer " + token
-},
-
 body:JSON.stringify({
 game_code:GAME_CODE
 })
