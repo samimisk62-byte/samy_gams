@@ -860,7 +860,7 @@ async function loadOwnerDashboard(){
     const pending=orders.filter(o=>!["paid","rejected","refunded","cancelled","expired"].includes(o.status));
     summary.textContent="✅ تم التحقق من صلاحية الإدارة. إجمالي الطلبات المعروضة: "+orders.length+" — الطلبات التي تحتاج مراجعة: "+pending.length;
     if(!orders.length){list.textContent="لا توجد طلبات حتى الآن.";return;}
-    const names={al7aet:"الحائط الصعب",alashra:"العشرة",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
+    const names={al7aet:"الحائط الصعب",alashra:"لعبة الـ٦ ورقات",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
     const statuses={pending:"في انتظار المراجعة",paid:"تم اعتماد الدفع",active:"مفعّل",approved:"تمت الموافقة",rejected:"مرفوض",refunded:"تم رد المبلغ",cancelled:"ملغي",expired:"منتهي"};
     orders.forEach(function(order){
       const card=document.createElement("div");card.className="adminOrder";
