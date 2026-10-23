@@ -653,6 +653,15 @@ font-size:12px;
 
 }
 
+/* مؤثرات الضربات والبطولات */
+@keyframes impactShake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,1px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-2px,-1px)}}
+@keyframes ballFlash{0%{filter:brightness(1)}35%{filter:brightness(2.4) drop-shadow(0 0 9px #fff)}100%{filter:brightness(1)}}
+#field.impact{animation:impactShake .18s ease-out}
+#ball.impact{animation:ballFlash .25s ease-out}
+#field.smashImpact{animation:impactShake .32s ease-out;box-shadow:inset 0 0 22px #ffdb4d}
+#field.wallImpact{box-shadow:inset 0 0 16px #d8f7ff}
+#message{transition:background .12s}
+
 /* ================= منع اختيار/سحب الصفحة داخل اللعبة ================= */
 
 #game,
@@ -1156,6 +1165,9 @@ var coins = 500;
 
 var redScore = 0;
 var blueScore = 0;
+var tournamentWins = 0;
+var completedStages = 0;
+var totalGoals = 0;
 
 var stage = 1;
 var round = 1;
@@ -1237,6 +1249,9 @@ owned = Object.assign(owned,data.owned);
 if(data.selectedSkin){
 selectedSkin = data.selectedSkin;
 }
+tournamentWins = Number(data.tournamentWins)||0;
+completedStages = Number(data.completedStages)||0;
+totalGoals = Number(data.totalGoals)||0;
 if(Number.isInteger(data.unlockedStage) && data.unlockedStage>=1){
 unlockedStage=data.unlockedStage;
 }
@@ -1258,6 +1273,9 @@ JSON.stringify({
 coins:coins,
 owned:owned,
 selectedSkin:selectedSkin,
+tournamentWins:tournamentWins,
+completedStages:completedStages,
+totalGoals:totalGoals,
 unlockedStage:unlockedStage,
 selectedStage:selectedStage
 })
@@ -1821,6 +1839,21 @@ drawBall();
 
 }
 
+function impactEffect(kind){
+  var field=document.getElementById("field");
+  var ball=document.getElementById("ball");
+  if(!effects || !field || !ball)return;
+  field.classList.remove("impact","smashImpact","wallImpact");
+  ball.classList.remove("impact");
+  void field.offsetWidth;
+  field.classList.add(kind==="smash"?"smashImpact":(kind==="wall"?"wallImpact":"impact"));
+  ball.classList.add("impact");
+  setTimeout(function(){
+    if(field)field.classList.remove("impact","smashImpact","wallImpact");
+    if(ball)ball.classList.remove("impact");
+  },360);
+}
+
 function drawBall(){
 
 var ball =
@@ -1878,7 +1911,7 @@ by = 8;
 vy = Math.abs(vy);
 
 playWall();
-
+impactEffect("wall");
 document.getElementById("message").innerHTML =
 "🎾 الكرة اصطدمت بالحائط";
 
@@ -1914,6 +1947,7 @@ if(guardRed){
   }else{ballSpin = 0; document.getElementById("message").innerHTML = "🟥 ضربة الأحمر";}
 }
 playPaddle();
+impactEffect(strong?"smash":"hit");
 }
 
 if(
@@ -1924,6 +1958,16 @@ Math.abs(bx - (blueX + 7)) < 17
 ){
 /* نفس نظام التصويب والتسديدة القوية للمضرب الأزرق */
 by = 63;
+/* الكمبيوتر يختار مهارة دفاعية أو هجومية حسب مستوى الصعوبة */
+if(playerCount===1){
+  var aiChance=difficulty==="hard"?.72:(difficulty==="medium"?.38:.12);
+  if(Math.random()<aiChance){
+    var aiPick=Math.random();
+    if(aiPick<.42){strongBlue=true;spinReadyBlue=false;guardBlue=false;}
+    else if(aiPick<.72){spinReadyBlue=true;strongBlue=false;guardBlue=false;}
+    else{guardBlue=true;strongBlue=false;spinReadyBlue=false;}
+  }
+}
 var blueImpact = (bx - (blueX + 7)) / 15;
 blueImpact = Math.max(-1,Math.min(1,blueImpact));
 vy = -Math.max(.82,Math.abs(vy));
@@ -1946,6 +1990,7 @@ if(guardBlue){
   }else{ballSpin = 0; document.getElementById("message").innerHTML = "🟦 ضربة الأزرق";}
 }
 playPaddle();
+impactEffect(strongBlue?"smash":"hit");
 }
 
 if(by >= 92){
@@ -1973,6 +2018,8 @@ document.getElementById("message").innerHTML =
 }
 
 playScore();
+impactEffect("smash");
+totalGoals++;
 
 coins += 5;
 
@@ -2004,6 +2051,8 @@ if(difficulty === "hard"){
 speed = 2.25;
 }
 
+if(difficulty==="hard"){speed+=.45;}
+if(difficulty==="medium"){speed+=.12;}
 if(owned.wallUpgrade){
 speed += .20;
 }
@@ -2011,8 +2060,10 @@ speed += .20;
 var target;
 
 if(vy > 0){
-
-target = bx + (vx * 12);
+/* يتوقع مكان وصول الكرة بدل مطاردتها فقط */
+var lead=difficulty==="hard"?17:(difficulty==="medium"?13:9);
+target = bx + (vx * lead);
+if(difficulty==="hard" && Math.abs(vx)>.5){target += vx*4;}
 
 }else{
 
@@ -2367,7 +2418,12 @@ document.getElementById("blueNameGame").innerHTML;
 
 var winner;
 
+var rewardText="";
 if(redScore > blueScore){
+tournamentWins++;
+coins+=25;
+rewardText="<br><br>🎁 مكافأة الفوز: +25 عملة";
+saveData();updateCoins();
 winner = "🏆 الفائز: " + redName;
 }else if(blueScore > redScore){
 winner = "🏆 الفائز: " + blueName;
@@ -2382,7 +2438,7 @@ document.getElementById("resultText").innerHTML =
 "🟦 " + blueName +
 " : " + blueScore +
 "<br><br>" +
-winner;
+winner + rewardText;
 
 document.getElementById("result").style.display = "block";
 
@@ -2403,10 +2459,15 @@ round++;
 
 if(round > 3){
 round = 1;
+completedStages++;
+coins+=100;
+updateCoins();
 unlockedStage = Math.max(unlockedStage,stage+1);
 selectedStage = unlockedStage;
 saveData();
+renderTrophies();
 renderStages();
+alert("🏆 ممتاز! أكملت المرحلة "+stage+" وحصلت على 100 عملة إضافية وفتحت المرحلة التالية.");
 showStageSelect();
 return;
 }
@@ -2569,9 +2630,15 @@ function getTrophies(){
 
 var trophies = [];
 
-if(stage >= 2){
+if(unlockedStage >= 2 || completedStages>=1){
 trophies.push("🥉 وصلت إلى المرحلة الثانية");
 }
+if(tournamentWins>=1){trophies.push("🏅 أول انتصار في البطولة");}
+if(tournamentWins>=5){trophies.push("🏆 بطل خمس جولات");}
+if(tournamentWins>=10){trophies.push("👑 أسطورة الحائط الصعب");}
+if(completedStages>=3){trophies.push("🥇 أكملت ٣ مراحل");}
+if(completedStages>=10){trophies.push("💎 محترف البطولات: ١٠ مراحل");}
+if(totalGoals>=50){trophies.push("🎯 هداف البطولة: ٥٠ هدفًا");}
 
 if(stage >= 5){
 trophies.push("🥈 وصلت إلى المرحلة الخامسة");
