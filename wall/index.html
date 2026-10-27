@@ -826,9 +826,19 @@ html body .skiptranslate iframe{visibility:hidden!important}
 </button>
 
 <button id="two" type="button">
-👤 لاعب × 👤 لاعب
+👤 لاعبان على نفس الهاتف
 </button>
+<button id="online" type="button">🌐 لاعب عبر الإنترنت</button>
 
+</div>
+
+<div class="box" id="onlineRoomBox" style="display:none">
+<h3>🌐 مباراة من هاتف إلى هاتف</h3>
+<p class="small">سجّل الدخول على الهاتفين. أنشئ غرفة من الهاتف الأول وأرسل الرمز للهاتف الثاني.</p>
+<input id="roomCodeInput" inputmode="numeric" maxlength="6" placeholder="رمز الغرفة المكوّن من 6 أرقام">
+<button id="createRoomButton" type="button">➕ إنشاء غرفة</button>
+<button id="joinRoomButton" type="button">🔗 دخول غرفة</button>
+<div id="roomStatus" class="notice">اختر إنشاء غرفة أو دخول غرفة.</div>
 </div>
 
 <div class="box">
@@ -1348,6 +1358,16 @@ var blueX = 58;
 var dragging = false;
 var blueDragging = false;
 
+/* حالة اللعب بين هاتفين */
+var onlineMode = false;
+var onlineRole = "";
+var onlineRoomId = "";
+var onlineRoomCode = "";
+var onlinePollTimer = null;
+var onlineSnapshotTimer = null;
+var onlineLastSnapshotAt = 0;
+var onlineSending = false;
+
 var audioContext = null;
 var musicTimer = null;
 
@@ -1605,21 +1625,121 @@ showScreen("account");
 ========================================= */
 
 function players1(){
-
-playerCount = 1;
-
-document.getElementById("one").className = "sel";
-document.getElementById("two").className = "";
-
+stopOnlinePolling(); onlineMode=false; onlineRole=""; onlineRoomId=""; onlineRoomCode="";
+playerCount=1;
+document.getElementById("one").className="sel";
+document.getElementById("two").className="";
+document.getElementById("online").className="";
+document.getElementById("onlineRoomBox").style.display="none";
 }
 
 function players2(){
+stopOnlinePolling(); onlineMode=false; onlineRole=""; onlineRoomId=""; onlineRoomCode="";
+playerCount=2;
+document.getElementById("one").className="";
+document.getElementById("two").className="sel";
+document.getElementById("online").className="";
+document.getElementById("onlineRoomBox").style.display="none";
+}
 
-playerCount = 2;
-
-document.getElementById("one").className = "";
-document.getElementById("two").className = "sel";
-
+function selectOnlineMode(){
+playerCount=2; onlineMode=true; onlineRole="";
+document.getElementById("one").className="";
+document.getElementById("two").className="";
+document.getElementById("online").className="sel";
+document.getElementById("onlineRoomBox").style.display="block";
+setRoomStatus("سجّل الدخول، ثم أنشئ غرفة أو أدخل رمز صديقك.");
+}
+function setRoomStatus(message){var el=document.getElementById("roomStatus");if(el)el.innerHTML=message;}
+function onlineAuth(){try{return JSON.parse(localStorage.getItem(AUTH_KEY)||"{}");}catch(e){return {};}}
+async function createOnlineRoom(){
+var auth=onlineAuth();
+if(!userEmail||!auth.access_token){setRoomStatus("🔒 افتح الحساب وسجّل الدخول أولًا.");showAccount();return;}
+setRoomStatus("⏳ جاري إنشاء الغرفة...");
+try{
+var user=await authorizedRequest("/auth/v1/user",{method:"GET"});
+if(!user||!user.id)throw new Error("تعذر تحديد حسابك؛ سجّل الدخول مرة أخرى.");
+var code=String(Math.floor(100000+Math.random()*900000));
+var name=(document.getElementById("redNameInput").value||"الأحمر").trim().slice(0,40)||"الأحمر";
+var rows=await authorizedRequest("/rest/v1/wall_online_rooms",{
+method:"POST",headers:{"Prefer":"return=representation"},
+body:JSON.stringify({room_code:code,host_id:user.id,host_name:name,status:"waiting",game_state:{}})
+});
+if(!Array.isArray(rows)||!rows[0])throw new Error("لم يتم إنشاء الغرفة.");
+onlineRoomId=rows[0].id;onlineRoomCode=code;onlineRole="host";onlineMode=true;playerCount=2;
+document.getElementById("roomCodeInput").value=code;
+setRoomStatus("✅ رمز غرفتك: <strong style='font-size:25px;letter-spacing:4px'>"+code+"</strong><br>أرسل الرمز للهاتف الثاني. بعد دخوله اختر المرحلة وابدأ المباراة.");
+startOnlinePolling();
+}catch(e){setRoomStatus("❌ "+(e.message||"تعذر إنشاء الغرفة."));}
+}
+async function joinOnlineRoom(){
+var auth=onlineAuth();
+if(!userEmail||!auth.access_token){setRoomStatus("🔒 افتح الحساب وسجّل الدخول أولًا.");showAccount();return;}
+var code=(document.getElementById("roomCodeInput").value||"").replace(/\D/g,"").slice(0,6);
+if(code.length!==6){setRoomStatus("اكتب رمز الغرفة المكوّن من 6 أرقام.");return;}
+setRoomStatus("⏳ جاري دخول الغرفة...");
+try{
+var result=await authorizedRequest("/rest/v1/rpc/wall_join_room",{method:"POST",body:JSON.stringify({p_room_code:code,p_player_name:(document.getElementById("blueNameInput").value||"الأزرق").trim().slice(0,40)||"الأزرق"})});
+var room=Array.isArray(result)?result[0]:result;
+if(!room||!room.id)throw new Error("الغرفة غير موجودة أو بدأ اللعب بالفعل.");
+onlineRoomId=room.id;onlineRoomCode=code;onlineRole="guest";onlineMode=true;playerCount=2;
+setRoomStatus("✅ دخلت الغرفة "+code+". انتظر المضيف ليبدأ المباراة.");
+startOnlinePolling();
+}catch(e){setRoomStatus("❌ "+(e.message||"تعذر دخول الغرفة."));}
+}
+function stopOnlinePolling(){
+if(onlinePollTimer){clearInterval(onlinePollTimer);onlinePollTimer=null;}
+if(onlineSnapshotTimer){clearInterval(onlineSnapshotTimer);onlineSnapshotTimer=null;}
+}
+function startOnlinePolling(){stopOnlinePolling();onlinePollTimer=setInterval(pollOnlineRoom,700);if(onlineRole==="host")onlineSnapshotTimer=setInterval(sendOnlineSnapshot,450);pollOnlineRoom();}
+function currentOnlineSnapshot(){return {running:gameRunning,paused:paused,bx:bx,by:by,vx:vx,vy:vy,redX:redX,blueX:blueX,redScore:redScore,blueScore:blueScore,timeLeft:timeLeft,stage:stage,round:round,redName:document.getElementById("redNameGame").textContent,blueName:document.getElementById("blueNameGame").textContent,at:Date.now()};}
+async function sendOnlineSnapshot(){
+if(!onlineMode||onlineRole!=="host"||!onlineRoomId||onlineSending)return;
+onlineSending=true;
+try{await authorizedRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineRoomId),{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({game_state:currentOnlineSnapshot(),status:gameRunning?"playing":"finished",updated_at:new Date().toISOString()})});}
+catch(e){console.warn("Room sync:",e.message);}finally{onlineSending=false;}
+}
+async function pollOnlineRoom(){
+if(!onlineMode||!onlineRoomId)return;
+try{
+var rows=await authorizedRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineRoomId)+"&select=*",{method:"GET"});
+if(!Array.isArray(rows)||!rows[0])return;
+var room=rows[0];
+if(onlineRole==="host"&&room.guest_id){blueX=Number(room.guest_blue_x)||blueX;movePlayer("bluePlayer",blueX);setRoomStatus("🟢 الهاتف الثاني متصل! الرمز: "+onlineRoomCode+" — اختر المرحلة وابدأ المباراة.");}
+if(onlineRole==="guest"&&room.game_state&&room.game_state.running&&!gameRunning)beginGuestGame(room.game_state);
+if(onlineRole==="guest"&&room.game_state&&room.game_state.at&&room.game_state.at>onlineLastSnapshotAt){onlineLastSnapshotAt=room.game_state.at;applyOnlineSnapshot(room.game_state);}
+if(onlineRole==="guest"&&room.status==="finished"){gameRunning=false;if(gameTimer!==null){clearInterval(gameTimer);gameTimer=null;}if(ballTimer!==null){clearInterval(ballTimer);ballTimer=null;}setRoomStatus("🏁 انتهت المباراة على الهاتف المضيف.");}
+}catch(e){console.warn("Room poll:",e.message);}
+}
+function beginGuestGame(st){
+if(onlineRole!=="guest"||gameRunning)return;
+playerCount=2;stage=Number(st.stage)||1;round=Number(st.round)||1;timeLeft=Number(st.timeLeft)||60;
+document.getElementById("redNameGame").textContent=st.redName||"الأحمر";
+document.getElementById("blueNameGame").textContent=st.blueName||"الأزرق";
+document.getElementById("menu").style.display="none";document.getElementById("stages").style.display="none";
+document.getElementById("game").style.display="block";document.getElementById("game").classList.add("running");
+document.getElementById("result").style.display="none";gameRunning=true;paused=false;
+applySkin();applyStageTheme();setupStageObstacles();applyOnlineSnapshot(st);
+setRoomStatus("🟢 متصل بالمباراة. أنت اللاعب الأزرق.");
+}
+function sendGuestPaddlePosition(){
+if(!onlineMode||onlineRole!=="guest"||!onlineRoomId||onlineSending)return;
+onlineSending=true;
+authorizedRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineRoomId),{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({guest_blue_x:blueX,updated_at:new Date().toISOString()})})
+.catch(function(e){console.warn("Paddle sync:",e.message);}).finally(function(){onlineSending=false;});
+}
+function applyOnlineSnapshot(st){
+if(onlineRole!=="guest"||!st)return;
+bx=Number(st.bx);by=Number(st.by);vx=Number(st.vx);vy=Number(st.vy);
+redX=Number(st.redX);blueX=Number(st.blueX);
+redScore=Number(st.redScore)||0;blueScore=Number(st.blueScore)||0;
+if(Number.isFinite(Number(st.timeLeft)))timeLeft=Number(st.timeLeft);
+if(Number.isFinite(Number(st.stage)))stage=Number(st.stage);
+if(Number.isFinite(Number(st.round)))round=Number(st.round);
+paused=!!st.paused;
+document.getElementById("redScore").textContent=redScore;document.getElementById("blueScore").textContent=blueScore;
+document.getElementById("time").textContent=timeLeft;document.getElementById("stage").textContent=stage;document.getElementById("round").textContent=round;
+movePlayer("redPlayer",redX);movePlayer("bluePlayer",blueX);drawBall();
 }
 
 /* =========================================
@@ -1823,6 +1943,8 @@ checkOrientation,
 
 async function startGame(){
 
+if(onlineMode && onlineRole==="guest"){setRoomStatus("انتظر المضيف ليبدأ المباراة.");return;}
+
 if(
 ACCESS_REQUIRED &&
 (!ownerAccess && (!accessUntil || accessUntil <= Date.now())) &&
@@ -1964,6 +2086,8 @@ endRound();
 ========================================= */
 
 function startBall(){
+
+if(onlineMode && onlineRole==="guest") return;
 
 if(ballTimer !== null){
 clearInterval(ballTimer);
@@ -2448,6 +2572,7 @@ x = 85;
 blueX = x;
 
 movePlayer("bluePlayer",blueX);
+sendGuestPaddlePosition();
 
 }
 
@@ -2570,6 +2695,8 @@ document.getElementById("message").innerHTML="🟦 الدرع جاهز! صدّ �
 
 function pauseGame(){
 
+if(onlineMode && onlineRole==="guest")return;
+
 if(!gameRunning){
 return;
 }
@@ -2607,6 +2734,8 @@ startMusic();
 ========================================= */
 
 function restartGame(){
+
+if(onlineMode && onlineRole==="guest")return;
 
 redScore = 0;
 blueScore = 0;
@@ -4075,6 +4204,9 @@ document.getElementById("rotateNotice").style.display =
 
 document.getElementById("one").addEventListener("click",players1);
 document.getElementById("two").addEventListener("click",players2);
+document.getElementById("online").addEventListener("click",selectOnlineMode);
+document.getElementById("createRoomButton").addEventListener("click",createOnlineRoom);
+document.getElementById("joinRoomButton").addEventListener("click",joinOnlineRoom);
 
 document.getElementById("t60").addEventListener("click",time60);
 document.getElementById("t90").addEventListener("click",time90);
