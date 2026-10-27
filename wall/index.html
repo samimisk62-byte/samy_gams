@@ -1317,6 +1317,13 @@ var effects = true;
 
 var coins = 500;
 
+/* مزامنة رصيد المتجر والتطويرات مع حساب اللاعب */
+var cloudWalletReady = false;
+var cloudUserId = "";
+var cloudWalletSaveTimer = null;
+var cloudWalletSaving = false;
+var cloudWalletSaveAgain = false;
+
 var redScore = 0;
 var blueScore = 0;
 var tournamentWins = 0;
@@ -1503,6 +1510,8 @@ selectedStage:selectedStage
 );
 
 }catch(e){}
+
+if(cloudWalletReady) scheduleCloudWalletSave();
 
 }
 
@@ -3593,6 +3602,7 @@ ownerAccess = false;
 }
 
 updateAccountUI();
+if(userEmail) syncCloudWallet();
 
 }
 
@@ -3734,6 +3744,65 @@ async function authorizedRequest(path, options){
   }
 }
 
+/* مزامنة العملات والتطويرات بين الأجهزة عند تسجيل الدخول */
+function scheduleCloudWalletSave(){
+  if(!cloudWalletReady || !cloudUserId) return;
+  if(cloudWalletSaveTimer) clearTimeout(cloudWalletSaveTimer);
+  cloudWalletSaveTimer=setTimeout(saveCloudWallet,700);
+}
+async function saveCloudWallet(){
+  if(!cloudWalletReady || !cloudUserId) return;
+  if(cloudWalletSaving){cloudWalletSaveAgain=true;return;}
+  cloudWalletSaving=true;
+  try{
+    var payload={
+      coins:Math.max(0,Math.floor(Number(coins)||0)),
+      owned:owned,
+      selected_skin:selectedSkin,
+      unlocked_stage:Math.max(1,Math.floor(Number(unlockedStage)||1)),
+      updated_at:new Date().toISOString()
+    };
+    await authorizedRequest("/rest/v1/wall_player_wallets?user_id=eq."+encodeURIComponent(cloudUserId),{
+      method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify(payload)
+    });
+  }catch(e){console.warn("Cloud wallet save:",e.message);}
+  finally{
+    cloudWalletSaving=false;
+    if(cloudWalletSaveAgain){cloudWalletSaveAgain=false;saveCloudWallet();}
+  }
+}
+async function syncCloudWallet(){
+  var auth={};
+  try{auth=JSON.parse(localStorage.getItem(AUTH_KEY)||"{}");}catch(e){}
+  if(!auth.access_token || !userEmail) return false;
+  cloudWalletReady=false;cloudUserId="";
+  try{
+    var user=await authorizedRequest("/auth/v1/user",{method:"GET"});
+    if(!user||!user.id)throw new Error("تعذر تحديد الحساب الحالي.");
+    cloudUserId=user.id;
+    var rows=await authorizedRequest("/rest/v1/wall_player_wallets?user_id=eq."+encodeURIComponent(cloudUserId)+"&select=*",{method:"GET"});
+    if(Array.isArray(rows)&&rows.length){
+      var w=rows[0];
+      coins=Number.isFinite(Number(w.coins))?Math.max(0,Number(w.coins)):coins;
+      owned=Object.assign(owned,w.owned||{});
+      selectedSkin=w.selected_skin||selectedSkin;
+      unlockedStage=Math.max(1,Number(w.unlocked_stage)||1);
+    }else{
+      await authorizedRequest("/rest/v1/wall_player_wallets",{
+        method:"POST",headers:{"Prefer":"return=minimal"},
+        body:JSON.stringify({user_id:cloudUserId,coins:Math.max(0,Math.floor(Number(coins)||0)),owned:owned,selected_skin:selectedSkin,unlocked_stage:Math.max(1,Math.floor(Number(unlockedStage)||1))})
+      });
+    }
+    cloudWalletReady=true;
+    updateCoins();applySkin();applyPaddleUpgrades();renderStore();renderTrophies();saveData();
+    return true;
+  }catch(e){
+    cloudWalletReady=false;cloudUserId="";
+    console.warn("Cloud wallet load:",e.message);
+    return false;
+  }
+}
+
 /* =========================================
 تسجيل الدخول
 ========================================= */
@@ -3801,6 +3870,7 @@ msg.innerHTML =
 "✅ تم تسجيل الدخول. يمكنك الآن تشغيل اللعبة.";
 
 await checkAccess();
+await syncCloudWallet();
 
 }catch(e){
 
@@ -3879,6 +3949,7 @@ updateAccountUI();
 
 msg.innerHTML =
 "✅ تم إنشاء الحساب وتسجيل الدخول.";
+await syncCloudWallet();
 
 }else{
 
@@ -4143,6 +4214,8 @@ document.getElementById("accountMessage").innerHTML =
 
 async function logout(){
 
+if(cloudWalletReady) await saveCloudWallet();
+
 try{
 
 var auth =
@@ -4171,6 +4244,8 @@ body:"{}"
 }catch(e){}
 
 clearAuth();
+cloudWalletReady=false;cloudUserId="";
+if(cloudWalletSaveTimer){clearTimeout(cloudWalletSaveTimer);cloudWalletSaveTimer=null;}
 
 document.getElementById("accountMessage").innerHTML =
 "تم تسجيل الخروج.";
