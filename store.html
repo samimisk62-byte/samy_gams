@@ -287,19 +287,120 @@ document.addEventListener("change",function(e){
 })();
 </script>
 
-<script>
 
+<script id="marketplaceLocalLanguage">
 (function(){
- var b=document.getElementById("universalLanguageButton");
- var shade=document.getElementById("universalSettingsShade");
- if(!b||!shade)return;
- b.addEventListener("click",function(){
-  shade.classList.add("open");
-  var section=document.getElementById("universalTranslateSection");
-  if(section){setTimeout(function(){section.scrollIntoView({behavior:"smooth",block:"start"});},80);}
+"use strict";
+var phrases={
+"🛍️ المتجر الشامل":"🛍️ Marketplace",
+"اعرض منتجاتك أو ابحث عن منتج تريده. الاتفاق على السعر والدفع والتسليم يتم مباشرة بين البائع والمشتري.":"List your products or search for something you need. Price, payment, and delivery are agreed directly between buyer and seller.",
+"🎮 العودة إلى منصة ألعابي":"🎮 Back to My Games Platform",
+"🔄 تحديث المنتجات":"🔄 Refresh products",
+"🔎 ابحث عن منتج":"🔎 Search products",
+"اسم المنتج أو وصفه":"Product name or description",
+"كل الأقسام":"All categories",
+"موبايلات وإلكترونيات":"Phones & electronics",
+"ملابس وأحذية":"Clothing & shoes",
+"أثاث ومنزل":"Furniture & home",
+"ألعاب وإكسسوارات":"Games & accessories",
+"أدوات ومعدات":"Tools & equipment",
+"مأكولات ومشروبات":"Food & drinks",
+"كتب ومستلزمات":"Books & supplies",
+"خدمات":"Services",
+"أخرى":"Other",
+"➕ أضف إعلان بيع":"➕ Create a listing",
+"يجب تسجيل الدخول بحساب منصة ألعابي حتى تتمكن من إضافة إعلان. افتح المنصة وسجّل الدخول بنفس الحساب أولًا.":"Log in to My Games Platform before adding a listing. Use the same account.",
+"اسم المنتج *":"Product name *",
+"مثال: هاتف مستعمل بحالة جيدة":"Example: used phone in good condition",
+"القسم *":"Category *",
+"اختر القسم":"Choose a category",
+"السعر *":"Price *",
+"السعر":"Price",
+"جنيه مصري":"Egyptian pounds",
+"دولار أمريكي":"US dollars",
+"وصف المنتج *":"Product description *",
+"اكتب الحالة والمواصفات وأي تفاصيل مهمة (5 أحرف على الأقل)":"Describe condition, specifications, and details (at least 5 characters)",
+"اسم العرض *":"Display name *",
+"اسم البائع الظاهر":"Seller display name",
+"رقم واتساب للتواصل *":"WhatsApp contact number *",
+"مثال: 2010xxxxxxxx":"Example: 2010xxxxxxxx",
+"رابط صورة المنتج (اختياري)":"Product image URL (optional)",
+"⚠️ المرحلة الأولى تستخدم رابط صورة من الإنترنت. لا ترسل كلمة مرور أو بيانات بنكية. افحص المنتج بنفسك واتفق مع البائع مباشرة، ولا تحوّل المال قبل التأكد من البائع والسلعة.":"⚠️ This version uses an online image URL. Never share passwords or bank details. Check the item and seller, and agree directly before sending money.",
+"📢 نشر الإعلان":"📢 Publish listing",
+"مسح الحقول":"Clear fields",
+"🛒 المنتجات المعروضة":"🛒 Listed products",
+"جارٍ تحميل المنتجات...":"Loading products...",
+"جارٍ نشر الإعلان...":"Publishing listing...",
+"لم يتم تحميل المنتجات":"Products have not loaded",
+"لا توجد منتجات مطابقة الآن. جرّب كلمة بحث أخرى أو أضف أول إعلان.":"No matching products yet. Try another search or add the first listing.",
+"عدد المنتجات المعروضة: ":"Products shown: ",
+"البائع: ":"Seller: ",
+"🟢 تواصل مع البائع عبر واتساب":"🟢 Contact seller on WhatsApp",
+"رقم التواصل غير صالح؛ راجع الإعلان.":"Invalid contact number; check the listing.",
+"🗑️ حذف إعلاني":"🗑️ Delete my listing",
+"تم العثور على جلسة دخولك. يمكنك نشر إعلان باسم حسابك.":"Your login session was found. You can publish a listing under your account.",
+"يجب تسجيل الدخول بحساب منصة ألعابي حتى تتمكن من إضافة إعلان. افتح المنصة وسجّل الدخول بنفس الحساب أولًا.":"Log in to My Games Platform before adding a listing. Use the same account.",
+"راجع الحقول المطلوبة وتأكد من صحتها.":"Check the required fields and make sure they are valid.",
+"رابط الصورة غير صحيح. استخدم رابطًا يبدأ بـ https://":"Invalid image URL. Use a URL beginning with https://",
+"تم نشر إعلانك بنجاح.":"Your listing was published successfully.",
+"تعذر تحميل المنتجات":"Could not load products",
+"تأكد من اتصال الإنترنت.":"Check your internet connection.",
+"تعذر نشر الإعلان":"Could not publish listing",
+"تعذر حذف الإعلان":"Could not delete listing",
+"هل تريد حذف إعلان «":"Delete listing “",
+"»؟":"”?",
+"تم حذف الإعلان.":"Listing deleted."
+};
+var original=new WeakMap(),originalAttrs=new WeakMap(),current="ar",busy=false;
+function convert(value,lang){
+ if(lang!=="en")return value;
+ var trimmed=value.trim();
+ if(!Object.prototype.hasOwnProperty.call(phrases,trimmed))return value;
+ return value.replace(trimmed,phrases[trimmed]);
+}
+function walk(root,lang){
+ if(!root)return;
+ busy=true;
+ try{
+  var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  var nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(function(n){
+   if(!original.has(n))original.set(n,n.nodeValue);
+   var base=original.get(n);var next=convert(base,lang);
+   if(n.nodeValue!==next)n.nodeValue=next;
+  });
+  var els=[];
+  if(root.nodeType===1)els.push(root);
+  if(root.querySelectorAll)els=els.concat(Array.from(root.querySelectorAll("*")));
+  els.forEach(function(el){
+   ["placeholder","title","aria-label","value"].forEach(function(attr){
+    if(!el.hasAttribute||!el.hasAttribute(attr))return;
+    var bag=originalAttrs.get(el);if(!bag){bag={};originalAttrs.set(el,bag);}
+    if(!(attr in bag))bag[attr]=el.getAttribute(attr);
+    var next=convert(bag[attr],lang);if(el.getAttribute(attr)!==next)el.setAttribute(attr,next);
+   });
+  });
+ }finally{busy=false;}
+}
+window.setMarketplaceLanguage=function(lang){
+ current=lang==="en"?"en":"ar";
+ try{localStorage.setItem("platform_preferred_language",current);}catch(e){}
+ document.documentElement.lang=current;document.documentElement.dir=current==="en"?"ltr":"rtl";
+ walk(document.body,current);
+};
+function init(){
+ var saved="ar";try{saved=localStorage.getItem("platform_preferred_language")||"ar";}catch(e){}
+ window.setMarketplaceLanguage(saved);
+ var obs=new MutationObserver(function(records){
+  if(busy)return;
+  records.forEach(function(rec){rec.addedNodes.forEach(function(n){if(n.nodeType===1)walk(n,current);else if(n.nodeType===3){if(!original.has(n))original.set(n,n.nodeValue);var next=convert(original.get(n),current);if(n.nodeValue!==next)n.nodeValue=next;}});});
  });
+ obs.observe(document.body,{childList:true,subtree:true});
+ var b=document.getElementById("universalLanguageButton");
+ if(b)b.addEventListener("click",function(e){e.preventDefault();e.stopImmediatePropagation();window.setMarketplaceLanguage(current==="en"?"ar":"en");},true);
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
-
 </script>
 </body>
 </html>
