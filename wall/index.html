@@ -2915,7 +2915,8 @@ startMusic();
 function setupStageObstacles(){
 var field = document.getElementById("field");
 var obstacles = field.querySelectorAll(".obstacle");
-var count = 0;
+/* تزداد الحواجز تدريجيًا مع تقدم اللاعب: واحد من المرحلة 3، واثنان من 8، وثلاثة من 15. */
+var count = stage>=15 ? 3 : (stage>=8 ? 2 : (stage>=3 ? 1 : 0));
 for(var i=0;i<obstacles.length;i++){
  var ob=obstacles[i];
  ob.style.display = i<count ? "block" : "none";
@@ -2924,12 +2925,12 @@ for(var i=0;i<obstacles.length;i++){
  ob.dataset.baseTop = [30,48,65][i] + "";
  ob.style.left = ob.dataset.baseLeft + "%";
  ob.style.top = ob.dataset.baseTop + "%";
- if((stage>=3 && i===2) || (stage>=8 && i===1) || (stage>=15 && i===0)){
+ if((stage>=3 && i===0) || (stage>=8 && i===1) || (stage>=15 && i===2)){
    ob.classList.add("moving");
  }
 }
 var msg = document.getElementById("message");
-msg.innerHTML="🎾 اللعب بدون حواجز — الملعب مفتوح في كل المراحل";
+msg.innerHTML = count ? "🧱 الحواجز: " + count + (count===1 ? " — احذر الحاجز المتحرك!" : " — احذر الحواجز المتحركة!") : "🎾 المرحلة التدريبية — الملعب مفتوح بدون حواجز";
 }
 
 function moveStageObstacles(){
