@@ -2445,9 +2445,10 @@ speed = 2.25;
 if(difficulty==="hard"){speed+=.45;}
 if(difficulty==="medium"){speed+=.12;}
 if(owned.wallUpgrade){
-speed += .20;
- speed *= getUniversalGameMultiplier("aiSpeed");
+ speed += .20;
 }
+/* إعداد سرعة الكمبيوتر يؤثر دائمًا، وليس فقط بعد شراء تطوير الحائط. */
+speed *= getUniversalGameMultiplier("aiSpeed");
 
 var target;
 
