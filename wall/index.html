@@ -2285,6 +2285,7 @@ if(difficulty==="hard"){speed+=.45;}
 if(difficulty==="medium"){speed+=.12;}
 if(owned.wallUpgrade){
 speed += .20;
+ speed *= getUniversalGameMultiplier("aiSpeed");
 }
 
 var target;
