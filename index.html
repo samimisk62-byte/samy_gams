@@ -913,7 +913,9 @@ async function loadOwnerDashboard(){
       details.textContent="لا يوجد طلب معلّق لهذه اللعبة حاليًا. عند إنشاء العميل طلب اشتراك، سيظهر هنا زر اعتماد الدفع بعد إدخال رقم التحويل والتحقق من وصول المبلغ.";
       card.appendChild(details);
       const row=document.createElement("div");row.className="row";
-      const waiting=document.createElement("button");waiting.className="gray";waiting.textContent="⏳ لا يوجد طلب لاعتماده";waiting.disabled=true;row.appendChild(waiting);card.appendChild(row);
+      const approve=document.createElement("button");approve.className="green";approve.textContent="✅ اعتماد الدفع وتفعيل الاشتراك";approve.disabled=true;approve.title="لا يوجد طلب شراء لهذه اللعبة حاليًا";
+      const reject=document.createElement("button");reject.className="red";reject.textContent="❌ رفض الطلب";reject.disabled=true;reject.title="لا يوجد طلب شراء لهذه اللعبة حاليًا";
+      row.append(approve,reject);card.appendChild(row);
       list.appendChild(card);
     });
   }catch(error){
