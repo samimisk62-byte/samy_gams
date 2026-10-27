@@ -1716,7 +1716,8 @@ var rows=await authorizedRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURICo
 if(!Array.isArray(rows)||!rows[0])return;
 var room=rows[0];
 if(onlineRole==="host"&&room.guest_id){
-blueX=Number(room.guest_blue_x)||blueX;movePlayer("bluePlayer",blueX);
+var remoteBlueX=Number(room.guest_blue_x);
+if(Number.isFinite(remoteBlueX)){blueX=Math.max(50,Math.min(85,remoteBlueX));movePlayer("bluePlayer",blueX);}
 var guestName=(room.guest_name||"الأزرق").trim()||"الأزرق";
 document.getElementById("blueNameInput").value=guestName;
 setRoomStatus(gameRunning?"🟢 الهاتف الثاني متصل — المباراة جارية.":"🟢 الهاتف الثاني متصل! الرمز: "+onlineRoomCode+" — اختر المرحلة وابدأ المباراة.");
@@ -1746,7 +1747,8 @@ authorizedRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineR
 function applyOnlineSnapshot(st){
 if(onlineRole!=="guest"||!st)return;
 bx=Number(st.bx);by=Number(st.by);vx=Number(st.vx);vy=Number(st.vy);
-redX=Number(st.redX);blueX=Number(st.blueX);
+redX=Number(st.redX);
+/* اللاعب الأزرق يتحكم في مضربه محليًا؛ لا نستبدل موضعه كل تحديث من المضيف */
 redScore=Number(st.redScore)||0;blueScore=Number(st.blueScore)||0;
 if(Number.isFinite(Number(st.timeLeft)))timeLeft=Number(st.timeLeft);
 if(Number.isFinite(Number(st.stage)))stage=Number(st.stage);
