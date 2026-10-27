@@ -1367,6 +1367,7 @@ var onlinePollTimer = null;
 var onlineSnapshotTimer = null;
 var onlineLastSnapshotAt = 0;
 var onlineSending = false;
+var onlineMatchStarted = false;
 
 var audioContext = null;
 var musicTimer = null;
@@ -1666,7 +1667,7 @@ method:"POST",headers:{"Prefer":"return=representation"},
 body:JSON.stringify({room_code:code,host_id:user.id,host_name:name,status:"waiting",game_state:{}})
 });
 if(!Array.isArray(rows)||!rows[0])throw new Error("لم يتم إنشاء الغرفة.");
-onlineRoomId=rows[0].id;onlineRoomCode=code;onlineRole="host";onlineMode=true;playerCount=2;
+onlineRoomId=rows[0].id;onlineRoomCode=code;onlineRole="host";onlineMode=true;onlineMatchStarted=false;playerCount=2;
 document.getElementById("roomCodeInput").value=code;
 setRoomStatus("✅ رمز غرفتك: <strong style='font-size:25px;letter-spacing:4px'>"+code+"</strong><br>أرسل الرمز للهاتف الثاني. بعد دخوله اختر المرحلة وابدأ المباراة.");
 startOnlinePolling();
@@ -1696,7 +1697,7 @@ function currentOnlineSnapshot(){return {running:gameRunning,paused:paused,bx:bx
 async function sendOnlineSnapshot(){
 if(!onlineMode||onlineRole!=="host"||!onlineRoomId||onlineSending)return;
 onlineSending=true;
-try{await authorizedRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineRoomId),{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({game_state:currentOnlineSnapshot(),status:gameRunning?"playing":"finished",updated_at:new Date().toISOString()})});}
+try{await authorizedRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineRoomId),{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({game_state:currentOnlineSnapshot(),status:!onlineMatchStarted?"waiting":(gameRunning?"playing":"finished"),updated_at:new Date().toISOString()})});}
 catch(e){console.warn("Room sync:",e.message);}finally{onlineSending=false;}
 }
 async function pollOnlineRoom(){
@@ -1705,7 +1706,12 @@ try{
 var rows=await authorizedRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineRoomId)+"&select=*",{method:"GET"});
 if(!Array.isArray(rows)||!rows[0])return;
 var room=rows[0];
-if(onlineRole==="host"&&room.guest_id){blueX=Number(room.guest_blue_x)||blueX;movePlayer("bluePlayer",blueX);setRoomStatus("🟢 الهاتف الثاني متصل! الرمز: "+onlineRoomCode+" — اختر المرحلة وابدأ المباراة.");}
+if(onlineRole==="host"&&room.guest_id){
+blueX=Number(room.guest_blue_x)||blueX;movePlayer("bluePlayer",blueX);
+var guestName=(room.guest_name||"الأزرق").trim()||"الأزرق";
+document.getElementById("blueNameInput").value=guestName;
+setRoomStatus(gameRunning?"🟢 الهاتف الثاني متصل — المباراة جارية.":"🟢 الهاتف الثاني متصل! الرمز: "+onlineRoomCode+" — اختر المرحلة وابدأ المباراة.");
+}
 if(onlineRole==="guest"&&room.game_state&&room.game_state.running&&!gameRunning)beginGuestGame(room.game_state);
 if(onlineRole==="guest"&&room.game_state&&room.game_state.at&&room.game_state.at>onlineLastSnapshotAt){onlineLastSnapshotAt=room.game_state.at;applyOnlineSnapshot(room.game_state);}
 if(onlineRole==="guest"&&room.status==="finished"){gameRunning=false;if(gameTimer!==null){clearInterval(gameTimer);gameTimer=null;}if(ballTimer!==null){clearInterval(ballTimer);ballTimer=null;}setRoomStatus("🏁 انتهت المباراة على الهاتف المضيف.");}
@@ -2028,6 +2034,7 @@ serveBall();
 
 gameRunning = true;
 paused = false;
+if(onlineMode && onlineRole==="host") onlineMatchStarted=true;
 
 document.getElementById("pause").innerHTML = "⏸️ إيقاف";
 document.getElementById("message").innerHTML = "🎾 بدأت المباراة";
@@ -2755,6 +2762,7 @@ serveBall();
 
 gameRunning = true;
 paused = false;
+if(onlineMode && onlineRole==="host") onlineMatchStarted=true;
 
 document.getElementById("result").style.display = "none";
 document.getElementById("pause").innerHTML = "⏸️ إيقاف";
