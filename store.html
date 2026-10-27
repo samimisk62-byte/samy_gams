@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🛍️ المتجر الشامل | منصة ألعابي</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101820;color:#fff;font-family:Arial,Tahoma,sans-serif}.wrap{max-width:1100px;margin:auto;padding:12px}header,.panel,.product{background:#182a38;border:1px solid #304858;border-radius:16px;padding:15px;margin-bottom:12px}header{text-align:center}h1{margin:4px 0 8px;font-size:27px}h2{margin:0 0 12px;font-size:20px}.muted{color:#c6d5de;line-height:1.7;font-size:14px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}button,.btn{border:0;border-radius:11px;padding:12px 14px;margin:3px;font-size:15px;font-weight:bold;text-decoration:none;cursor:pointer;color:#fff;background:#1976d2;display:inline-flex;align-items:center;justify-content:center}.green{background:#109b55}.orange{background:#d98317}.gray{background:#53636d}.red{background:#c73942}.whatsapp{background:#128c4a}.row>*{flex:1;min-width:130px}input,select,textarea{width:100%;padding:12px;border:1px solid #496273;border-radius:10px;margin:5px 0;background:#fff;color:#111;font:16px Arial}textarea{min-height:100px;resize:vertical}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.formgrid .full{grid-column:1/-1}.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.product{margin:0;display:flex;flex-direction:column;gap:7px;overflow:hidden}.product img{width:100%;height:190px;object-fit:cover;border-radius:10px;background:#0d1920}.product h3{margin:3px 0;font-size:19px}.price{font-size:20px;font-weight:bold;color:#7cffb2}.tag{display:inline-block;background:#263f50;border-radius:20px;padding:5px 9px;font-size:12px;width:max-content}.empty{text-align:center;padding:28px;color:#d2dee5}.notice{background:#243a48;border-radius:10px;padding:10px;line-height:1.7}.danger{color:#ffb6b6}#status{display:none;padding:10px;border-radius:10px;margin-bottom:10px;line-height:1.6}footer{text-align:center;color:#8ea2ae;padding:15px;font-size:13px}@media(max-width:560px){.formgrid{grid-template-columns:1fr}.formgrid .full{grid-column:auto}h1{font-size:23px}.product img{height:170px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>🛍️ المتجر الشامل</h1>
+<p class="muted">اعرض منتجاتك أو ابحث عن منتج تريده. الاتفاق على السعر والدفع والتسليم يتم مباشرة بين البائع والمشتري.</p>
+<div class="row">
+<a class="btn gray" href="./">🎮 العودة إلى منصة ألعابي</a>
+<button class="green" id="refreshBtn">🔄 تحديث المنتجات</button>
+</div>
+</header>
+<div id="status" role="status" aria-live="polite"></div>
+<section class="panel">
+<h2>🔎 ابحث عن منتج</h2>
+<div class="formgrid">
+<div><input id="searchInput" type="search" placeholder="اسم المنتج أو وصفه"></div>
+<div><select id="categoryFilter"><option value="">كل الأقسام</option><option>موبايلات وإلكترونيات</option><option>ملابس وأحذية</option><option>أثاث ومنزل</option><option>ألعاب وإكسسوارات</option><option>أدوات ومعدات</option><option>مأكولات ومشروبات</option><option>كتب ومستلزمات</option><option>خدمات</option><option>أخرى</option></select></div>
+</div>
+</section>
+<section class="panel">
+<h2>➕ أضف إعلان بيع</h2>
+<p class="muted" id="loginHint">يجب تسجيل الدخول بحساب منصة ألعابي حتى تتمكن من إضافة إعلان. افتح المنصة وسجّل الدخول بنفس الحساب أولًا.</p>
+<form id="listingForm">
+<div class="formgrid">
+<div><label for="title">اسم المنتج *</label><input id="title" maxlength="100" required placeholder="مثال: هاتف مستعمل بحالة جيدة"></div>
+<div><label for="category">القسم *</label><select id="category" required><option value="">اختر القسم</option><option>موبايلات وإلكترونيات</option><option>ملابس وأحذية</option><option>أثاث ومنزل</option><option>ألعاب وإكسسوارات</option><option>أدوات ومعدات</option><option>مأكولات ومشروبات</option><option>كتب ومستلزمات</option><option>خدمات</option><option>أخرى</option></select></div>
+<div><label for="price">السعر *</label><input id="price" type="number" min="0" max="999999999" step="0.01" required placeholder="السعر"></div>
+<div><label for="currency">العملة</label><select id="currency"><option value="EGP">جنيه مصري</option><option value="USD">دولار أمريكي</option></select></div>
+<div class="full"><label for="description">وصف المنتج *</label><textarea id="description" maxlength="3000" required placeholder="اكتب الحالة والمواصفات وأي تفاصيل مهمة (5 أحرف على الأقل)"></textarea></div>
+<div><label for="sellerName">اسم العرض *</label><input id="sellerName" maxlength="80" required placeholder="اسم البائع الظاهر"></div>
+<div><label for="contactPhone">رقم واتساب للتواصل *</label><input id="contactPhone" type="tel" maxlength="40" required placeholder="مثال: 2010xxxxxxxx"></div>
+<div class="full"><label for="imageUrl">رابط صورة المنتج (اختياري)</label><input id="imageUrl" type="url" placeholder="https://..."></div>
+</div>
+<div class="notice muted">⚠️ المرحلة الأولى تستخدم رابط صورة من الإنترنت. لا ترسل كلمة مرور أو بيانات بنكية. افحص المنتج بنفسك واتفق مع البائع مباشرة، ولا تحوّل المال قبل التأكد من البائع والسلعة.</div>
+<div class="row"><button class="green" id="publishBtn" type="submit">📢 نشر الإعلان</button><button class="gray" type="reset">مسح الحقول</button></div>
+</form>
+</section>
+<section class="panel">
+<h2>🛒 المنتجات المعروضة</h2>
+<div class="muted" id="countText">جارٍ تحميل المنتجات...</div>
+<div class="products" id="products"><div class="empty">جارٍ تحميل المنتجات...</div></div>
+</section>
+<footer>🛍️ المتجر الشامل — جزء من منصة ألعابي © 2026</footer>
+</div>
+<script>
+"use strict";
+const SUPABASE_URL="https://auptwgjiivhglxtdjlnd.supabase.co";
+const SUPABASE_KEY="sb_publishable_6dszOZKIdlA57hHf2E3V5Q_VO-ewwtM";
+let session=null, products=[];
+const $=id=>document.getElementById(id);
+function message(text,good=false){const el=$("status");el.textContent=text;el.style.display="block";el.style.background=good?"#173d2b":"#3b2930";el.style.color=good?"#baffd5":"#ffd8dc";el.scrollIntoView({behavior:"smooth",block:"nearest"});}
+function getSession(){try{session=JSON.parse(localStorage.getItem("game_platform_session")||"null");}catch(e){session=null;}const ok=!!(session&&session.access_token&&session.user&&session.user.id);$("loginHint").textContent=ok?"تم العثور على جلسة دخولك. يمكنك نشر إعلان باسم حسابك.":"يجب تسجيل الدخول بحساب منصة ألعابي حتى تتمكن من إضافة إعلان. افتح المنصة وسجّل الدخول بنفس الحساب أولًا.";$("publishBtn").disabled=!ok;return ok;}
+function headers(auth=false){const h={"apikey":SUPABASE_KEY,"Content-Type":"application/json"};if(auth&&session?.access_token)h.Authorization="Bearer "+session.access_token;return h;}
+function safeUrl(value){try{const u=new URL(value);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch(e){return "";}}
+function digitsPhone(value){return String(value||"").replace(/[^0-9]/g,"").replace(/^00/,"");}
+function waLink(phone){const digits=digitsPhone(phone);return digits.length>=8&&digits.length<=15?"https://wa.me/"+digits:"";}
+function make(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
+async function loadProducts(){const box=$("products");box.replaceChildren(make("div","empty","جارٍ تحميل المنتجات..."));try{const response=await fetch(SUPABASE_URL+"/rest/v1/marketplace_products?select=id,seller_id,title,description,category,price,currency,image_url,contact_phone,seller_name,is_active,created_at&is_active=eq.true&order=created_at.desc",{headers:headers(false)});if(!response.ok)throw new Error("تعذر تحميل المنتجات (رمز "+response.status+").");products=await response.json();renderProducts();}catch(e){box.replaceChildren(make("div","empty",e.message+" تأكد من اتصال الإنترنت."));$("countText").textContent="لم يتم تحميل المنتجات";}}
+function renderProducts(){const term=$("searchInput").value.trim().toLocaleLowerCase("ar");const cat=$("categoryFilter").value;const shown=products.filter(p=>(!cat||p.category===cat)&&(!term||(p.title+" "+p.description+" "+p.category+" "+p.seller_name).toLocaleLowerCase("ar").includes(term)));const box=$("products");box.replaceChildren();$("countText").textContent="عدد المنتجات المعروضة: "+shown.length; if(!shown.length){box.appendChild(make("div","empty","لا توجد منتجات مطابقة الآن. جرّب كلمة بحث أخرى أو أضف أول إعلان."));return;}shown.forEach(p=>{const card=make("article","product");const imgUrl=safeUrl(p.image_url||"");if(imgUrl){const img=make("img");img.src=imgUrl;img.alt=p.title;img.loading="lazy";img.referrerPolicy="no-referrer";img.onerror=()=>img.remove();card.appendChild(img);}card.appendChild(make("span","tag",p.category));card.appendChild(make("h3","",p.title));card.appendChild(make("div","price",Number(p.price).toLocaleString("ar-EG",{maximumFractionDigits:2})+(p.currency==="USD"?" دولار":" جنيه")));card.appendChild(make("p","muted",p.description));card.appendChild(make("div","muted","البائع: "+p.seller_name));const wa=waLink(p.contact_phone);if(wa){const link=make("a","btn whatsapp","🟢 تواصل مع البائع عبر واتساب");link.href=wa;link.target="_blank";link.rel="noopener noreferrer";card.appendChild(link);}else{card.appendChild(make("p","muted","رقم التواصل غير صالح؛ راجع الإعلان."));}if(session?.user?.id===p.seller_id){const del=make("button","red","🗑️ حذف إعلاني");del.type="button";del.addEventListener("click",()=>deleteProduct(p));card.appendChild(del);}box.appendChild(card);});}
+async function submitListing(event){event.preventDefault();if(!getSession()){message("سجّل الدخول إلى منصة ألعابي أولًا، ثم ارجع إلى المتجر.");return;}const title=$("title").value.trim(),description=$("description").value.trim(),category=$("category").value,price=Number($("price").value),currency=$("currency").value,seller_name=$("sellerName").value.trim(),contact_phone=$("contactPhone").value.trim(),image_url=safeUrl($("imageUrl").value.trim())||null;if(title.length<2||description.length<5||!category||!Number.isFinite(price)||price<0||seller_name.length<2||contact_phone.length<5){message("راجع الحقول المطلوبة وتأكد من صحتها.");return;}if($("imageUrl").value.trim()&&!image_url){message("رابط الصورة غير صحيح. استخدم رابطًا يبدأ بـ https://");return;}const btn=$("publishBtn");btn.disabled=true;btn.textContent="جارٍ نشر الإعلان...";try{const response=await fetch(SUPABASE_URL+"/rest/v1/marketplace_products",{method:"POST",headers:{...headers(true),"Prefer":"return=representation"},body:JSON.stringify({seller_id:session.user.id,title,description,category,price,currency,seller_name,contact_phone,image_url,is_active:true})});const data=await response.json().catch(()=>null);if(!response.ok)throw new Error(data?.message||data?.hint||"تعذر نشر الإعلان (رمز "+response.status+").");$("listingForm").reset();message("✅ تم نشر إعلانك بنجاح.",true);await loadProducts();}catch(e){message(e.message);}finally{btn.textContent="📢 نشر الإعلان";btn.disabled=!getSession();}}
+async function deleteProduct(p){if(!session?.access_token||session.user.id!==p.seller_id)return;if(!confirm("هل تريد حذف إعلان «"+p.title+"»؟"))return;try{const r=await fetch(SUPABASE_URL+"/rest/v1/marketplace_products?id=eq."+encodeURIComponent(p.id),{method:"DELETE",headers:{...headers(true),"Prefer":"return=minimal"}});if(!r.ok)throw new Error("تعذر حذف الإعلان (رمز "+r.status+").");message("تم حذف الإعلان.",true);await loadProducts();}catch(e){message(e.message);}}
+$("listingForm").addEventListener("submit",submitListing);
+$("refreshBtn").addEventListener("click",loadProducts);
+$("searchInput").addEventListener("input",renderProducts);
+$("categoryFilter").addEventListener("change",renderProducts);
+getSession();loadProducts();
+</script>
+</body>
+</html>
