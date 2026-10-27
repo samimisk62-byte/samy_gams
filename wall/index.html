@@ -2560,6 +2560,9 @@ if(!gameRunning || paused){
 return;
 }
 
+/* في مباراة الإنترنت يتحكم الضيف فقط في المضرب الأزرق */
+if(onlineMode && onlineRole==="host") return;
+
 if(playerCount !== 2){
 return;
 }
