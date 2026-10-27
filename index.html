@@ -106,6 +106,21 @@ button{font-size:14px}
 .password-field .toggle-password{position:absolute;left:7px;top:50%;transform:translateY(-50%);width:42px;height:40px;margin:0;padding:0;border:1px solid #607d8b;border-radius:9px;background:#eaf5fb;color:#163243;font-size:19px;display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer}
 .password-field .toggle-password:focus-visible{outline:3px solid #35c6df;outline-offset:2px}
 
+/* أدوات الإنترنت والتواصل */
+#internetTools h2{margin-bottom:6px}
+#webSearchForm{gap:7px}
+#webSearchForm input{margin:5px 0;flex:2}
+.internetButtons{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:9px;margin-top:12px}
+.internetButton{display:flex;align-items:center;justify-content:center;min-height:48px;padding:12px 8px;border-radius:12px;text-decoration:none;color:#fff;font-weight:bold;text-align:center;border:1px solid #ffffff28;box-shadow:0 3px 8px #0003}
+.internetButton:active{transform:scale(.98)}
+.browserButton{background:#2869b2}
+.facebookButton{background:#1877f2}
+.whatsappButton{background:#128c4a}
+.instagramButton{background:linear-gradient(120deg,#7b2ff7,#f107a3,#f5a623)}
+.youtubeButton{background:#c5222a}
+.tiktokButton{background:#191919;border-color:#36e7e7}
+.telegramButton{background:#168ac4}
+@media(max-width:420px){.internetButtons{grid-template-columns:repeat(2,minmax(0,1fr))}#webSearchForm button{min-width:100%}}
 </style>
 </head>
 
@@ -183,6 +198,26 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <button id="adminOpenBtn" class="orange">🔐 لوحة الإدارة</button>
 <button id="logoutBtn" class="gray">🚪 خروج</button>
 </div>
+</div>
+
+<!-- أدوات الإنترنت والتواصل الاجتماعي -->
+<div id="internetTools" class="panel">
+  <h2>🌐 الإنترنت والتواصل الاجتماعي</h2>
+  <p class="small">ابحث في الإنترنت أو افتح الموقع الذي تريده. ستُفتح المواقع الخارجية في صفحة جديدة.</p>
+  <form id="webSearchForm" class="row" style="align-items:center">
+    <input id="webSearchInput" type="search" placeholder="🔎 اكتب ما تريد البحث عنه..." aria-label="بحث في الإنترنت" style="flex:1;min-width:180px">
+    <button type="submit" class="green" style="flex:1">🔎 بحث في الإنترنت</button>
+  </form>
+  <div class="internetButtons">
+    <a class="internetButton browserButton" href="https://www.google.com/" target="_blank" rel="noopener noreferrer">🌐 متصفح الإنترنت</a>
+    <a class="internetButton facebookButton" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">📘 فيسبوك</a>
+    <a class="internetButton whatsappButton" href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer">🟢 واتساب ويب</a>
+    <a class="internetButton instagramButton" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">📸 إنستجرام</a>
+    <a class="internetButton youtubeButton" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">▶️ يوتيوب</a>
+    <a class="internetButton tiktokButton" href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">🎵 تيك توك</a>
+    <a class="internetButton telegramButton" href="https://web.telegram.org/" target="_blank" rel="noopener noreferrer">✈️ تيليجرام</a>
+  </div>
+  <p class="small">ملاحظة: تشغيل المواقع والتطبيقات يحتاج إلى الإنترنت، وقد يطلب الموقع تسجيل الدخول. زر المتصفح يفتح Google؛ أما التصفح داخل صفحة المنصة نفسها فبعض المواقع لا تسمح به.</p>
 </div>
 
 <div id="adminPanel" class="panel">
@@ -995,6 +1030,14 @@ document.querySelectorAll("[data-password-target]").forEach(function(button){
     button.setAttribute("aria-label",show?"إخفاء كلمة المرور":"إظهار كلمة المرور");
     button.setAttribute("aria-pressed",show?"true":"false");
   });
+});
+
+/* البحث في الإنترنت */
+$("webSearchForm").addEventListener("submit",function(event){
+  event.preventDefault();
+  const query=$("webSearchInput").value.trim();
+  if(!query){showMessage("اكتب كلمة أو جملة للبحث أولًا.");$("webSearchInput").focus();return;}
+  window.open("https://www.google.com/search?q="+encodeURIComponent(query),"_blank","noopener,noreferrer");
 });
 
 /* ربط الأزرار */
