@@ -1014,7 +1014,7 @@ async function changeOwnerOrderStatus(orderId,status){
 
 /* تشغيل اللعبة */
 async function openGame(button){
-  const url=button.dataset.url;const gameCode=button.dataset.game;
+  const originalUrl=button.dataset.url;const gameCode=button.dataset.game;let url=originalUrl;try{const preferredLanguage=localStorage.getItem("platform_preferred_language")||"";if(preferredLanguage){const launchUrl=new URL(originalUrl,window.location.href);launchUrl.searchParams.set("platform_lang",preferredLanguage);url=launchUrl.toString();}}catch(languageError){}
   if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا لتشغيل الألعاب.");return;}
   const allowed=await checkGameAccess(gameCode);
   if(!allowed){showMessage("🔒 لا يوجد اشتراك فعال للعبة "+(GAME_NAMES[gameCode]||gameCode)+". اضغط اشتراك / تجديد أولًا.");return;}
