@@ -1665,6 +1665,8 @@ function onlineAuth(){try{return JSON.parse(localStorage.getItem(AUTH_KEY)||"{}"
 async function createOnlineRoom(){
 var auth=onlineAuth();
 if(!userEmail||!auth.access_token){setRoomStatus("🔒 افتح الحساب وسجّل الدخول أولًا.");showAccount();return;}
+var roomAccessOk=await checkAccess();
+if(!roomAccessOk){setRoomStatus("🔒 يلزم اشتراك فعال في الحائط الصعب على هذا الحساب لإنشاء غرفة.");return;}
 setRoomStatus("⏳ جاري إنشاء الغرفة...");
 try{
 var user=await authorizedRequest("/auth/v1/user",{method:"GET"});
@@ -1685,6 +1687,8 @@ startOnlinePolling();
 async function joinOnlineRoom(){
 var auth=onlineAuth();
 if(!userEmail||!auth.access_token){setRoomStatus("🔒 افتح الحساب وسجّل الدخول أولًا.");showAccount();return;}
+var roomAccessOk=await checkAccess();
+if(!roomAccessOk){setRoomStatus("🔒 يلزم اشتراك فعال في الحائط الصعب على هذا الحساب للانضمام إلى غرفة.");return;}
 var code=(document.getElementById("roomCodeInput").value||"").replace(/\D/g,"").slice(0,6);
 if(code.length!==6){setRoomStatus("اكتب رمز الغرفة المكوّن من 6 أرقام.");return;}
 setRoomStatus("⏳ جاري دخول الغرفة...");
