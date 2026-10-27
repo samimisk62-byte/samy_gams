@@ -1095,6 +1095,21 @@ $("copyWalletBtn").addEventListener("click",async function(){try{await navigator
     await refreshAccess();
   }
 })();
+
+document.querySelectorAll("[data-share-game]").forEach(function(btn){
+  btn.addEventListener("click",async function(){
+    var card=btn.closest(".game");
+    var gameButton=card&&card.querySelector("[data-game]");
+    var url=gameButton?gameButton.getAttribute("data-url"):location.href;
+    var title=btn.getAttribute("data-share-title")||"لعبة من منصة ألعابي";
+    try{
+      if(navigator.share){await navigator.share({title:title,text:"جرّب "+title+" من منصة ألعابي",url:url});}
+      else if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(url);showMessage("تم نسخ رابط اللعبة. يمكنك إرساله لأي شخص.",true);}
+      else{window.prompt("انسخ رابط اللعبة:",url);}
+    }catch(e){if(e&&e.name!=="AbortError"){window.prompt("انسخ رابط اللعبة:",url);}}
+  });
+});
+
 </script>
 
 </body>
