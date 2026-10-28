@@ -1055,7 +1055,7 @@ async function refreshAccess(){
   const codes=Object.keys(GAME_NAMES);let activeCount=0;
   for(const code of codes){const allowed=await checkGameAccess(code);if(allowed)activeCount++;const status=document.querySelector('[data-status-for="' + code + '"]');if(status)status.textContent=allowed?(platformIsOwner?"🟢 متاحة مجانًا لمالك المنصة":"🟢 الاشتراك فعال"):"🟡 لا يوجد اشتراك فعال";}
   document.querySelectorAll("[data-subscribe-game]").forEach(function(button){button.style.display=platformIsOwner?"none":"";});
-  $("accountStatus").textContent=platformIsOwner?"🟢 حساب مالك المنصة: الألعاب الأربع متاحة مجانًا":(activeCount?"🟢 لديك اشتراك فعال في "+activeCount+" لعبة":"🟡 لا توجد اشتراكات نشطة حاليًا");
+  $("accountStatus").textContent=platformIsOwner?"🟢 حساب مالك المنصة: كل ألعاب المنصة متاحة مجانًا":(activeCount?"🟢 لديك اشتراك فعال في "+activeCount+" لعبة":"🟡 لا توجد اشتراكات نشطة حاليًا");
   await loadMyOrders();
 }
 
