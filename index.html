@@ -296,6 +296,17 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 </div>
 
 <div class="game">
+<div class="gameIcon">🎯</div>
+<h3>لعبة العشرة</h3>
+<p>لعبة مستقلة بتسلسل الأرقام من ١ إلى ١٠، خمس ورقات لكل لاعب، وأرض مقلوبة وجمع الورق حتى نفاد الرزمة.</p>
+<div class="price">30 جنيه / 30 يوم<br>أو 5 دولار</div>
+<div class="accessStatus" data-status-for="alashra_ten">🔄 حالة الاشتراك: جاري الفحص</div>
+<button class="orange" data-subscribe-game="alashra_ten" data-game-name="لعبة العشرة">💳 اشتراك / تجديد</button>
+<button class="green" data-game="alashra_ten" data-url="https://samimisk62-byte.github.io/Alashra-Gam/ten.html">▶️ تشغيل اللعبة</button>
+<div class="gameShare"><button type="button" class="gray" data-share-game="alashra_ten" data-share-title="لعبة العشرة">📤 مشاركة اللعبة</button><a class="internetButton whatsappButton" target="_blank" rel="noopener noreferrer" href="https://wa.me/?text=%D9%84%D8%B9%D8%A8%D8%A9%20%D8%A7%D9%84%D8%B9%D8%B4%D8%B1%D8%A9%20https%3A%2F%2Fsamimisk62-byte.github.io%2FAlashra-Gam%2Ften.html">🟢 واتساب</a><a class="internetButton facebookButton" target="_blank" rel="noopener noreferrer" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fsamimisk62-byte.github.io%2FAlashra-Gam%2Ften.html">📘 فيسبوك</a></div>
+</div>
+
+<div class="game">
 <div class="gameIcon">🎣</div>
 <h3>صائد السمك</h3>
 <p>رحلة صيد في البحر، أسماك متعددة ومراحل وأخطار أثناء اللعب.</p>
@@ -878,7 +889,7 @@ async function checkGameAccess(gameCode){
     return (data.game_code===gameCode&&(data.owner===true||data.active===true))||data.has_access===true||data.is_active===true||data.active===true;
   }catch(e){return false;}
 }
-const GAME_NAMES={al7aet:"الحائط الصعب",alashra:"لعبة الـ٦ ورقات",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
+const GAME_NAMES={al7aet:"الحائط الصعب",alashra:"لعبة الـ٦ ورقات",alashra_ten:"لعبة العشرة",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
 function pendingOrderStorageKey(gameCode){
   return "platform_pending_order_" + (session?.user?.id || "user") + "_" + gameCode;
 }
@@ -951,7 +962,7 @@ async function loadOwnerDashboard(){
     const orders=Array.isArray(result.data?.orders)?result.data.orders:[];
     const pending=orders.filter(o=>!["paid","rejected","refunded","cancelled","expired"].includes(o.status));
     summary.textContent="✅ تم التحقق من صلاحية الإدارة. إجمالي الطلبات المعروضة: "+orders.length+" — الطلبات التي تحتاج مراجعة: "+pending.length;
-    const names={al7aet:"الحائط الصعب",alashra:"لعبة الـ٦ ورقات",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
+    const names={al7aet:"الحائط الصعب",alashra:"لعبة الـ٦ ورقات",alashra_ten:"لعبة العشرة",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
     if(!orders.length){list.textContent="لا توجد طلبات شراء حاليًا. ستظهر تفاصيل الطلب وزر الاعتماد عند إنشاء العميل طلبًا لهذه اللعبة.";}
     
     const statuses={pending:"في انتظار المراجعة",paid:"تم اعتماد الدفع",active:"مفعّل",approved:"تمت الموافقة",rejected:"مرفوض",refunded:"تم رد المبلغ",cancelled:"ملغي",expired:"منتهي"};
@@ -1387,7 +1398,7 @@ var phrases = {
 "🎮 ألعاب المنصة":"🎮 Platform games","اختر اللعبة التي تريد تشغيلها.":"Choose a game to play.","الحائط الصعب":"The Hard Wall","لعبة الكرة والمضرب. العب ضد الكمبيوتر أو لاعب آخر وتحدى المراحل.":"A ball-and-paddle game. Play against the computer or another player and beat the stages.",
 "30 جنيه / 30 يوم":"30 EGP / 30 days","أو 5 دولار":"or $5","🔄 حالة الاشتراك: جاري الفحص":"🔄 Subscription status: Checking",
 "💳 اشتراك / تجديد":"💳 Subscribe / Renew","▶️ تشغيل اللعبة":"▶️ Play game","📤 مشاركة اللعبة":"📤 Share game",
-"لعبة الـ٦ ورقات":"The Six-Card Game","صائد السمك":"Fish Hunter","رحلة صيد في البحر، أسماك متعددة ومراحل وأخطار أثناء اللعب.":"A sea fishing adventure with many fish, stages, and hazards.",
+"لعبة الـ٦ ورقات":"The Six-Card Game","لعبة العشرة":"Ten Sequence Game","صائد السمك":"Fish Hunter","رحلة صيد في البحر، أسماك متعددة ومراحل وأخطار أثناء اللعب.":"A sea fishing adventure with many fish, stages, and hazards.",
 "مطعمي":"My Restaurant","أدر مطعمك، واستقبل الزبائن واطبخ الطلبات وطوّر مطعمك.":"Manage your restaurant, serve customers, cook orders, and upgrade your restaurant.",
 "🎣 صائد السمك — اللعب داخل المنصة":"🎣 Fish Hunter — Play inside the platform","✖ إغلاق اللعبة والعودة للقائمة":"✖ Close game and return to menu",
 "🍔 مطعمي — اللعب داخل منصة ألعابي":"🍔 My Restaurant — Play inside My Games Platform","✖ إغلاق مطعمي والعودة للقائمة":"✖ Close My Restaurant and return to menu",
