@@ -677,10 +677,10 @@ function strongPasswordError(password){
   if(!/[a-z]/.test(password)) return "أضف حرفًا إنجليزيًا صغيرًا واحدًا على الأقل.";
   if(!/[A-Z]/.test(password)) return "أضف حرفًا إنجليزيًا كبيرًا واحدًا على الأقل.";
   if(!/[0-9]/.test(password)) return "أضف رقمًا واحدًا على الأقل.";
-  if(!/[!@#$%^&*()_+\-=[\]{};':"\\|<>?,./`~]/.test(password)) return "أضف رمزًا واحدًا على الأقل مثل ! أو @ أو #.";
+  const symbols = ["!","@","#","$","%","^","&","*","(",")","_","+","-","=","[","]","{","}",":",";","?",".",",","/","|"];
+  if(!Array.from(password).some(character=>symbols.includes(character))) return "أضف رمزًا واحدًا على الأقل مثل ! أو @ أو #.";
   return "";
 }
-
 /* رسائل أخطاء التسجيل بالعربية مع السماح بتصحيح البيانات وإعادة المحاولة */
 function signupErrorArabic(message){
   const m=String(message||"").toLowerCase();
