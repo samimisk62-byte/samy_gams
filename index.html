@@ -221,7 +221,7 @@ html body .skiptranslate iframe{visibility:hidden!important}
 <hr>
 <h2>📝 إنشاء حساب جديد</h2>
 <input id="signupEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
-<div class="password-field"><input id="signupPassword" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" autocomplete="new-password"><button type="button" class="toggle-password" data-password-target="signupPassword" aria-label="إظهار كلمة المرور" aria-pressed="false">👁</button></div>
+<div class="password-field"><input id="signupPassword" type="password" placeholder="8 أحرف على الأقل: كبير وصغير ورقم ورمز" autocomplete="new-password"><button type="button" class="toggle-password" data-password-target="signupPassword" aria-label="إظهار كلمة المرور" aria-pressed="false">👁</button></div>
 <div class="password-field"><input id="signupPassword2" type="password" placeholder="تأكيد كلمة المرور" autocomplete="new-password"><button type="button" class="toggle-password" data-password-target="signupPassword2" aria-label="إظهار كلمة المرور" aria-pressed="false">👁</button></div>
 <button id="signupBtn" class="green">✅ إنشاء الحساب</button>
 <p class="small">قد تحتاج إلى فتح رسالة تأكيد البريد الإلكتروني قبل تسجيل الدخول.</p>
@@ -234,7 +234,7 @@ html body .skiptranslate iframe{visibility:hidden!important}
 <p class="small">اكتب كلمة المرور الجديدة مرتين. بعد الحفظ يمكنك تسجيل الدخول بها.</p>
 
 <div class="password-field"><input id="newPassword" type="password"
-placeholder="كلمة المرور الجديدة (6 أحرف على الأقل)"
+placeholder="8 أحرف على الأقل: كبير وصغير ورقم ورمز"
 autocomplete="new-password"><button type="button" class="toggle-password" data-password-target="newPassword" aria-label="إظهار كلمة المرور" aria-pressed="false">👁</button></div>
 
 <div class="password-field"><input id="newPassword2" type="password"
@@ -671,6 +671,16 @@ async function login(){
   }
 }
 
+/* التحقق من قوة كلمة المرور للحسابات الجديدة وعند تعيين كلمة مرور عبر الاستعادة */
+function strongPasswordError(password){
+  if(password.length<8) return "كلمة المرور يجب أن تكون 8 أحرف على الأقل.";
+  if(!/[a-z]/.test(password)) return "أضف حرفًا إنجليزيًا صغيرًا واحدًا على الأقل.";
+  if(!/[A-Z]/.test(password)) return "أضف حرفًا إنجليزيًا كبيرًا واحدًا على الأقل.";
+  if(!/[0-9]/.test(password)) return "أضف رقمًا واحدًا على الأقل.";
+  if(!/[!@#$%^&*()_+\-=[\]{};':"\\|<>?,./`~]/.test(password)) return "أضف رمزًا واحدًا على الأقل مثل ! أو @ أو #.";
+  return "";
+}
+
 /* رسائل أخطاء التسجيل بالعربية مع السماح بتصحيح البيانات وإعادة المحاولة */
 function signupErrorArabic(message){
   const m=String(message||"").toLowerCase();
@@ -679,7 +689,7 @@ function signupErrorArabic(message){
   if(m.includes("invalid email")||m.includes("email address is invalid"))
     return "البريد الإلكتروني غير صحيح. راجع كتابته ثم حاول مرة أخرى.";
   if(m.includes("password")&&(m.includes("weak")||m.includes("short")||m.includes("least")))
-    return "كلمة المرور ضعيفة أو قصيرة. استخدم 6 أحرف على الأقل.";
+    return "كلمة المرور لا تحقق شروط القوة. استخدم 8 أحرف على الأقل مع حرف كبير وصغير ورقم ورمز.";
   if(m.includes("rate limit")||m.includes("too many requests"))
     return "حاولت التسجيل مرات كثيرة في وقت قصير. انتظر قليلًا ثم أعد المحاولة.";
   if(m.includes("email")&&(m.includes("send")||m.includes("smtp")||m.includes("provider")))
@@ -703,8 +713,9 @@ async function signup(){
   if(!password){
     showMessage("⚠️ اكتب كلمة المرور.");passwordInput.focus();return;
   }
-  if(password.length<6){
-    showMessage("⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل. اكتب كلمة مرور أطول.");passwordInput.focus();return;
+  const passwordProblem=strongPasswordError(password);
+  if(passwordProblem){
+    showMessage("⚠️ "+passwordProblem);passwordInput.focus();return;
   }
   if(!password2){
     showMessage("⚠️ اكتب كلمة المرور مرة أخرى في خانة التأكيد.");confirmInput.focus();return;
@@ -907,8 +918,10 @@ async function resetPassword(){
     return;
   }
 
-  if(password.length < 6){
-    showMessage("⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
+  const passwordProblem = strongPasswordError(password);
+  if(passwordProblem){
+    showMessage("⚠️ " + passwordProblem);
+    $("newPassword").focus();
     return;
   }
 
