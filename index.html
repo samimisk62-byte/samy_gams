@@ -291,6 +291,21 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <hr>
 
 <hr>
+
+<hr><section id="customGamesAdmin">
+<h2>🎮 إضافة وإدارة الألعاب الداخلية والخارجية</h2>
+<p class="small">اللعبة الداخلية: رابط داخل ملفات المنصة أو GitHub. اللعبة الخارجية: رابط موقع أو لعبة من خارج المنصة. يمكنك إضافة صورة أو فيديو غلاف لكل لعبة.</p>
+<label>اسم اللعبة</label><input id="customGameName" type="text" maxlength="100" placeholder="اسم اللعبة">
+<label>نوع اللعبة</label><select id="customGameType"><option value="internal">داخلية — ضمن المنصة / GitHub</option><option value="external">خارجية — رابط موقع آخر</option></select>
+<label>رابط تشغيل اللعبة</label><input id="customGameUrl" type="url" maxlength="1000" placeholder="https://... أو /مسار/ أو ./مسار/">
+<label>وصف اللعبة</label><textarea id="customGameDescription" rows="3" maxlength="1200" placeholder="وصف مختصر للعبة"></textarea>
+<label>السعر أو عبارة العرض</label><input id="customGamePrice" type="text" maxlength="80" value="مجانية" placeholder="مجانية أو 30 جنيه / 30 يوم">
+<label>صورة أو فيديو للعبة (اختياري — حتى 25 ميجابايت)</label><input id="customGameMedia" type="file" accept="image/*,video/*">
+<div id="customGameMediaStatus" class="small">لم يتم اختيار ملف.</div>
+<div class="row"><button id="customGameSave" class="green" type="button">💾 حفظ اللعبة وإظهارها</button><button id="customGameClear" class="gray" type="button">تفريغ الخانات</button></div>
+<div id="customGamesAdminList"></div>
+</section>
+
 <section id="broadcastAdmin">
 <h2>📨 مركز الرسائل الجماعية</h2>
 <p class="small">اكتب الرسالة مرة واحدة لنشرها داخل حسابات جميع المستخدمين. ويمكنك تجهيز نفس النص للمشاركة عبر واتساب. اختر مجموعة أو مستلمين من واتساب واضغط إرسال هناك؛ لا يتم الإرسال تلقائيًا من المنصة.</p>
@@ -346,6 +361,11 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 </div>
 
 <!-- الألعاب -->
+
+<section id="customGamesSection" class="panel" style="display:none">
+<h2>🕹️ ألعاب إضافية</h2><p class="small">ألعاب جديدة أضافتها إدارة المنصة.</p><div id="customGamesList" class="games"></div>
+</section>
+
 <div id="gamesSection">
 <div class="panel">
 <h2>🎮 ألعاب المنصة</h2>
@@ -1324,6 +1344,65 @@ async function openGame(button){
   window.location.href=url;
 }
 
+
+/* إدارة وعرض الألعاب الإضافية */
+let customGameEditingId=null,customGameUploadedMedia=null;
+async function loadCustomGames(){
+  const section=$("customGamesSection"),list=$("customGamesList");if(!section||!list||!session?.access_token)return;
+  try{const d=await callBroadcast("games");const games=d.games||[];list.textContent="";
+    if(!games.length){section.style.display="none";return;}section.style.display="block";
+    games.forEach(g=>{
+      const card=document.createElement("article");card.className="game";
+      if(g.media_url){if(g.media_type==="video"){const v=document.createElement("video");v.src=g.media_url;v.controls=true;v.playsInline=true;v.style.width="100%";v.style.maxHeight="220px";card.appendChild(v);}else{const im=document.createElement("img");im.src=g.media_url;im.alt=g.game_name;im.loading="lazy";im.style.width="100%";im.style.maxHeight="220px";im.style.objectFit="cover";im.style.borderRadius="10px";card.appendChild(im);}}
+      const h=document.createElement("h3");h.textContent=(g.game_type==="external"?"🌐 ":"🎮 ")+g.game_name;card.appendChild(h);
+      const p=document.createElement("p");p.textContent=g.description||"";card.appendChild(p);
+      const price=document.createElement("div");price.className="price";price.textContent=g.price_label||"مجانية";card.appendChild(price);
+      const a=document.createElement("a");a.className="internetButton green";a.href=g.game_url.startsWith("/")||g.game_url.startsWith("./")?new URL(g.game_url,location.href).href:g.game_url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="▶️ تشغيل اللعبة";card.appendChild(a);
+      list.appendChild(card);
+    });
+  }catch(e){section.style.display="none";}
+}
+function clearCustomGameForm(){
+  customGameEditingId=null;customGameUploadedMedia=null;
+  ["customGameName","customGameUrl","customGameDescription"].forEach(id=>$(id).value="");
+  $("customGameType").value="internal";$("customGamePrice").value="مجانية";$("customGameMedia").value="";$("customGameMediaStatus").textContent="لم يتم اختيار ملف.";
+  $("customGameSave").textContent="💾 حفظ اللعبة وإظهارها";
+}
+async function loadCustomGamesAdmin(){
+  const list=$("customGamesAdminList");if(!list)return;list.textContent="⏳ جاري تحميل الألعاب...";
+  try{const d=await callBroadcast("games_admin");list.textContent="";const games=d.games||[];
+    if(!games.length){list.textContent="لا توجد ألعاب إضافية حتى الآن.";return;}
+    games.forEach(g=>{
+      const c=document.createElement("div");c.className="dataManageCard";
+      const h=document.createElement("strong");h.textContent=(g.game_type==="external"?"🌐 خارجية: ":"🎮 داخلية: ")+g.game_name;c.appendChild(h);
+      const p=document.createElement("div");p.className="dataManageMeta";p.textContent=(g.description||"")+"
+الرابط: "+g.game_url+"
+السعر: "+g.price_label+"
+الحالة: "+(g.is_active?"ظاهرة":"مؤرشفة");c.appendChild(p);
+      if(g.is_active){const edit=document.createElement("button");edit.className="green";edit.textContent="✏️ تعديل";edit.onclick=()=>{customGameEditingId=g.id;$("customGameName").value=g.game_name;$("customGameType").value=g.game_type;$("customGameUrl").value=g.game_url;$("customGameDescription").value=g.description||"";$("customGamePrice").value=g.price_label||"مجانية";customGameUploadedMedia={media_url:g.media_url,media_type:g.media_type};$("customGameMediaStatus").textContent=g.media_url?"يوجد مرفق محفوظ؛ اختيار ملف جديد يستبدل رابط المرفق.":"لا يوجد مرفق."; $("customGameSave").textContent="💾 حفظ التعديلات";$("customGameName").scrollIntoView({behavior:"smooth",block:"center"});};c.appendChild(edit);
+        const ar=document.createElement("button");ar.className="gray";ar.textContent="📦 أرشفة";ar.onclick=async()=>{if(!confirm("إخفاء اللعبة من المنصة مع الاحتفاظ بسجلها؟"))return;try{await callBroadcast("archive_game",{id:g.id});await loadCustomGamesAdmin();await loadCustomGames();showMessage("تمت أرشفة اللعبة.",true);}catch(e){showMessage("تعذر أرشفة اللعبة: "+e.message);}};c.appendChild(ar);}
+      list.appendChild(c);
+    });
+  }catch(e){list.textContent="تعذر تحميل الألعاب: "+e.message;}
+}
+$("customGameMedia").addEventListener("change",async function(){
+ const file=this.files&&this.files[0];if(!file){customGameUploadedMedia=null;$("customGameMediaStatus").textContent="لم يتم اختيار ملف.";return;}
+ if(file.size>25*1024*1024){this.value="";$("customGameMediaStatus").textContent="حجم الملف أكبر من 25 ميجابايت.";return;}
+ $("customGameMediaStatus").textContent="⏳ جاري رفع الملف...";
+ try{customGameUploadedMedia=await uploadBroadcastMedia(file);$("customGameMediaStatus").textContent="✅ تم رفع الملف.";}
+ catch(e){customGameUploadedMedia=null;this.value="";$("customGameMediaStatus").textContent="❌ تعذر رفع الملف: "+e.message;}
+});
+$("customGameSave").addEventListener("click",async function(){
+ const name=$("customGameName").value.trim(),url=$("customGameUrl").value.trim();
+ if(name.length<2||!url){showMessage("اكتب اسم اللعبة ورابط التشغيل.");return;}
+ if($("customGameMedia").files.length&&!customGameUploadedMedia){showMessage("انتظر انتهاء رفع صورة أو فيديو اللعبة.");return;}
+ this.disabled=true;
+ try{await callBroadcast("save_game",{id:customGameEditingId,game_name:name,game_type:$("customGameType").value,game_url:url,description:$("customGameDescription").value.trim(),price_label:$("customGamePrice").value.trim()||"مجانية",media_url:customGameUploadedMedia?.media_url||null,media_type:customGameUploadedMedia?.media_type||null});
+ clearCustomGameForm();await loadCustomGamesAdmin();await loadCustomGames();showMessage("✅ تم حفظ اللعبة وإضافتها للمنصة.",true);
+ }catch(e){showMessage("❌ تعذر حفظ اللعبة: "+e.message);}finally{this.disabled=false;}
+});
+$("customGameClear").addEventListener("click",clearCustomGameForm);
+
 /* مركز الرسائل الجماعية */
 async function callBroadcast(action,payload={}){
   if(!session?.access_token)throw new Error("سجّل الدخول أولًا.");
@@ -1414,6 +1493,7 @@ async function refreshAccess(){
   $("accountStatus").textContent=platformIsOwner?"🟢 حساب مالك المنصة: كل ألعاب المنصة متاحة مجانًا":(activeCount?"🟢 لديك اشتراك فعال في "+activeCount+" لعبة":"🟡 لا توجد اشتراكات نشطة حاليًا");
   await loadMyOrders();
   await loadBroadcastFeed();
+  await loadCustomGames();
 }
 
 /* إظهار وإخفاء النماذج */
@@ -1456,7 +1536,7 @@ $("forgotBtn").addEventListener("click",forgotPassword);
 $("resetPasswordBtn").addEventListener("click",resetPassword);
 $("logoutBtn").addEventListener("click",logout);
 $("refreshBtn").addEventListener("click",refreshAccess);
-$("adminOpenBtn").addEventListener("click",function(){$("adminPanel").style.display="block";$("adminPanel").scrollIntoView({behavior:"smooth",block:"start"});loadOwnerDashboard();loadDataManagement();loadBroadcastAdmin();});
+$("adminOpenBtn").addEventListener("click",function(){$("adminPanel").style.display="block";$("adminPanel").scrollIntoView({behavior:"smooth",block:"start"});loadOwnerDashboard();loadDataManagement();loadBroadcastAdmin();loadCustomGamesAdmin();});
 $("adminReloadBtn").addEventListener("click",loadOwnerDashboard);
 $("dataManagerReload").addEventListener("click",loadDataManagement);
 $("dataManagerBackup").addEventListener("click",async function(){if(!confirm("سيتم إنشاء نسخة احتياطية من بيانات المنصة والألعاب والمستخدمين والطلبات. هل تريد المتابعة؟"))return;this.disabled=true;try{const r=await callOwnerData("backup_all");showMessage("✅ "+r.message+" — الجداول: "+r.tables+" — المستخدمون: "+r.users,true);await loadDataManagement();}catch(e){showMessage("❌ تعذر إنشاء النسخة: "+e.message);}finally{this.disabled=false;}});
