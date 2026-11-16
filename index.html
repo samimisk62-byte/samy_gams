@@ -975,6 +975,32 @@ async function loadOwnerDashboard(){
       details.style.whiteSpace="pre-line";card.appendChild(details);
       if(!["paid","rejected","refunded","cancelled","expired"].includes(order.status)){
         const row=document.createElement("div");row.className="row";
+        const referenceInput=document.createElement("input");
+        referenceInput.type="text";referenceInput.inputMode="text";referenceInput.maxLength=80;
+        referenceInput.placeholder="أدخل رقم التحويل الحقيقي الذي وصلك";
+        referenceInput.value=order.payment_reference||"";
+        referenceInput.setAttribute("aria-label","رقم التحويل الحقيقي");
+        referenceInput.style.margin="8px 0";
+        const saveReference=document.createElement("button");
+        saveReference.className="orange";saveReference.textContent="💾 حفظ رقم التحويل";
+        saveReference.addEventListener("click",async function(){
+          const reference=referenceInput.value.trim();
+          if(reference.length<4){showMessage("⚠️ اكتب رقم العملية الحقيقي أولًا.");return;}
+          if(!confirm("هل راجعت رسالة المحفظة وتأكدت أن هذا الرقم يخص مبلغ هذا الطلب؟"))return;
+          saveReference.disabled=true;
+          try{
+            const response=await fetch(SUPABASE_URL+"/functions/v1/owner-dashboard",{
+              method:"POST",headers:authHeaders(),
+              body:JSON.stringify({action:"set_payment_reference",order_id:order.id,payment_reference:reference})
+            });
+            const result=await readResponse(response);
+            if(!response.ok||!result.ok)throw new Error(getServerError(result,response));
+            showMessage("✅ تم حفظ رقم التحويل في الطلب. راجعه ثم اعتمد الدفع عند التأكد.",true);
+            await loadOwnerDashboard();
+          }catch(error){showMessage("❌ تعذر حفظ رقم التحويل: "+(error.message||"خطأ غير معروف"));}
+          finally{saveReference.disabled=false;}
+        });
+        card.appendChild(referenceInput);card.appendChild(saveReference);
         const approve=document.createElement("button");approve.className="green";approve.textContent="✅ اعتماد الدفع وتفعيل الاشتراك";
         approve.addEventListener("click",async function(){
           if(!order.payment_reference){showMessage("⚠️ لا يوجد رقم تحويل في الطلب. لا تعتمد الطلب قبل استلام الرقم والتحقق من الدفع.");return;}
