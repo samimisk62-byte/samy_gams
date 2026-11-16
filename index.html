@@ -245,7 +245,7 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 
 <div class="row">
 <button id="refreshBtn" class="green">🔄 تحديث الاشتراكات</button>
-<button id="adminOpenBtn" class="orange">🔐 لوحة الإدارة</button>
+<button id="adminOpenBtn" class="orange" type="button" onclick="window.openPlatformAdminPanel && window.openPlatformAdminPanel()">🔐 لوحة الإدارة</button>
 <button id="logoutBtn" class="gray">🚪 خروج</button>
 </div>
 </div>
@@ -1053,6 +1053,21 @@ async function loadMyOrders(){
   }catch(error){box.textContent="تعذر تحميل الطلبات الآن. جرّب زر تحديث الاشتراكات لاحقًا."}
 }
 
+/* فتح لوحة الإدارة بطريقة مباشرة مع إظهار نتيجة التحميل داخل اللوحة */
+window.openPlatformAdminPanel = function(){
+  const panel=document.getElementById("adminPanel");
+  if(!panel){alert("تعذر العثور على لوحة الإدارة في الصفحة.");return;}
+  panel.style.display="block";
+  panel.hidden=false;
+  panel.scrollIntoView({behavior:"smooth",block:"start"});
+  const summary=document.getElementById("adminSummary");
+  if(summary)summary.textContent="⏳ تم فتح اللوحة. جارٍ التحقق من صلاحية المالك وتحميل الطلبات والعملاء...";
+  try{loadOwnerDashboard();}catch(e){if(summary)summary.textContent="تعذر تحميل اللوحة: "+(e.message||e);}
+  try{loadDataManagement();}catch(e){}
+  try{loadBroadcastAdmin();}catch(e){}
+  try{loadCustomGamesAdmin();}catch(e){}
+};
+ 
 /* لوحة إدارة الطلبات — صلاحية المالك تتحقق منها دالة الخادم */
 async function loadOwnerDashboard(){
   const summary=$("adminSummary"), list=$("adminOrders"), entitlementList=$("adminEntitlements");
@@ -1533,7 +1548,7 @@ $("forgotBtn").addEventListener("click",forgotPassword);
 $("resetPasswordBtn").addEventListener("click",resetPassword);
 $("logoutBtn").addEventListener("click",logout);
 $("refreshBtn").addEventListener("click",refreshAccess);
-$("adminOpenBtn").addEventListener("click",function(){$("adminPanel").style.display="block";$("adminPanel").scrollIntoView({behavior:"smooth",block:"start"});loadOwnerDashboard();loadDataManagement();loadBroadcastAdmin();loadCustomGamesAdmin();});
+$("adminOpenBtn").addEventListener("click",function(){window.openPlatformAdminPanel();});
 $("adminReloadBtn").addEventListener("click",loadOwnerDashboard);
 $("dataManagerReload").addEventListener("click",loadDataManagement);
 $("dataManagerBackup").addEventListener("click",async function(){if(!confirm("سيتم إنشاء نسخة احتياطية من بيانات المنصة والألعاب والمستخدمين والطلبات. هل تريد المتابعة؟"))return;this.disabled=true;try{const r=await callOwnerData("backup_all");showMessage("✅ "+r.message+" — الجداول: "+r.tables+" — المستخدمون: "+r.users,true);await loadDataManagement();}catch(e){showMessage("❌ تعذر إنشاء النسخة: "+e.message);}finally{this.disabled=false;}});
