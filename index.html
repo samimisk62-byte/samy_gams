@@ -287,6 +287,7 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
   <div id="dataManagerSummary" class="small">اضغط تحديث بيانات الإدارة لتحميل البيانات.</div>
   <hr>
   <h3>➕ إضافة أو استبدال معلومة</h3>
+  <p class="small">يمكنك تعديل المعلومة من بطاقتها، أو إيقافها مع الاحتفاظ بها، ثم إعادة تفعيلها لاحقًا. لا يوجد حذف نهائي هنا حتى لا تُحذف بيانات قد تعتمد عليها الألعاب.</p>
   <label>مكان المعلومة</label>
   <select id="dataSettingScope"><option value="platform">المنصة كلها</option><option value="game">لعبة محددة</option></select>
   <label>اللعبة</label>
@@ -1181,13 +1182,25 @@ async function loadDataManagement(){
     const settings=$("dataSettingList");settings.textContent="";
     (d.platform_settings||[]).forEach(x=>{
       const c=dataCard(settings,"🌐 "+x.setting_key,"القيمة: "+JSON.stringify(x.setting_value)+"\n"+(x.description||"")+(x.is_active?"\nالحالة: مفعّلة":"\nالحالة: متوقفة"));
-      const b=document.createElement("button");b.className="gray";b.textContent="إيقاف المعلومة";b.disabled=!x.is_active;
-      b.onclick=async()=>{if(!confirm("هل تريد إيقاف هذه المعلومة؟ يمكن إعادة إضافتها لاحقًا."))return;await callOwnerData("disable_setting",{scope:"platform",setting_key:x.setting_key});await loadDataManagement();};c.appendChild(b);
+      const edit=document.createElement("button");edit.className="green";edit.textContent="✏️ تعديل المعلومة";
+      edit.onclick=()=>{ $("dataSettingScope").value="platform";$("dataSettingGame").disabled=true;$("dataSettingKey").value=x.setting_key;$("dataSettingValue").value=JSON.stringify(x.setting_value);$("dataSettingDescription").value=x.description||"";$("dataSettingSave").scrollIntoView({behavior:"smooth",block:"center"});$("dataSettingValue").focus(); };
+      c.appendChild(edit);
+      if(x.is_active){
+        const b=document.createElement("button");b.className="gray";b.textContent="⏸️ إيقاف / أرشفة";b.onclick=async()=>{if(!confirm("سيتم إيقاف هذه المعلومة مع الاحتفاظ بها في السجل والنسخ الاحتياطية. قد تتأثر أي وظيفة تعتمد عليها. هل تريد المتابعة؟"))return;try{await callOwnerData("disable_setting",{scope:"platform",setting_key:x.setting_key});await loadDataManagement();showMessage("تم إيقاف المعلومة مع الاحتفاظ بها.",true);}catch(e){showMessage("تعذر إيقاف المعلومة: "+e.message);}};c.appendChild(b);
+      }else{
+        const b=document.createElement("button");b.className="orange";b.textContent="♻️ إعادة تفعيل";b.onclick=async()=>{if(!confirm("هل تريد إعادة تفعيل هذه المعلومة؟"))return;try{await callOwnerData("restore_setting",{scope:"platform",setting_key:x.setting_key});await loadDataManagement();showMessage("تمت إعادة تفعيل المعلومة.",true);}catch(e){showMessage("تعذر إعادة التفعيل: "+e.message);}};c.appendChild(b);
+      }
     });
     (d.game_settings||[]).forEach(x=>{
       const c=dataCard(settings,"🎮 "+(GAME_NAMES[x.game_code]||x.game_code)+" — "+x.setting_key,"القيمة: "+JSON.stringify(x.setting_value)+"\n"+(x.description||"")+(x.is_active?"\nالحالة: مفعّلة":"\nالحالة: متوقفة"));
-      const b=document.createElement("button");b.className="gray";b.textContent="إيقاف المعلومة";b.disabled=!x.is_active;
-      b.onclick=async()=>{if(!confirm("هل تريد إيقاف هذه المعلومة؟"))return;await callOwnerData("disable_setting",{scope:"game",game_code:x.game_code,setting_key:x.setting_key});await loadDataManagement();};c.appendChild(b);
+      const edit=document.createElement("button");edit.className="green";edit.textContent="✏️ تعديل المعلومة";
+      edit.onclick=()=>{ $("dataSettingScope").value="game";$("dataSettingGame").value=x.game_code;$("dataSettingGame").disabled=false;$("dataSettingKey").value=x.setting_key;$("dataSettingValue").value=JSON.stringify(x.setting_value);$("dataSettingDescription").value=x.description||"";$("dataSettingSave").scrollIntoView({behavior:"smooth",block:"center"});$("dataSettingValue").focus(); };
+      c.appendChild(edit);
+      if(x.is_active){
+        const b=document.createElement("button");b.className="gray";b.textContent="⏸️ إيقاف / أرشفة";b.onclick=async()=>{if(!confirm("سيتم إيقاف هذه المعلومة مع الاحتفاظ بها في السجل والنسخ الاحتياطية. قد تتأثر أي وظيفة تعتمد عليها. هل تريد المتابعة؟"))return;try{await callOwnerData("disable_setting",{scope:"game",game_code:x.game_code,setting_key:x.setting_key});await loadDataManagement();showMessage("تم إيقاف المعلومة مع الاحتفاظ بها.",true);}catch(e){showMessage("تعذر إيقاف المعلومة: "+e.message);}};c.appendChild(b);
+      }else{
+        const b=document.createElement("button");b.className="orange";b.textContent="♻️ إعادة تفعيل";b.onclick=async()=>{if(!confirm("هل تريد إعادة تفعيل هذه المعلومة؟"))return;try{await callOwnerData("restore_setting",{scope:"game",game_code:x.game_code,setting_key:x.setting_key});await loadDataManagement();showMessage("تمت إعادة تفعيل المعلومة.",true);}catch(e){showMessage("تعذر إعادة التفعيل: "+e.message);}};c.appendChild(b);
+      }
     });
     const catalog=$("dataCatalogList");catalog.textContent="";
     (d.catalog||[]).forEach(x=>{
