@@ -282,8 +282,13 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <h2>🛠️ لوحة إدارة الاشتراكات</h2>
 <p class="small">هذه اللوحة مخصصة لحساب صاحب المنصة فقط. راجع رقم التحويل بنفسك قبل اعتماد أي طلب. اعتماد الطلب يفعّل الاشتراك لمدة المدة المحددة للعبة.</p>
 <div class="row"><button id="adminReloadBtn" class="green">🔄 تحديث الطلبات</button><button id="adminCloseBtn" class="gray">إغلاق اللوحة</button></div>
-<div id="adminSummary" class="small" style="margin-top:10px">اضغط تحديث الطلبات لعرض الطلبات.</div>
+<div id="adminSummary" class="small" style="margin-top:10px">اضغط تحديث الطلبات لعرض الطلبات والعملاء.</div>
+<h2>🧾 طلبات الاشتراك ومراجعة الدفع</h2>
 <div id="adminOrders"></div>
+<hr>
+<h2>👥 جميع العملاء المسجلين</h2>
+<p class="small">قائمة حسابات المستخدمين المسجلين على المنصة، مع تاريخ التسجيل وآخر دخول.</p>
+<div id="adminCustomers">اضغط تحديث الطلبات لعرض العملاء.</div>
 <hr>
 <h2>📅 الاشتراكات الفعّالة وتواريخ الانتهاء</h2>
 <p class="small">يعرض هذا القسم كل اشتراك محفوظ لكل حساب، مع تاريخ البداية والانتهاء. تحديث الطلبات يحدّث هذه البيانات أيضًا.</p>
@@ -1070,11 +1075,12 @@ window.openPlatformAdminPanel = function(){
  
 /* لوحة إدارة الطلبات — صلاحية المالك تتحقق منها دالة الخادم */
 async function loadOwnerDashboard(){
-  const summary=$("adminSummary"), list=$("adminOrders"), entitlementList=$("adminEntitlements");
+  const summary=$("adminSummary"), list=$("adminOrders"), entitlementList=$("adminEntitlements"), customerList=$("adminCustomers");
   if(!session?.access_token){showMessage("سجّل الدخول أولًا.");return;}
   summary.textContent="⏳ جاري تحميل الطلبات والتحقق من صلاحية الإدارة...";
   list.textContent="";
   if(entitlementList) entitlementList.textContent="⏳ جاري تحميل الاشتراكات...";
+  if(customerList) customerList.textContent="⏳ جاري تحميل العملاء المسجلين...";
   try{
     const response=await fetch(SUPABASE_URL+"/functions/v1/owner-dashboard",{
       method:"POST",headers:authHeaders(),body:JSON.stringify({action:"summary"})
@@ -1083,8 +1089,27 @@ async function loadOwnerDashboard(){
     if(!response.ok) throw new Error(getServerError(result,response));
     const orders=Array.isArray(result.data?.orders)?result.data.orders:[];
     const entitlements=Array.isArray(result.data?.entitlements)?result.data.entitlements:[];
+    const customers=Array.isArray(result.data?.customers)?result.data.customers:[];
     const pending=orders.filter(o=>!["paid","rejected","refunded","cancelled","expired"].includes(o.status));
-    summary.textContent="✅ تم التحقق من صلاحية الإدارة. إجمالي الطلبات المعروضة: "+orders.length+" — الطلبات التي تحتاج مراجعة: "+pending.length;
+    summary.textContent="✅ تم التحقق من صلاحية الإدارة. العملاء المسجلون: "+customers.length+" — طلبات الشراء: "+orders.length+" — الطلبات التي تحتاج مراجعة: "+pending.length;
+    if(customerList){
+      customerList.textContent="";
+      if(!customers.length){
+        customerList.textContent="لا توجد حسابات عملاء مسجلة حتى الآن.";
+      }else{
+        customers.forEach(function(customer,index){
+          const card=document.createElement("div");card.className="adminEntitlement";
+          const title=document.createElement("h3");title.textContent=(index+1)+". "+(customer.email||"حساب بدون بريد إلكتروني");card.appendChild(title);
+          const details=document.createElement("div");details.className="meta";
+          const created=customer.created_at?new Date(customer.created_at):null;
+          const last=customer.last_sign_in_at?new Date(customer.last_sign_in_at):null;
+          details.textContent="تاريخ التسجيل: "+(created&&!Number.isNaN(created.getTime())?created.toLocaleString("ar-EG",{timeZone:"Africa/Cairo"}):"غير متاح")+
+            "\\nآخر دخول: "+(last&&!Number.isNaN(last.getTime())?last.toLocaleString("ar-EG",{timeZone:"Africa/Cairo"}):"لم يسجل دخولًا بعد")+
+            "\\nتأكيد البريد: "+(customer.email_confirmed_at?"مؤكد":"غير مؤكد");
+          details.style.whiteSpace="pre-line";card.appendChild(details);customerList.appendChild(card);
+        });
+      }
+    }
     const names={al7aet:"الحائط الصعب",alashra:"لعبة الـ٦ ورقات",alashra_ten:"لعبة العشرة",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
     if(!orders.length){list.textContent="لا توجد طلبات شراء حاليًا. ستظهر تفاصيل الطلب وزر الاعتماد عند إنشاء العميل طلبًا لهذه اللعبة.";}
     
