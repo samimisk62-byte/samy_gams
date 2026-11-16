@@ -1375,10 +1375,7 @@ async function loadCustomGamesAdmin(){
     games.forEach(g=>{
       const c=document.createElement("div");c.className="dataManageCard";
       const h=document.createElement("strong");h.textContent=(g.game_type==="external"?"🌐 خارجية: ":"🎮 داخلية: ")+g.game_name;c.appendChild(h);
-      const p=document.createElement("div");p.className="dataManageMeta";p.textContent=(g.description||"")+"
-الرابط: "+g.game_url+"
-السعر: "+g.price_label+"
-الحالة: "+(g.is_active?"ظاهرة":"مؤرشفة");c.appendChild(p);
+      const p=document.createElement("div");p.className="dataManageMeta";p.textContent=(g.description||"")+"\\nالرابط: "+g.game_url+"\\nالسعر: "+g.price_label+"\\nالحالة: "+(g.is_active?"ظاهرة":"مؤرشفة");c.appendChild(p);
       if(g.is_active){const edit=document.createElement("button");edit.className="green";edit.textContent="✏️ تعديل";edit.onclick=()=>{customGameEditingId=g.id;$("customGameName").value=g.game_name;$("customGameType").value=g.game_type;$("customGameUrl").value=g.game_url;$("customGameDescription").value=g.description||"";$("customGamePrice").value=g.price_label||"مجانية";customGameUploadedMedia={media_url:g.media_url,media_type:g.media_type};$("customGameMediaStatus").textContent=g.media_url?"يوجد مرفق محفوظ؛ اختيار ملف جديد يستبدل رابط المرفق.":"لا يوجد مرفق."; $("customGameSave").textContent="💾 حفظ التعديلات";$("customGameName").scrollIntoView({behavior:"smooth",block:"center"});};c.appendChild(edit);
         const ar=document.createElement("button");ar.className="gray";ar.textContent="📦 أرشفة";ar.onclick=async()=>{if(!confirm("إخفاء اللعبة من المنصة مع الاحتفاظ بسجلها؟"))return;try{await callBroadcast("archive_game",{id:g.id});await loadCustomGamesAdmin();await loadCustomGames();showMessage("تمت أرشفة اللعبة.",true);}catch(e){showMessage("تعذر أرشفة اللعبة: "+e.message);}};c.appendChild(ar);}
       list.appendChild(c);
