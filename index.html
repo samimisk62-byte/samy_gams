@@ -1238,9 +1238,17 @@ async function loadDataManagement(){
     const products=$("dataProductsList");products.textContent="";
     (d.products||[]).forEach(x=>dataCard(products,"🛍️ "+x.title,"البائع: "+x.seller_id+"\nالسعر: "+x.price+" "+x.currency+"\nالحالة: "+(x.is_active?"نشط":"موقوف")));
     const backups=$("dataBackupsList");backups.textContent="";
-    (d.backups||[]).forEach(x=>dataCard(backups,x.label,"النطاق: "+x.scope+"\nالتاريخ: "+new Date(x.created_at).toLocaleString("ar-EG")));
+    if((d.backups||[]).length){
+      (d.backups||[]).forEach(x=>dataCard(backups,x.label||"نسخة احتياطية","النطاق: "+(x.scope||"المنصة")+"\\nالتاريخ: "+(x.created_at?new Date(x.created_at).toLocaleString("ar-EG"):"غير متاح")));
+    }else{
+      dataCard(backups,"لا توجد نسخ احتياطية محفوظة حتى الآن","استخدم زر «🛡️ إنشاء نسخة احتياطية شاملة» الموجود أعلى لوحة الإدارة لإنشاء أول نسخة.");
+    }
     const audit=$("dataAuditList");audit.textContent="";
-    (d.audit||[]).forEach(x=>dataCard(audit,x.action+" — "+x.entity_type+" — "+(x.entity_id||""),(x.note||"")+(x.created_at?"\n"+new Date(x.created_at).toLocaleString("ar-EG"):"")));
+    if((d.audit||[]).length){
+      (d.audit||[]).forEach(x=>dataCard(audit,x.action+" — "+x.entity_type+" — "+(x.entity_id||""),(x.note||"")+(x.created_at?"\\n"+new Date(x.created_at).toLocaleString("ar-EG"):"")));
+    }else{
+      dataCard(audit,"لا توجد تعديلات مسجلة حتى الآن","ستظهر هنا عمليات إنشاء البيانات وتعديلها وإيقافها وإعادة تفعيلها بعد تنفيذها.");
+    }
   }catch(e){summary.textContent="❌ تعذر تحميل إدارة البيانات: "+(e.message||"خطأ غير معروف");}
 }
 async function saveDataSetting(mode="save"){
