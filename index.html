@@ -158,6 +158,14 @@ html body .skiptranslate iframe{visibility:hidden!important}
 #universalLanguageButton:focus-visible,#universalSettingsButton:focus-visible{outline:3px solid #ffd166;outline-offset:3px}
 @media(max-width:500px){#universalLanguageButton{width:49px;height:49px;left:9px;bottom:10px}}
 
+
+#dataManagementSection{margin-top:16px;padding:12px;border:1px solid #52758a;border-radius:13px;background:#102b3b}
+#dataManagementSection label{display:block;margin:9px 0 4px;font-weight:bold}
+#dataManagementSection input,#dataManagementSection textarea,#dataManagementSection select{width:100%;padding:10px;border-radius:9px;border:1px solid #688393;background:#f6fbff;color:#152b38;font-size:15px}
+.dataManageCard{background:#1c3949;border:1px solid #4d6d7d;border-radius:10px;padding:10px;margin:8px 0;overflow-wrap:anywhere}
+.dataManageCard .row{gap:6px}
+.dataManageCard button{margin-top:6px}
+.dataManageMeta{white-space:pre-line;line-height:1.8;color:#d9e6ec;font-size:13px}
 </style>
 </head>
 
@@ -268,6 +276,46 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <h2>📅 الاشتراكات الفعّالة وتواريخ الانتهاء</h2>
 <p class="small">يعرض هذا القسم كل اشتراك محفوظ لكل حساب، مع تاريخ البداية والانتهاء. تحديث الطلبات يحدّث هذه البيانات أيضًا.</p>
 <div id="adminEntitlements"></div>
+<hr>
+<section id="dataManagementSection">
+  <h2>🗂️ إدارة وتبديل بيانات المنصة والألعاب</h2>
+  <p class="small">إدارة الإعدادات العامة، بيانات الألعاب، الاشتراكات، حسابات المستخدمين والنسخ الاحتياطية. كل تعديل يُسجَّل قبل وبعد التغيير.</p>
+  <div class="row">
+    <button id="dataManagerReload" class="green" type="button">🔄 تحديث بيانات الإدارة</button>
+    <button id="dataManagerBackup" class="orange" type="button">🛡️ إنشاء نسخة احتياطية شاملة</button>
+  </div>
+  <div id="dataManagerSummary" class="small">اضغط تحديث بيانات الإدارة لتحميل البيانات.</div>
+  <hr>
+  <h3>➕ إضافة أو استبدال معلومة</h3>
+  <label>مكان المعلومة</label>
+  <select id="dataSettingScope"><option value="platform">المنصة كلها</option><option value="game">لعبة محددة</option></select>
+  <label>اللعبة</label>
+  <select id="dataSettingGame">
+    <option value="al7aet">الحائط الصعب</option><option value="alashra">لعبة الـ٦ ورقات</option>
+    <option value="alashra_ten">لعبة العشرة</option><option value="saed_al_samak">صائد السمك</option><option value="mat3amy">مطعمي</option>
+  </select>
+  <label>اسم المعلومة (مفتاح)</label><input id="dataSettingKey" type="text" maxlength="100" placeholder="مثال: welcome_message أو stage_limit">
+  <label>القيمة الجديدة (نص أو JSON)</label><textarea id="dataSettingValue" rows="3" placeholder='مثال: "أهلاً بك" أو {"enabled":true,"count":10}'></textarea>
+  <label>شرح مختصر</label><input id="dataSettingDescription" type="text" maxlength="500" placeholder="وصف المعلومة">
+  <button id="dataSettingSave" class="green" type="button">💾 حفظ / استبدال المعلومة</button>
+  <div id="dataSettingList"></div>
+  <hr>
+  <h3>🎮 بيانات الألعاب والأسعار</h3><div id="dataCatalogList"></div>
+  <hr>
+  <h3>📅 تعديل تواريخ الاشتراكات</h3><div id="dataEntitlementsList"></div>
+  <hr>
+  <h3>👥 حسابات المستخدمين</h3>
+  <p class="small">يمكن إيقاف الحساب مؤقتًا أو إعادة فتحه. لا يوجد حذف نهائي للحسابات من هذه اللوحة.</p>
+  <div id="dataUsersList"></div>
+  <hr>
+  <h3>🧾 طلبات الدفع والمنتجات</h3>
+  <p class="small">عرض ومراجعة فقط هنا. اعتماد الدفع أو رد المبلغ يتم من لوحة الاشتراكات الأصلية مع الاحتفاظ بسجل التحويل.</p>
+  <div id="dataOrdersList"></div>
+  <div id="dataProductsList"></div>
+  <hr>
+  <h3>🛡️ النسخ الاحتياطية وسجل التعديلات</h3>
+  <div id="dataBackupsList"></div><div id="dataAuditList"></div>
+</section>
 </div>
 
 <!-- الألعاب -->
@@ -1106,6 +1154,93 @@ async function changeOwnerOrderStatus(orderId,status){
   }catch(error){showMessage("❌ تعذر تحديث الطلب: "+(error.message||"خطأ غير معروف"));}
 }
 
+
+/* إدارة بيانات المنصة والألعاب — جميع التغييرات تمر عبر خادم المالك */
+let ownerDataCache=null;
+async function callOwnerData(action,payload={}){
+  if(!session?.access_token)throw new Error("سجّل الدخول أولًا.");
+  const response=await fetch(SUPABASE_URL+"/functions/v1/owner-data-manager",{
+    method:"POST",headers:authHeaders(),body:JSON.stringify({action,...payload})
+  });
+  const result=await readResponse(response);
+  if(!response.ok||result.error)throw new Error(getServerError(result,response));
+  return result.data||result;
+}
+function dataCard(parent,title,meta){
+  const card=document.createElement("div");card.className="dataManageCard";
+  const h=document.createElement("strong");h.textContent=title;card.appendChild(h);
+  const p=document.createElement("div");p.className="dataManageMeta";p.textContent=meta||"";card.appendChild(p);
+  parent.appendChild(card);return card;
+}
+async function loadDataManagement(){
+  const summary=$("dataManagerSummary");if(!summary)return;
+  summary.textContent="⏳ جاري تحميل بيانات المنصة...";
+  try{
+    const d=await callOwnerData("summary");ownerDataCache=d;
+    summary.textContent="✅ تم التحقق من صلاحية المالك — المستخدمون: "+(d.users||[]).length+" — الاشتراكات: "+(d.entitlements||[]).length+" — الطلبات: "+(d.orders||[]).length+" — الإعدادات: "+((d.platform_settings||[]).length+(d.game_settings||[]).length);
+    const settings=$("dataSettingList");settings.textContent="";
+    (d.platform_settings||[]).forEach(x=>{
+      const c=dataCard(settings,"🌐 "+x.setting_key,"القيمة: "+JSON.stringify(x.setting_value)+"\n"+(x.description||"")+(x.is_active?"\nالحالة: مفعّلة":"\nالحالة: متوقفة"));
+      const b=document.createElement("button");b.className="gray";b.textContent="إيقاف المعلومة";b.disabled=!x.is_active;
+      b.onclick=async()=>{if(!confirm("هل تريد إيقاف هذه المعلومة؟ يمكن إعادة إضافتها لاحقًا."))return;await callOwnerData("disable_setting",{scope:"platform",setting_key:x.setting_key});await loadDataManagement();};c.appendChild(b);
+    });
+    (d.game_settings||[]).forEach(x=>{
+      const c=dataCard(settings,"🎮 "+(GAME_NAMES[x.game_code]||x.game_code)+" — "+x.setting_key,"القيمة: "+JSON.stringify(x.setting_value)+"\n"+(x.description||"")+(x.is_active?"\nالحالة: مفعّلة":"\nالحالة: متوقفة"));
+      const b=document.createElement("button");b.className="gray";b.textContent="إيقاف المعلومة";b.disabled=!x.is_active;
+      b.onclick=async()=>{if(!confirm("هل تريد إيقاف هذه المعلومة؟"))return;await callOwnerData("disable_setting",{scope:"game",game_code:x.game_code,setting_key:x.setting_key});await loadDataManagement();};c.appendChild(b);
+    });
+    const catalog=$("dataCatalogList");catalog.textContent="";
+    (d.catalog||[]).forEach(x=>{
+      const c=dataCard(catalog,GAME_NAMES[x.game_code]||x.game_code,"");
+      const name=document.createElement("input");name.value=x.game_name||"";name.placeholder="اسم اللعبة";
+      const egp=document.createElement("input");egp.type="number";egp.min="0";egp.value=x.price_egp;
+      const usd=document.createElement("input");usd.type="number";usd.min="0";usd.value=x.price_usd_cents;
+      const days=document.createElement("input");days.type="number";days.min="1";days.value=x.subscription_days;
+      const sale=document.createElement("select");sale.innerHTML='<option value="true">متاحة للبيع</option><option value="false">موقوفة للبيع</option>';sale.value=String(x.is_for_sale);
+      [["اسم اللعبة",name],["السعر بالجنيه",egp],["السعر بالدولار بالسنت",usd],["مدة الاشتراك بالأيام",days],["حالة البيع",sale]].forEach(([label,el])=>{const l=document.createElement("label");l.textContent=label;c.append(l,el);});
+      const b=document.createElement("button");b.className="green";b.textContent="حفظ بيانات اللعبة";
+      b.onclick=async()=>{if(!confirm("هل تريد حفظ بيانات وسعر هذه اللعبة؟"))return;await callOwnerData("update_catalog",{game_code:x.game_code,game_name:name.value,price_egp:Number(egp.value),price_usd_cents:Number(usd.value),subscription_days:Number(days.value),is_for_sale:sale.value==="true"});await loadDataManagement();};
+      c.appendChild(b);
+    });
+    const ents=$("dataEntitlementsList");ents.textContent="";
+    (d.entitlements||[]).forEach(x=>{
+      const c=dataCard(ents,(GAME_NAMES[x.game_code]||x.game_code)+" — "+(x.customer_email||x.user_id),"");
+      const start=document.createElement("input");start.type="datetime-local";start.value=x.starts_at?new Date(new Date(x.starts_at).getTime()-new Date(x.starts_at).getTimezoneOffset()*60000).toISOString().slice(0,16):"";
+      const end=document.createElement("input");end.type="datetime-local";end.value=x.expires_at?new Date(new Date(x.expires_at).getTime()-new Date(x.expires_at).getTimezoneOffset()*60000).toISOString().slice(0,16):"";
+      const status=document.createElement("select");status.innerHTML='<option value="active">نشط</option><option value="expired">منتهي</option><option value="revoked">ملغي</option>';status.value=x.status;
+      [["بداية الاشتراك",start],["تاريخ الانتهاء",end],["الحالة",status]].forEach(([label,el])=>{const l=document.createElement("label");l.textContent=label;c.append(l,el);});
+      const b=document.createElement("button");b.className="orange";b.textContent="حفظ تعديل الاشتراك";
+      b.onclick=async()=>{if(!start.value||!end.value){showMessage("أدخل تاريخ البداية والانتهاء.");return;}if(!confirm("تأكيد تعديل تاريخ أو حالة هذا الاشتراك؟"))return;await callOwnerData("update_subscription",{entitlement_id:x.id,starts_at:new Date(start.value).toISOString(),expires_at:new Date(end.value).toISOString(),status:status.value});await loadDataManagement();await loadOwnerDashboard();};
+      c.appendChild(b);
+    });
+    const users=$("dataUsersList");users.textContent="";
+    (d.users||[]).forEach(x=>{
+      const c=dataCard(users,x.email||x.id,"تاريخ الحساب: "+(x.created_at?new Date(x.created_at).toLocaleDateString("ar-EG"):"غير متاح")+"\nآخر دخول: "+(x.last_sign_in_at?new Date(x.last_sign_in_at).toLocaleString("ar-EG"):"لم يسجل دخولًا")+(x.banned_until?"\nالحساب موقوف حتى: "+x.banned_until:"\nالحساب متاح"));
+      const b=document.createElement("button");b.className=x.banned_until?"green":"red";b.textContent=x.banned_until?"إعادة فتح الحساب":"إيقاف الحساب";
+      b.onclick=async()=>{const mode=x.banned_until?"restore":"suspend";if(!confirm(mode==="suspend"?"هل تريد إيقاف دخول هذا الحساب؟ لن يتم حذف بياناته.":"هل تريد إعادة فتح هذا الحساب؟"))return;await callOwnerData("set_user_access",{user_id:x.id,mode});await loadDataManagement();};
+      c.appendChild(b);
+    });
+    const orders=$("dataOrdersList");orders.textContent="";
+    (d.orders||[]).forEach(x=>dataCard(orders,(GAME_NAMES[x.game_code]||x.game_code)+" — "+(x.customer_email||x.user_id),"الحالة: "+x.status+"\nالمبلغ: "+(Number(x.amount_minor||0)/100)+" "+x.currency+"\nرقم العملية: "+(x.payment_reference||"غير مسجل")+"\nتاريخ الطلب: "+new Date(x.created_at).toLocaleString("ar-EG")));
+    const products=$("dataProductsList");products.textContent="";
+    (d.products||[]).forEach(x=>dataCard(products,"🛍️ "+x.title,"البائع: "+x.seller_id+"\nالسعر: "+x.price+" "+x.currency+"\nالحالة: "+(x.is_active?"نشط":"موقوف")));
+    const backups=$("dataBackupsList");backups.textContent="";
+    (d.backups||[]).forEach(x=>dataCard(backups,x.label,"النطاق: "+x.scope+"\nالتاريخ: "+new Date(x.created_at).toLocaleString("ar-EG")));
+    const audit=$("dataAuditList");audit.textContent="";
+    (d.audit||[]).forEach(x=>dataCard(audit,x.action+" — "+x.entity_type+" — "+(x.entity_id||""),(x.note||"")+(x.created_at?"\n"+new Date(x.created_at).toLocaleString("ar-EG"):"")));
+  }catch(e){summary.textContent="❌ تعذر تحميل إدارة البيانات: "+(e.message||"خطأ غير معروف");}
+}
+async function saveDataSetting(){
+  try{
+    const scope=$("dataSettingScope").value,key=$("dataSettingKey").value.trim(),raw=$("dataSettingValue").value.trim();
+    if(!key||!raw){showMessage("اكتب اسم المعلومة وقيمتها أولًا.");return;}
+    let value;try{value=JSON.parse(raw);}catch(e){value=raw;}
+    const payload={scope,setting_key:key,setting_value:value,description:$("dataSettingDescription").value};
+    if(scope==="game")payload.game_code=$("dataSettingGame").value;
+    if(!confirm("سيتم حفظ المعلومة أو استبدال القديمة مع تسجيل نسخة قبل التغيير. هل توافق؟"))return;
+    await callOwnerData("save_setting",payload);showMessage("✅ تم حفظ المعلومة الجديدة.",true);$("dataSettingKey").value="";$("dataSettingValue").value="";$("dataSettingDescription").value="";await loadDataManagement();
+  }catch(e){showMessage("❌ تعذر حفظ المعلومة: "+(e.message||""));}
+}
 /* تشغيل اللعبة */
 async function openGame(button){
   const originalUrl=button.dataset.url;const gameCode=button.dataset.game;let url=originalUrl;try{const preferredLanguage=localStorage.getItem("platform_preferred_language")||"";if(preferredLanguage){const launchUrl=new URL(originalUrl,window.location.href);launchUrl.searchParams.set("platform_lang",preferredLanguage);url=launchUrl.toString();}}catch(languageError){}
@@ -1184,6 +1319,12 @@ $("logoutBtn").addEventListener("click",logout);
 $("refreshBtn").addEventListener("click",refreshAccess);
 $("adminOpenBtn").addEventListener("click",function(){$("adminPanel").style.display="block";$("adminPanel").scrollIntoView({behavior:"smooth",block:"start"});loadOwnerDashboard();});
 $("adminReloadBtn").addEventListener("click",loadOwnerDashboard);
+$("dataManagerReload").addEventListener("click",loadDataManagement);
+$("dataManagerBackup").addEventListener("click",async function(){if(!confirm("سيتم إنشاء نسخة احتياطية من بيانات المنصة والألعاب والمستخدمين والطلبات. هل تريد المتابعة؟"))return;this.disabled=true;try{const r=await callOwnerData("backup_all");showMessage("✅ "+r.message+" — الجداول: "+r.tables+" — المستخدمون: "+r.users,true);await loadDataManagement();}catch(e){showMessage("❌ تعذر إنشاء النسخة: "+e.message);}finally{this.disabled=false;}});
+$("dataSettingSave").addEventListener("click",saveDataSetting);
+$("dataSettingScope").addEventListener("change",function(){$("dataSettingGame").disabled=this.value!=="game";});
+$("dataSettingGame").disabled=true;
+
 $("adminCloseBtn").addEventListener("click",function(){$("adminPanel").style.display="none";});
 
 document.querySelectorAll("[data-game]").forEach(function(button){button.addEventListener("click",function(){openGame(button);});});
