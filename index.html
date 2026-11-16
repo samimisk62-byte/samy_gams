@@ -1073,6 +1073,21 @@ window.openPlatformAdminPanel = function(){
   try{loadCustomGamesAdmin();}catch(e){}
 };
  
+async function manageCustomer(action,userId,extra={}){
+  if(!session?.access_token){showMessage("سجّل الدخول أولًا.");return;}
+  try{
+    const response=await fetch(SUPABASE_URL+"/functions/v1/owner-dashboard",{
+      method:"POST",headers:authHeaders(),body:JSON.stringify({action,user_id:userId,...extra})
+    });
+    const result=await readResponse(response);
+    if(!response.ok) throw new Error(getServerError(result,response));
+    showMessage(action==="customer_profile"?"تم حفظ الاسم الظاهر للعميل.":(extra.mode==="suspend"?"تم إيقاف الحساب لمدة 7 أيام.":"تمت إعادة تفعيل الحساب."));
+    await loadOwnerDashboard();
+  }catch(error){
+    showMessage("تعذر تنفيذ الإجراء: "+(error.message||error));
+  }
+}
+
 /* لوحة إدارة الطلبات — صلاحية المالك تتحقق منها دالة الخادم */
 async function loadOwnerDashboard(){
   const summary=$("adminSummary"), list=$("adminOrders"), entitlementList=$("adminEntitlements"), customerList=$("adminCustomers");
@@ -1105,8 +1120,24 @@ async function loadOwnerDashboard(){
           const last=customer.last_sign_in_at?new Date(customer.last_sign_in_at):null;
           details.textContent="تاريخ التسجيل: "+(created&&!Number.isNaN(created.getTime())?created.toLocaleString("ar-EG",{timeZone:"Africa/Cairo"}):"غير متاح")+
             "\\nآخر دخول: "+(last&&!Number.isNaN(last.getTime())?last.toLocaleString("ar-EG",{timeZone:"Africa/Cairo"}):"لم يسجل دخولًا بعد")+
-            "\\nتأكيد البريد: "+(customer.email_confirmed_at?"مؤكد":"غير مؤكد");
-          details.style.whiteSpace="pre-line";card.appendChild(details);customerList.appendChild(card);
+            "\\nتأكيد البريد: "+(customer.email_confirmed_at?"مؤكد":"غير مؤكد")+
+            "\\nحالة الحساب: "+(customer.banned_until&&new Date(customer.banned_until)>new Date()?"موقوف مؤقتًا حتى "+new Date(customer.banned_until).toLocaleString("ar-EG",{timeZone:"Africa/Cairo"}):"نشط");
+          details.style.whiteSpace="pre-line";card.appendChild(details);
+          const nameLabel=document.createElement("label");nameLabel.textContent="الاسم الظاهر داخل المنصة";card.appendChild(nameLabel);
+          const nameInput=document.createElement("input");nameInput.type="text";nameInput.maxLength=80;nameInput.placeholder="اكتب اسم العميل (اختياري)";nameInput.value=customer.display_name||"";card.appendChild(nameInput);
+          const actions=document.createElement("div");actions.className="row";
+          const saveName=document.createElement("button");saveName.className="green";saveName.type="button";saveName.textContent="💾 حفظ الاسم";
+          saveName.addEventListener("click",()=>manageCustomer("customer_profile",customer.id,{display_name:nameInput.value}));
+          actions.appendChild(saveName);
+          const banned=customer.banned_until&&new Date(customer.banned_until)>new Date();
+          const accessButton=document.createElement("button");accessButton.className=banned?"green":"orange";accessButton.type="button";
+          accessButton.textContent=banned?"🔓 إعادة تفعيل الحساب":"⏸ إيقاف الحساب 7 أيام";
+          accessButton.addEventListener("click",()=>{
+            const mode=banned?"activate":"suspend";
+            const question=banned?"هل تريد إعادة تفعيل هذا الحساب الآن؟":"هل تريد إيقاف هذا الحساب لمدة 7 أيام؟";
+            if(window.confirm(question)) manageCustomer("customer_access",customer.id,{mode});
+          });
+          actions.appendChild(accessButton);card.appendChild(actions);customerList.appendChild(card);
         });
       }
     }
