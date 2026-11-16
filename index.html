@@ -367,6 +367,8 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <div class="row"><button id="copyWalletBtn" class="orange">📱 نسخ رقم فودافون كاش</button></div>
 <p class="small">رقم فودافون كاش: <b dir="ltr">01099083048</b></p><p>رقم طلب الاشتراك:</p><code id="orderIdText"></code>
 <label for="paymentReference">رقم عملية التحويل</label><input id="paymentReference" type="text" maxlength="80" autocomplete="off" placeholder="اكتب رقم العملية بعد التحويل">
+<label for="senderWalletPhone">رقم محفظة الشخص الذي أرسل المبلغ</label><input id="senderWalletPhone" type="tel" inputmode="tel" maxlength="24" autocomplete="tel" placeholder="مثال: 010xxxxxxxx">
+<p class="small">اكتب رقم المحفظة التي أرسلت منها الفلوس، وليس رقم محفظتك المستقبِلة.</p>
 <button id="submitReferenceBtn" class="green">✅ إرسال رقم التحويل للمراجعة</button></div>
 <hr><h3>📋 طلبات اشتراكي</h3><div id="ordersList" class="small">ستظهر طلباتك هنا بعد تسجيل الدخول.</div>
 </div>
@@ -904,7 +906,7 @@ function openSubscription(gameCode,gameName){
   if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا قبل طلب الاشتراك.");return;}
   selectedGameCode=gameCode;
   $("subscriptionTitle").textContent="💳 اشتراك / تجديد: "+(gameName||GAME_NAMES[gameCode]||gameCode);
-  $("orderDetails").style.display="none";$("paymentReference").value="";
+  $("orderDetails").style.display="none";$("paymentReference").value="";$("senderWalletPhone").value="";
   let cached=null;
   try{cached=JSON.parse(localStorage.getItem(pendingOrderStorageKey(gameCode))||"null");}catch(e){}
   if(cached&&cached.id){displaySubscriptionOrder(cached,true);}else{currentOrderId=null;$("createOrderBtn").disabled=false;}
@@ -929,12 +931,15 @@ async function createSubscriptionOrder(){
 }
 async function submitPaymentReference(){
   if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا.");return;}if(!currentOrderId){showMessage("أنشئ طلب الاشتراك أولًا.");return;}
-  const reference=$("paymentReference").value.trim();if(reference.length<4){showMessage("⚠️ اكتب رقم عملية التحويل (4 أحرف أو أرقام على الأقل).");return;}
+  const reference=$("paymentReference").value.trim();
+  const senderPhone=$("senderWalletPhone").value.replace(/[\s()-]/g,"");
+  if(reference.length<4){showMessage("⚠️ اكتب رقم عملية التحويل (4 أحرف أو أرقام على الأقل).");return;}
+  if(!/^\+?[0-9]{7,20}$/.test(senderPhone)){showMessage("⚠️ اكتب رقم محفظة المُرسِل بشكل صحيح (من 7 إلى 20 رقمًا).");return;}
   const button=$("submitReferenceBtn");button.disabled=true;
   try{
-    const response=await fetch(SUPABASE_URL+"/functions/v1/submit-payment-reference",{method:"POST",headers:authHeaders(),body:JSON.stringify({order_id:currentOrderId,payment_reference:reference})});
+    const response=await fetch(SUPABASE_URL+"/functions/v1/submit-payment-reference",{method:"POST",headers:authHeaders(),body:JSON.stringify({order_id:currentOrderId,payment_reference:reference,sender_wallet_phone:senderPhone})});
     const result=await readResponse(response);if(!response.ok||!result.data?.ok)throw new Error(getServerError(result,response));
-    $("paymentReference").value="";$("orderDetails").style.display="none";try{localStorage.removeItem(pendingOrderStorageKey(selectedGameCode));}catch(e){}currentOrderId=null;$("createOrderBtn").disabled=false;showMessage("✅ تم إرسال رقم التحويل. سيُفعّل الاشتراك بعد مراجعة الإدارة وتأكيد الدفع.",true);await loadMyOrders();
+    $("paymentReference").value="";$("senderWalletPhone").value="";$("orderDetails").style.display="none";try{localStorage.removeItem(pendingOrderStorageKey(selectedGameCode));}catch(e){}currentOrderId=null;$("createOrderBtn").disabled=false;showMessage("✅ تم إرسال رقم التحويل. سيُفعّل الاشتراك بعد مراجعة الإدارة وتأكيد الدفع.",true);await loadMyOrders();
   }catch(error){showMessage("❌ تعذر إرسال رقم التحويل: "+(error.message||"خطأ غير معروف"));}finally{button.disabled=false;}
 }
 async function loadMyOrders(){
@@ -971,27 +976,35 @@ async function loadOwnerDashboard(){
       const title=document.createElement("h3");title.textContent=(names[order.game_code]||order.game_code||"لعبة")+" — "+(statuses[order.status]||order.status||"غير معروف");card.appendChild(title);
       const details=document.createElement("div");details.className="meta";
       const amount=Number(order.amount_minor||0)/100;
-      details.textContent="العميل: "+(order.customer_email||"بريد غير متاح")+"\nالمبلغ: "+(order.currency==="EGP"?amount+" جنيه مصري":amount.toFixed(2)+" دولار أمريكي")+"\nرقم الطلب: "+(order.id||"غير متاح")+"\nرقم التحويل: "+(order.payment_reference||"لم يُرسل رقم التحويل بعد")+"\nتاريخ الطلب: "+(order.created_at?new Date(order.created_at).toLocaleString("ar-EG"):"غير متاح");
+      details.textContent="العميل: "+(order.customer_email||"بريد غير متاح")+"\nالمبلغ: "+(order.currency==="EGP"?amount+" جنيه مصري":amount.toFixed(2)+" دولار أمريكي")+"\nرقم الطلب: "+(order.id||"غير متاح")+"\nرقم العملية: "+(order.payment_reference||"لم يُرسل رقم التحويل بعد")+"\nمحفظة المُرسِل: "+(order.sender_wallet_phone||"لم يُرسل رقم المحفظة بعد")+"\nتاريخ الطلب: "+(order.created_at?new Date(order.created_at).toLocaleString("ar-EG"):"غير متاح");
       details.style.whiteSpace="pre-line";card.appendChild(details);
       if(!["paid","rejected","refunded","cancelled","expired"].includes(order.status)){
         const row=document.createElement("div");row.className="row";
         const referenceInput=document.createElement("input");
         referenceInput.type="text";referenceInput.inputMode="text";referenceInput.maxLength=80;
-        referenceInput.placeholder="أدخل رقم التحويل الحقيقي الذي وصلك";
+        referenceInput.placeholder="أدخل رقم العملية الحقيقي";
         referenceInput.value=order.payment_reference||"";
-        referenceInput.setAttribute("aria-label","رقم التحويل الحقيقي");
+        referenceInput.setAttribute("aria-label","رقم العملية الحقيقي");
         referenceInput.style.margin="8px 0";
+        const senderPhoneInput=document.createElement("input");
+        senderPhoneInput.type="tel";senderPhoneInput.inputMode="tel";senderPhoneInput.maxLength=24;
+        senderPhoneInput.placeholder="رقم محفظة المُرسِل (الهاتف الذي أرسل الفلوس)";
+        senderPhoneInput.value=order.sender_wallet_phone||"";
+        senderPhoneInput.setAttribute("aria-label","رقم محفظة المُرسِل");
+        senderPhoneInput.style.margin="8px 0";
         const saveReference=document.createElement("button");
         saveReference.className="orange";saveReference.textContent="💾 حفظ رقم التحويل";
         saveReference.addEventListener("click",async function(){
           const reference=referenceInput.value.trim();
+          const senderPhone=senderPhoneInput.value.replace(/[\s()-]/g,"");
           if(reference.length<4){showMessage("⚠️ اكتب رقم العملية الحقيقي أولًا.");return;}
+          if(!/^\+?[0-9]{7,20}$/.test(senderPhone)){showMessage("⚠️ اكتب رقم محفظة المُرسِل بشكل صحيح.");return;}
           if(!confirm("هل راجعت رسالة المحفظة وتأكدت أن هذا الرقم يخص مبلغ هذا الطلب؟"))return;
           saveReference.disabled=true;
           try{
             const response=await fetch(SUPABASE_URL+"/functions/v1/owner-dashboard",{
               method:"POST",headers:authHeaders(),
-              body:JSON.stringify({action:"set_payment_reference",order_id:order.id,payment_reference:reference})
+              body:JSON.stringify({action:"set_payment_reference",order_id:order.id,payment_reference:reference,sender_wallet_phone:senderPhone})
             });
             const result=await readResponse(response);
             if(!response.ok||!result.ok)throw new Error(getServerError(result,response));
@@ -1000,10 +1013,11 @@ async function loadOwnerDashboard(){
           }catch(error){showMessage("❌ تعذر حفظ رقم التحويل: "+(error.message||"خطأ غير معروف"));}
           finally{saveReference.disabled=false;}
         });
-        card.appendChild(referenceInput);card.appendChild(saveReference);
+        card.appendChild(referenceInput);card.appendChild(senderPhoneInput);card.appendChild(saveReference);
         const approve=document.createElement("button");approve.className="green";approve.textContent="✅ اعتماد الدفع وتفعيل الاشتراك";
         approve.addEventListener("click",async function(){
-          if(!order.payment_reference){showMessage("⚠️ لا يوجد رقم تحويل في الطلب. لا تعتمد الطلب قبل استلام الرقم والتحقق من الدفع.");return;}
+          if(!order.payment_reference){showMessage("⚠️ لا يوجد رقم عملية في الطلب. لا تعتمد الطلب قبل استلام الرقم والتحقق من الدفع.");return;}
+          if(!order.sender_wallet_phone){showMessage("⚠️ سجّل رقم محفظة المُرسِل أولًا ثم احفظ البيانات قبل الاعتماد.");return;}
           if(!confirm("هل تحققت بنفسك من وصول المبلغ فعلًا؟ عند الموافقة سيتفعّل الاشتراك."))return;
           await changeOwnerOrderStatus(order.id,"paid");
         });
