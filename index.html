@@ -1055,10 +1055,10 @@ async function loadOwnerDashboard(){
           const isActive=ent.status==="active"&&expiry&&expiry.getTime()>Date.now();
           const statusText=isActive?"🟢 نشط":(ent.status==="revoked"?"🔴 ملغي":"⚪ منتهي");
           const details=document.createElement("div");details.className="meta";
-          details.textContent="الحساب: "+(emailByUser.get(ent.user_id)||"معرّف الحساب: "+(ent.user_id||"غير متاح"))+
+          details.textContent="الحساب: "+(ent.customer_email||emailByUser.get(ent.user_id)||"معرّف الحساب: "+(ent.user_id||"غير متاح"))+
             "\\nالحالة: "+statusText+
-            "\\nبداية الاشتراك: "+(start?start.toLocaleString("ar-EG"):"غير مسجل")+
-            "\\nتاريخ الانتهاء: "+(expiry?expiry.toLocaleString("ar-EG"):"غير مسجل");
+            "\\nبداية الاشتراك: "+(start?start.toLocaleString("ar-EG",{timeZone:"Africa/Cairo"}):"غير مسجل")+
+            "\\nتاريخ الانتهاء: "+(expiry?expiry.toLocaleString("ar-EG",{timeZone:"Africa/Cairo"}):"غير مسجل");
           card.appendChild(details);
           entitlementList.appendChild(card);
         });
