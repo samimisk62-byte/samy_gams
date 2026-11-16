@@ -297,7 +297,7 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
   <label>اسم المعلومة (مفتاح)</label><input id="dataSettingKey" type="text" maxlength="100" placeholder="مثال: welcome_message أو stage_limit">
   <label>القيمة الجديدة (نص أو JSON)</label><textarea id="dataSettingValue" rows="3" placeholder='مثال: "أهلاً بك" أو {"enabled":true,"count":10}'></textarea>
   <label>شرح مختصر</label><input id="dataSettingDescription" type="text" maxlength="500" placeholder="وصف المعلومة">
-  <button id="dataSettingSave" class="green" type="button">💾 حفظ / استبدال المعلومة</button>
+  <div class="row"><button id="dataSettingCreate" class="orange" type="button">➕ إنشاء جديد</button><button id="dataSettingSave" class="green" type="button">💾 حفظ / استبدال المعلومة</button></div>
   <div id="dataSettingList"></div>
   <hr>
   <h3>🎮 بيانات الألعاب والأسعار</h3><div id="dataCatalogList"></div>
@@ -1230,16 +1230,25 @@ async function loadDataManagement(){
     (d.audit||[]).forEach(x=>dataCard(audit,x.action+" — "+x.entity_type+" — "+(x.entity_id||""),(x.note||"")+(x.created_at?"\n"+new Date(x.created_at).toLocaleString("ar-EG"):"")));
   }catch(e){summary.textContent="❌ تعذر تحميل إدارة البيانات: "+(e.message||"خطأ غير معروف");}
 }
-async function saveDataSetting(){
+async function saveDataSetting(mode="save"){
   try{
     const scope=$("dataSettingScope").value,key=$("dataSettingKey").value.trim(),raw=$("dataSettingValue").value.trim();
     if(!key||!raw){showMessage("اكتب اسم المعلومة وقيمتها أولًا.");return;}
     let value;try{value=JSON.parse(raw);}catch(e){value=raw;}
     const payload={scope,setting_key:key,setting_value:value,description:$("dataSettingDescription").value};
     if(scope==="game")payload.game_code=$("dataSettingGame").value;
-    if(!confirm("سيتم حفظ المعلومة أو استبدال القديمة مع تسجيل نسخة قبل التغيير. هل توافق؟"))return;
-    await callOwnerData("save_setting",payload);showMessage("✅ تم حفظ المعلومة الجديدة.",true);$("dataSettingKey").value="";$("dataSettingValue").value="";$("dataSettingDescription").value="";await loadDataManagement();
-  }catch(e){showMessage("❌ تعذر حفظ المعلومة: "+(e.message||""));}
+    if(mode==="create"){
+      if(!confirm("سيتم إنشاء معلومة جديدة فقط. إذا كان الاسم مستخدمًا بالفعل فلن يتم استبدالها. هل تريد المتابعة؟"))return;
+      await callOwnerData("create_setting",payload);
+      showMessage("✅ تم إنشاء المعلومة الجديدة بنجاح.",true);
+    }else{
+      if(!confirm("سيتم حفظ المعلومة أو استبدال القديمة مع تسجيل نسخة قبل التغيير. هل توافق؟"))return;
+      await callOwnerData("save_setting",payload);
+      showMessage("✅ تم حفظ المعلومة أو استبدالها بنجاح.",true);
+    }
+    $("dataSettingKey").value="";$("dataSettingValue").value="";$("dataSettingDescription").value="";
+    await loadDataManagement();
+  }catch(e){showMessage("❌ تعذر تنفيذ العملية: "+(e.message||""));}
 }
 /* تشغيل اللعبة */
 async function openGame(button){
@@ -1322,6 +1331,7 @@ $("adminReloadBtn").addEventListener("click",loadOwnerDashboard);
 $("dataManagerReload").addEventListener("click",loadDataManagement);
 $("dataManagerBackup").addEventListener("click",async function(){if(!confirm("سيتم إنشاء نسخة احتياطية من بيانات المنصة والألعاب والمستخدمين والطلبات. هل تريد المتابعة؟"))return;this.disabled=true;try{const r=await callOwnerData("backup_all");showMessage("✅ "+r.message+" — الجداول: "+r.tables+" — المستخدمون: "+r.users,true);await loadDataManagement();}catch(e){showMessage("❌ تعذر إنشاء النسخة: "+e.message);}finally{this.disabled=false;}});
 $("dataSettingSave").addEventListener("click",saveDataSetting);
+$("dataSettingCreate").addEventListener("click",function(){saveDataSetting("create");});
 $("dataSettingScope").addEventListener("change",function(){$("dataSettingGame").disabled=this.value!=="game";});
 $("dataSettingGame").disabled=true;
 
