@@ -166,6 +166,11 @@ html body .skiptranslate iframe{visibility:hidden!important}
 .dataManageCard .row{gap:6px}
 .dataManageCard button{margin-top:6px}
 .dataManageMeta{white-space:pre-line;line-height:1.8;color:#d9e6ec;font-size:13px}
+
+#broadcastInbox{display:none;margin:12px 0;padding:12px;border:1px solid #2b8069;border-radius:13px;background:#102f31}
+.broadcastCard{padding:10px;margin:9px 0;border:1px solid #52758a;border-radius:10px;background:#1c3949;white-space:pre-wrap;overflow-wrap:anywhere}
+.broadcastCard img,.broadcastCard video{display:block;max-width:100%;max-height:340px;margin-top:9px;border-radius:10px}
+#broadcastAdmin input,#broadcastAdmin textarea{width:100%;padding:10px;border-radius:9px;margin:6px 0;color:#142b36;background:#f6fbff}
 </style>
 </head>
 
@@ -245,6 +250,13 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 </div>
 </div>
 
+
+<section id="broadcastInbox" class="panel">
+<h2>📨 رسائل وإعلانات المنصة</h2>
+<p class="small">رسائل الإدارة المرسلة لجميع المستخدمين.</p>
+<div id="broadcastFeed">جاري تحميل الرسائل...</div>
+</section>
+
 <!-- أدوات الإنترنت والتواصل الاجتماعي -->
 <div id="internetTools" class="panel">
   <h2>🌐 الإنترنت والتواصل الاجتماعي</h2>
@@ -277,6 +289,20 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <p class="small">يعرض هذا القسم كل اشتراك محفوظ لكل حساب، مع تاريخ البداية والانتهاء. تحديث الطلبات يحدّث هذه البيانات أيضًا.</p>
 <div id="adminEntitlements"></div>
 <hr>
+
+<hr>
+<section id="broadcastAdmin">
+<h2>📨 مركز الرسائل الجماعية</h2>
+<p class="small">اكتب الرسالة مرة واحدة لنشرها داخل حسابات جميع المستخدمين. ويمكنك تجهيز نفس النص للمشاركة عبر واتساب. اختر مجموعة أو مستلمين من واتساب واضغط إرسال هناك؛ لا يتم الإرسال تلقائيًا من المنصة.</p>
+<label>عنوان الرسالة</label><input id="broadcastTitle" type="text" maxlength="140" placeholder="مثال: إعلان لعبة جديدة">
+<label>نص الرسالة</label><textarea id="broadcastMessage" rows="4" maxlength="5000" placeholder="اكتب الإعلان أو التنبيه لجميع المستخدمين..."></textarea>
+<label>صورة أو فيديو (اختياري — حتى 25 ميجابايت)</label><input id="broadcastMedia" type="file" accept="image/*,video/*">
+<div id="broadcastMediaStatus" class="small">لم يتم اختيار ملف.</div>
+<div class="row"><button id="broadcastPublish" class="green" type="button">📢 نشر الرسالة لكل المستخدمين</button><button id="broadcastWhatsapp" class="orange" type="button">🟢 تجهيز رسالة واتساب</button></div>
+<hr><h3>📋 سجل الرسائل</h3><div id="broadcastAdminList" class="small">اضغط تحديث الرسائل لعرض السجل.</div>
+<button id="broadcastReload" class="gray" type="button">🔄 تحديث سجل الرسائل</button>
+</section>
+
 <section id="dataManagementSection">
   <h2>🗂️ إدارة وتبديل بيانات المنصة والألعاب</h2>
   <p class="small">إدارة الإعدادات العامة، بيانات الألعاب، الاشتراكات، حسابات المستخدمين والنسخ الاحتياطية. كل تعديل يُسجَّل قبل وبعد التغيير.</p>
@@ -1297,6 +1323,88 @@ async function openGame(button){
   }
   window.location.href=url;
 }
+
+/* مركز الرسائل الجماعية */
+async function callBroadcast(action,payload={}){
+  if(!session?.access_token)throw new Error("سجّل الدخول أولًا.");
+  const response=await fetch(SUPABASE_URL+"/functions/v1/platform-broadcasts",{
+    method:"POST",headers:authHeaders(),body:JSON.stringify({action,...payload})
+  });
+  const result=await readResponse(response);
+  if(!response.ok||result.data?.error)throw new Error(getServerError(result,response));
+  return result.data||{};
+}
+function renderBroadcastCard(parent,item,adminMode=false){
+  const card=document.createElement("article");card.className="broadcastCard";
+  const title=document.createElement("strong");title.textContent=item.title||"رسالة من إدارة المنصة";card.appendChild(title);
+  const date=document.createElement("div");date.className="small";date.textContent=item.sent_at?new Date(item.sent_at).toLocaleString("ar-EG"):"";card.appendChild(date);
+  const body=document.createElement("p");body.textContent=item.message||"";card.appendChild(body);
+  if(item.media_url){
+    if(item.media_type==="video"){const v=document.createElement("video");v.src=item.media_url;v.controls=true;v.playsInline=true;card.appendChild(v);}
+    else{const img=document.createElement("img");img.src=item.media_url;img.alt="مرفق الرسالة";img.loading="lazy";card.appendChild(img);}
+  }
+  if(adminMode&&item.is_active){
+    const b=document.createElement("button");b.className="gray";b.textContent="📦 أرشفة الرسالة";
+    b.onclick=async()=>{if(!confirm("أرشفة الرسالة وإخفاؤها من حسابات المستخدمين؟"))return;try{await callBroadcast("archive",{id:item.id});await loadBroadcastAdmin();await loadBroadcastFeed();showMessage("تمت أرشفة الرسالة.",true);}catch(e){showMessage("تعذر أرشفة الرسالة: "+e.message);}};
+    card.appendChild(b);
+  }
+  parent.appendChild(card);
+}
+async function loadBroadcastFeed(){
+  const box=$("broadcastInbox"),list=$("broadcastFeed");
+  if(!box||!list||!session?.access_token)return;
+  box.style.display="block";list.textContent="⏳ جاري تحميل الرسائل...";
+  try{const d=await callBroadcast("feed");list.textContent="";const items=d.messages||[];
+    if(!items.length){list.textContent="لا توجد رسائل جديدة من الإدارة حاليًا.";return;}
+    items.forEach(x=>renderBroadcastCard(list,x,false));
+  }catch(e){list.textContent="تعذر تحميل الرسائل الآن.";}
+}
+async function loadBroadcastAdmin(){
+  const list=$("broadcastAdminList");if(!list)return;list.textContent="⏳ جاري تحميل سجل الرسائل...";
+  try{const d=await callBroadcast("list");list.textContent="";const items=d.messages||[];
+    if(!items.length){list.textContent="لا توجد رسائل مسجلة حتى الآن.";return;}
+    items.forEach(x=>{const wrap=document.createElement("div");renderBroadcastCard(wrap,x,true);if(!x.is_active){const st=document.createElement("p");st.textContent="📦 مؤرشفة";wrap.appendChild(st);}list.appendChild(wrap);});
+  }catch(e){list.textContent="تعذر تحميل السجل: "+e.message;}
+}
+async function uploadBroadcastMedia(file){
+  const form=new FormData();form.append("file",file);
+  const response=await fetch(SUPABASE_URL+"/functions/v1/platform-broadcasts",{
+    method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+session.access_token},body:form
+  });
+  const result=await readResponse(response);
+  if(!response.ok||result.data?.error)throw new Error(getServerError(result,response));
+  return result.data;
+}
+let broadcastUploadedMedia=null;
+$("broadcastMedia").addEventListener("change",async function(){
+  const file=this.files&&this.files[0];broadcastUploadedMedia=null;
+  if(!file){$("broadcastMediaStatus").textContent="لم يتم اختيار ملف.";return;}
+  if(file.size>25*1024*1024){this.value="";$("broadcastMediaStatus").textContent="حجم الملف أكبر من 25 ميجابايت.";return;}
+  $("broadcastMediaStatus").textContent="⏳ جاري رفع الملف...";
+  try{broadcastUploadedMedia=await uploadBroadcastMedia(file);$("broadcastMediaStatus").textContent="✅ تم رفع "+file.name+" بنجاح.";}
+  catch(e){$("broadcastMediaStatus").textContent="❌ تعذر رفع الملف: "+e.message;this.value="";}
+});
+$("broadcastPublish").addEventListener("click",async function(){
+  const title=$("broadcastTitle").value.trim(),message=$("broadcastMessage").value.trim();
+  if(title.length<2||!message){showMessage("اكتب عنوان الرسالة ونصها أولًا.");return;}
+  if($("broadcastMedia").files.length&&!broadcastUploadedMedia){showMessage("انتظر انتهاء رفع الصورة أو الفيديو قبل النشر.");return;}
+  if(!confirm("سيتم نشر الرسالة لجميع حسابات المستخدمين داخل المنصة. هل تريد المتابعة؟"))return;
+  this.disabled=true;
+  try{await callBroadcast("publish",{title,message,media_url:broadcastUploadedMedia?.media_url||null,media_type:broadcastUploadedMedia?.media_type||null});
+    $("broadcastTitle").value="";$("broadcastMessage").value="";$("broadcastMedia").value="";$("broadcastMediaStatus").textContent="لم يتم اختيار ملف.";broadcastUploadedMedia=null;
+    showMessage("✅ تم نشر الرسالة لجميع المستخدمين داخل المنصة.",true);await loadBroadcastAdmin();
+  }catch(e){showMessage("❌ تعذر نشر الرسالة: "+e.message);}
+  finally{this.disabled=false;}
+});
+$("broadcastWhatsapp").addEventListener("click",function(){
+  const title=$("broadcastTitle").value.trim(),message=$("broadcastMessage").value.trim();
+  if(!message){showMessage("اكتب نص الرسالة أولًا.");return;}
+  const media=broadcastUploadedMedia?.media_url?"\n"+broadcastUploadedMedia.media_url:"";
+  const text=(title?title+"\n":"")+message+media+"\n\nمنصة ألعابي";
+  window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener,noreferrer");
+});
+$("broadcastReload").addEventListener("click",loadBroadcastAdmin);
+
 async function refreshAccess(){
   if(!session?.access_token)return;
   platformIsOwner=false;
@@ -1305,6 +1413,7 @@ async function refreshAccess(){
   document.querySelectorAll("[data-subscribe-game]").forEach(function(button){button.style.display=platformIsOwner?"none":"";});
   $("accountStatus").textContent=platformIsOwner?"🟢 حساب مالك المنصة: كل ألعاب المنصة متاحة مجانًا":(activeCount?"🟢 لديك اشتراك فعال في "+activeCount+" لعبة":"🟡 لا توجد اشتراكات نشطة حاليًا");
   await loadMyOrders();
+  await loadBroadcastFeed();
 }
 
 /* إظهار وإخفاء النماذج */
@@ -1347,7 +1456,7 @@ $("forgotBtn").addEventListener("click",forgotPassword);
 $("resetPasswordBtn").addEventListener("click",resetPassword);
 $("logoutBtn").addEventListener("click",logout);
 $("refreshBtn").addEventListener("click",refreshAccess);
-$("adminOpenBtn").addEventListener("click",function(){$("adminPanel").style.display="block";$("adminPanel").scrollIntoView({behavior:"smooth",block:"start"});loadOwnerDashboard();loadDataManagement();});
+$("adminOpenBtn").addEventListener("click",function(){$("adminPanel").style.display="block";$("adminPanel").scrollIntoView({behavior:"smooth",block:"start"});loadOwnerDashboard();loadDataManagement();loadBroadcastAdmin();});
 $("adminReloadBtn").addEventListener("click",loadOwnerDashboard);
 $("dataManagerReload").addEventListener("click",loadDataManagement);
 $("dataManagerBackup").addEventListener("click",async function(){if(!confirm("سيتم إنشاء نسخة احتياطية من بيانات المنصة والألعاب والمستخدمين والطلبات. هل تريد المتابعة؟"))return;this.disabled=true;try{const r=await callOwnerData("backup_all");showMessage("✅ "+r.message+" — الجداول: "+r.tables+" — المستخدمون: "+r.users,true);await loadDataManagement();}catch(e){showMessage("❌ تعذر إنشاء النسخة: "+e.message);}finally{this.disabled=false;}});
