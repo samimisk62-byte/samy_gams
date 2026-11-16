@@ -972,6 +972,7 @@ async function loadOwnerDashboard(){
     const result=await readResponse(response);
     if(!response.ok) throw new Error(getServerError(result,response));
     const orders=Array.isArray(result.data?.orders)?result.data.orders:[];
+    const entitlements=Array.isArray(result.data?.entitlements)?result.data.entitlements:[];
     const pending=orders.filter(o=>!["paid","rejected","refunded","cancelled","expired"].includes(o.status));
     summary.textContent="✅ تم التحقق من صلاحية الإدارة. إجمالي الطلبات المعروضة: "+orders.length+" — الطلبات التي تحتاج مراجعة: "+pending.length;
     const names={al7aet:"الحائط الصعب",alashra:"لعبة الـ٦ ورقات",alashra_ten:"لعبة العشرة",saed_al_samak:"صائد السمك",mat3amy:"مطعمي"};
