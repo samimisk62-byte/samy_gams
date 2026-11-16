@@ -1339,7 +1339,7 @@ $("forgotBtn").addEventListener("click",forgotPassword);
 $("resetPasswordBtn").addEventListener("click",resetPassword);
 $("logoutBtn").addEventListener("click",logout);
 $("refreshBtn").addEventListener("click",refreshAccess);
-$("adminOpenBtn").addEventListener("click",function(){$("adminPanel").style.display="block";$("adminPanel").scrollIntoView({behavior:"smooth",block:"start"});loadOwnerDashboard();});
+$("adminOpenBtn").addEventListener("click",function(){$("adminPanel").style.display="block";$("adminPanel").scrollIntoView({behavior:"smooth",block:"start"});loadOwnerDashboard();loadDataManagement();});
 $("adminReloadBtn").addEventListener("click",loadOwnerDashboard);
 $("dataManagerReload").addEventListener("click",loadDataManagement);
 $("dataManagerBackup").addEventListener("click",async function(){if(!confirm("سيتم إنشاء نسخة احتياطية من بيانات المنصة والألعاب والمستخدمين والطلبات. هل تريد المتابعة؟"))return;this.disabled=true;try{const r=await callOwnerData("backup_all");showMessage("✅ "+r.message+" — الجداول: "+r.tables+" — المستخدمون: "+r.users,true);await loadDataManagement();}catch(e){showMessage("❌ تعذر إنشاء النسخة: "+e.message);}finally{this.disabled=false;}});
