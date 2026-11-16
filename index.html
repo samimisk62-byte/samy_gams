@@ -985,6 +985,9 @@ async function loadOwnerDashboard(){
       const details=document.createElement("div");details.className="meta";
       const amount=Number(order.amount_minor||0)/100;
       details.textContent="العميل: "+(order.customer_email||"بريد غير متاح")+"\nالمبلغ: "+(order.currency==="EGP"?amount+" جنيه مصري":amount.toFixed(2)+" دولار أمريكي")+"\nرقم الطلب: "+(order.id||"غير متاح")+"\nرقم العملية: "+(order.payment_reference||"لم يُرسل رقم التحويل بعد")+"\nمحفظة المُرسِل: "+(order.sender_wallet_phone||"لم يُرسل رقم المحفظة بعد")+"\nتاريخ الطلب: "+(order.created_at?new Date(order.created_at).toLocaleString("ar-EG"):"غير متاح");
+      const orderEntitlement=entitlements.find(function(ent){return ent.user_id===order.user_id&&ent.game_code===order.game_code;});
+      if(orderEntitlement&&orderEntitlement.expires_at){const orderExpiry=new Date(orderEntitlement.expires_at);details.textContent+="\\n📅 تاريخ انتهاء الاشتراك: "+(!Number.isNaN(orderExpiry.getTime())?orderExpiry.toLocaleString("ar-EG",{timeZone:"Africa/Cairo"}):"غير متاح");}else if(order.status==="paid"){details.textContent+="\\n📅 تاريخ انتهاء الاشتراك: لم يصل تاريخ الانتهاء من سجل الاشتراك.";}
+      
       details.style.whiteSpace="pre-line";card.appendChild(details);
       if(!["paid","rejected","refunded","cancelled","expired"].includes(order.status)){
         const row=document.createElement("div");row.className="row";
