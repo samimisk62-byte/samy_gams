@@ -69,6 +69,7 @@ overflow-wrap:anywhere
 }
  .small{font-size:13px;color:#b9c8d0;line-height:1.8}
 .adminOrder{background:#213746;border:1px solid #40596a;border-radius:12px;padding:12px;margin:10px 0;overflow-wrap:anywhere}
+.adminEntitlement{background:#172f3c;border:1px solid #3c687d;border-radius:12px;padding:12px;margin:10px 0;overflow-wrap:anywhere}.adminEntitlement .meta{white-space:pre-line;line-height:1.9;color:#d4e0e6}
 .adminOrder .meta{line-height:1.9;color:#d4e0e6}
 #adminPanel{display:none}
 .payment{
@@ -263,6 +264,10 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <div class="row"><button id="adminReloadBtn" class="green">🔄 تحديث الطلبات</button><button id="adminCloseBtn" class="gray">إغلاق اللوحة</button></div>
 <div id="adminSummary" class="small" style="margin-top:10px">اضغط تحديث الطلبات لعرض الطلبات.</div>
 <div id="adminOrders"></div>
+<hr>
+<h2>📅 الاشتراكات الفعّالة وتواريخ الانتهاء</h2>
+<p class="small">يعرض هذا القسم كل اشتراك محفوظ لكل حساب، مع تاريخ البداية والانتهاء. تحديث الطلبات يحدّث هذه البيانات أيضًا.</p>
+<div id="adminEntitlements"></div>
 </div>
 
 <!-- الألعاب -->
@@ -946,7 +951,8 @@ async function loadMyOrders(){
   const box=$("ordersList");if(!box||!session?.access_token)return;
   try{
     const response=await fetch(SUPABASE_URL+"/functions/v1/my-game-orders",{method:"POST",headers:authHeaders(),body:JSON.stringify({})});const result=await readResponse(response);if(!response.ok)throw new Error(getServerError(result,response));
-    const orders=Array.isArray(result.data?.orders)?result.data.orders:[];box.textContent="";if(!orders.length){box.textContent="لا توجد طلبات اشتراك حتى الآن.";return;}
+    const orders=Array.isArray(result.data?.orders)?result.data.orders:[];
+    const entitlements=Array.isArray(result.data?.entitlements)?result.data.entitlements:[];box.textContent="";if(!orders.length){box.textContent="لا توجد طلبات اشتراك حتى الآن.";return;}
     const statusNames={pending:"في انتظار المراجعة",active:"مفعّل",paid:"تم الدفع",approved:"تمت الموافقة",rejected:"مرفوض",cancelled:"ملغي",expired:"منتهي"};
     orders.forEach(function(order){const row=document.createElement("div");row.style.cssText="background:#213746;border-radius:9px;padding:9px;margin:7px 0;overflow-wrap:anywhere";const name=GAME_NAMES[order.game_code]||order.game_code||"لعبة";const amount=Number(order.amount_minor||0)/100;const money=order.currency==="EGP"?amount+" جنيه":amount.toFixed(2)+" دولار";row.textContent=name+" — "+money+" — "+(statusNames[order.status]||order.status||"قيد المتابعة")+(order.payment_reference?" — رقم التحويل: "+order.payment_reference:"");box.appendChild(row);});
   }catch(error){box.textContent="تعذر تحميل الطلبات الآن. جرّب زر تحديث الاشتراكات لاحقًا."}
@@ -954,10 +960,11 @@ async function loadMyOrders(){
 
 /* لوحة إدارة الطلبات — صلاحية المالك تتحقق منها دالة الخادم */
 async function loadOwnerDashboard(){
-  const summary=$("adminSummary"), list=$("adminOrders");
+  const summary=$("adminSummary"), list=$("adminOrders"), entitlementList=$("adminEntitlements");
   if(!session?.access_token){showMessage("سجّل الدخول أولًا.");return;}
   summary.textContent="⏳ جاري تحميل الطلبات والتحقق من صلاحية الإدارة...";
   list.textContent="";
+  if(entitlementList) entitlementList.textContent="⏳ جاري تحميل الاشتراكات...";
   try{
     const response=await fetch(SUPABASE_URL+"/functions/v1/owner-dashboard",{
       method:"POST",headers:authHeaders(),body:JSON.stringify({action:"summary"})
@@ -1030,6 +1037,33 @@ async function loadOwnerDashboard(){
       }
       list.appendChild(card);
     });
+    // عرض الاشتراكات المحفوظة وتواريخها — قراءة فقط دون تعديل بيانات الاشتراك.
+    if(entitlementList){
+      entitlementList.textContent="";
+      const emailByUser=new Map();
+      orders.forEach(function(order){if(order.user_id&&order.customer_email)emailByUser.set(order.user_id,order.customer_email);});
+      if(!entitlements.length){
+        entitlementList.textContent="لا توجد اشتراكات محفوظة حاليًا.";
+      }else{
+        entitlements.forEach(function(ent){
+          const card=document.createElement("div");card.className="adminEntitlement";
+          const title=document.createElement("h3");
+          title.textContent=(names[ent.game_code]||ent.game_code||"لعبة");
+          card.appendChild(title);
+          const start=ent.starts_at?new Date(ent.starts_at):null;
+          const expiry=ent.expires_at?new Date(ent.expires_at):null;
+          const isActive=ent.status==="active"&&expiry&&expiry.getTime()>Date.now();
+          const statusText=isActive?"🟢 نشط":(ent.status==="revoked"?"🔴 ملغي":"⚪ منتهي");
+          const details=document.createElement("div");details.className="meta";
+          details.textContent="الحساب: "+(emailByUser.get(ent.user_id)||"معرّف الحساب: "+(ent.user_id||"غير متاح"))+
+            "\\nالحالة: "+statusText+
+            "\\nبداية الاشتراك: "+(start?start.toLocaleString("ar-EG"):"غير مسجل")+
+            "\\nتاريخ الانتهاء: "+(expiry?expiry.toLocaleString("ar-EG"):"غير مسجل");
+          card.appendChild(details);
+          entitlementList.appendChild(card);
+        });
+      }
+    }
     const gamesWithOrders=new Set(orders.map(order=>order.game_code));
     Object.entries(names).forEach(function(entry){
       const code=entry[0], gameName=entry[1];
