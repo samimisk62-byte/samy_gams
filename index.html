@@ -1056,10 +1056,15 @@ async function loadOwnerDashboard(){
           const isActive=ent.status==="active"&&expiry&&expiry.getTime()>Date.now();
           const statusText=isActive?"🟢 نشط":(ent.status==="revoked"?"🔴 ملغي":"⚪ منتهي");
           const details=document.createElement("div");details.className="meta";
-          details.textContent="الحساب: "+(ent.customer_email||emailByUser.get(ent.user_id)||"معرّف الحساب: "+(ent.user_id||"غير متاح"))+
-            "\\nالحالة: "+statusText+
-            "\\nبداية الاشتراك: "+(start?start.toLocaleString("ar-EG",{timeZone:"Africa/Cairo"}):"غير مسجل")+
-            "\\nتاريخ الانتهاء: "+(expiry?expiry.toLocaleString("ar-EG",{timeZone:"Africa/Cairo"}):"غير مسجل");
+          const accountLine=document.createElement("div");
+          accountLine.textContent="الحساب: "+(ent.customer_email||emailByUser.get(ent.user_id)||"معرّف الحساب: "+(ent.user_id||"غير متاح"));
+          const statusLine=document.createElement("div");statusLine.textContent="الحالة: "+statusText;
+          const startLine=document.createElement("div");
+          startLine.textContent="بداية الاشتراك: "+(start&&!Number.isNaN(start.getTime())?start.toLocaleString("ar-EG",{timeZone:"Africa/Cairo"}):"غير مسجل");
+          const expiryLine=document.createElement("div");
+          expiryLine.textContent="📅 تاريخ الانتهاء: "+(expiry&&!Number.isNaN(expiry.getTime())?expiry.toLocaleString("ar-EG",{timeZone:"Africa/Cairo"}):"غير مسجل في سجل الاشتراك");
+          expiryLine.style.fontWeight="700";
+          details.append(accountLine,statusLine,startLine,expiryLine);
           card.appendChild(details);
           entitlementList.appendChild(card);
         });
