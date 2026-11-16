@@ -171,6 +171,17 @@ html body .skiptranslate iframe{visibility:hidden!important}
 .broadcastCard{padding:10px;margin:9px 0;border:1px solid #52758a;border-radius:10px;background:#1c3949;white-space:pre-wrap;overflow-wrap:anywhere}
 .broadcastCard img,.broadcastCard video{display:block;max-width:100%;max-height:340px;margin-top:9px;border-radius:10px}
 #broadcastAdmin input,#broadcastAdmin textarea{width:100%;padding:10px;border-radius:9px;margin:6px 0;color:#142b36;background:#f6fbff}
+
+.privateChatThread{max-height:420px;overflow:auto;padding:10px;border:1px solid #496b7b;border-radius:12px;background:#102532;margin:10px 0}
+.privateChatBubble{max-width:88%;padding:10px;margin:8px 0;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere;background:#24485a}
+.privateChatBubble.owner{margin-right:auto;background:#174f43;border:1px solid #27866b}
+.privateChatBubble.customer{margin-left:auto;background:#29445e;border:1px solid #527da0}
+.privateChatBubble img,.privateChatBubble video{display:block;max-width:100%;max-height:300px;margin-top:8px;border-radius:9px}
+.privateChatMeta{font-size:11px;opacity:.8;margin-top:5px}
+.privateChatList{max-height:300px;overflow:auto;margin:10px 0}
+.privateChatConversation{display:block;width:100%;text-align:right;background:#1b3a4c;color:#fff;border:1px solid #52758a;border-radius:10px;padding:10px;margin:6px 0}
+.privateChatConversation.selected{border:2px solid #29b889;background:#164d46}
+
 </style>
 </head>
 
@@ -257,6 +268,16 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <div id="broadcastFeed">جاري تحميل الرسائل...</div>
 </section>
 
+<section id="privateChatCustomer" class="panel" style="display:none">
+<h2>💬 مراسلة الإدارة — محادثتك الخاصة</h2>
+<p class="small">هذه المحادثة خاصة بك وبإدارة المنصة فقط. لا يستطيع أي مستخدم آخر رؤية رسائلك.</p>
+<div id="privateChatCustomerThread" class="privateChatThread">جاري تحميل المحادثة...</div>
+<label>اكتب رسالتك</label><textarea id="privateChatCustomerText" rows="3" maxlength="5000" placeholder="اكتب رسالتك للإدارة..."></textarea>
+<label>إرفاق صورة أو فيديو (حتى 25 ميجابايت)</label><input id="privateChatCustomerFile" type="file" accept="image/*,video/*">
+<div id="privateChatCustomerFileStatus" class="small">لم يتم اختيار ملف.</div>
+<div class="row"><button id="privateChatCustomerSend" class="green" type="button">📨 إرسال للإدارة</button><button id="privateChatCustomerReload" class="gray" type="button">🔄 تحديث المحادثة</button></div>
+</section>
+
 <!-- أدوات الإنترنت والتواصل الاجتماعي -->
 <div id="internetTools" class="panel">
   <h2>🌐 الإنترنت والتواصل الاجتماعي</h2>
@@ -321,6 +342,21 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <div class="row"><button id="broadcastPublish" class="green" type="button">📢 نشر الرسالة لكل المستخدمين</button><button id="broadcastWhatsapp" class="orange" type="button">🟢 تجهيز رسالة واتساب</button></div>
 <hr><h3>📋 سجل الرسائل</h3><div id="broadcastAdminList" class="small">اضغط تحديث الرسائل لعرض السجل.</div>
 <button id="broadcastReload" class="gray" type="button">🔄 تحديث سجل الرسائل</button>
+</section>
+
+
+<section id="privateChatAdmin" class="panel">
+<h2>📩 رسائل المستخدمين — محادثات خاصة</h2>
+<p class="small">كل مستخدم له محادثة مستقلة. اختر المستخدم من القائمة لعرض رسائله والرد عليه نصًا أو بصورة أو فيديو.</p>
+<div class="row"><button id="privateChatAdminReload" class="green" type="button">🔄 تحديث قائمة المحادثات</button></div>
+<div id="privateChatConversations" class="privateChatList">جاري تحميل المحادثات...</div>
+<hr>
+<h3 id="privateChatAdminTitle">اختر محادثة من القائمة</h3>
+<div id="privateChatAdminThread" class="privateChatThread">لم يتم اختيار مستخدم بعد.</div>
+<label>رد الإدارة</label><textarea id="privateChatAdminText" rows="3" maxlength="5000" placeholder="اكتب ردك للمستخدم..."></textarea>
+<label>إرفاق صورة أو فيديو (حتى 25 ميجابايت)</label><input id="privateChatAdminFile" type="file" accept="image/*,video/*">
+<div id="privateChatAdminFileStatus" class="small">لم يتم اختيار ملف.</div>
+<button id="privateChatAdminSend" class="green" type="button" disabled>📨 إرسال الرد للمستخدم</button>
 </section>
 
 <section id="dataManagementSection">
@@ -1071,6 +1107,7 @@ window.openPlatformAdminPanel = function(){
   try{loadDataManagement();}catch(e){}
   try{loadBroadcastAdmin();}catch(e){}
   try{loadCustomGamesAdmin();}catch(e){}
+  try{loadPrivateChatConversations();}catch(e){}
 };
  
 async function manageCustomer(action,userId,extra={}){
@@ -1471,6 +1508,99 @@ $("customGameSave").addEventListener("click",async function(){
 });
 $("customGameClear").addEventListener("click",clearCustomGameForm);
 
+
+/* المحادثات الخاصة بين كل مستخدم وإدارة المنصة */
+let privateChatCustomerMedia=null, privateChatAdminMedia=null, privateChatSelectedCustomer=null;
+async function callPrivateChat(action,payload={}){
+ if(!session?.access_token)throw new Error("سجّل الدخول أولًا.");
+ const response=await fetch(SUPABASE_URL+"/functions/v1/platform-private-chat",{method:"POST",headers:authHeaders(),body:JSON.stringify({action,...payload})});
+ const result=await readResponse(response);
+ if(!response.ok||result.data?.error)throw new Error(getServerError(result,response));
+ return result.data||{};
+}
+async function uploadPrivateChatMedia(file,customerId=null){
+ const form=new FormData();form.append("action","upload");form.append("file",file);
+ if(customerId)form.append("customer_id",customerId);
+ const response=await fetch(SUPABASE_URL+"/functions/v1/platform-private-chat",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+session.access_token},body:form});
+ const result=await readResponse(response);
+ if(!response.ok||result.data?.error)throw new Error(getServerError(result,response));
+ return result.data;
+}
+function renderPrivateChatMessages(box,messages){
+ box.textContent="";
+ if(!messages.length){box.textContent="لا توجد رسائل في هذه المحادثة حتى الآن. ابدأ بإرسال رسالة.";return;}
+ messages.forEach(m=>{
+  const bubble=document.createElement("div");bubble.className="privateChatBubble "+(m.sender_role==="owner"?"owner":"customer");
+  const who=document.createElement("strong");who.textContent=m.sender_role==="owner"?"إدارة المنصة":"أنت / المستخدم";bubble.appendChild(who);
+  if(m.message_text){const p=document.createElement("div");p.textContent=m.message_text;bubble.appendChild(p);}
+  if(m.media_url){
+   if(m.media_type==="video"){const v=document.createElement("video");v.src=m.media_url;v.controls=true;v.playsInline=true;bubble.appendChild(v);}
+   else{const img=document.createElement("img");img.src=m.media_url;img.alt="مرفق المحادثة";img.loading="lazy";bubble.appendChild(img);}
+  }
+  const meta=document.createElement("div");meta.className="privateChatMeta";meta.textContent=m.created_at?new Date(m.created_at).toLocaleString("ar-EG"):"";bubble.appendChild(meta);
+  box.appendChild(bubble);
+ });
+ box.scrollTop=box.scrollHeight;
+}
+async function loadPrivateChatCustomer(){
+ const section=$("privateChatCustomer"),box=$("privateChatCustomerThread");
+ if(!section||!box||!session?.access_token)return;
+ if(platformIsOwner){section.style.display="none";return;}
+ section.style.display="block";box.textContent="⏳ جاري تحميل المحادثة...";
+ try{const d=await callPrivateChat("feed");renderPrivateChatMessages(box,d.messages||[]);}
+ catch(e){box.textContent="تعذر تحميل المحادثة: "+e.message;}
+}
+async function loadPrivateChatConversations(){
+ const list=$("privateChatConversations");if(!list)return;
+ list.textContent="⏳ جاري تحميل المحادثات...";
+ try{
+  const d=await callPrivateChat("conversations"),items=d.conversations||[];list.textContent="";
+  if(!items.length){list.textContent="لا توجد رسائل من المستخدمين حتى الآن.";return;}
+  items.forEach(item=>{
+   const b=document.createElement("button");b.type="button";b.className="privateChatConversation"+(privateChatSelectedCustomer===item.customer_id?" selected":"");
+   b.textContent=(item.email||"مستخدم")+" — "+(item.unread?"🔴 "+item.unread+" رسالة جديدة — ":"")+(item.last_message||"مرفق")+" — "+new Date(item.last_at).toLocaleString("ar-EG");
+   b.onclick=()=>openPrivateChatThread(item.customer_id,item.email);list.appendChild(b);
+  });
+ }catch(e){list.textContent="تعذر تحميل المحادثات: "+e.message;}
+}
+async function openPrivateChatThread(customerId,email){
+ privateChatSelectedCustomer=customerId;
+ $("privateChatAdminTitle").textContent="💬 محادثة: "+(email||"المستخدم");
+ $("privateChatAdminThread").textContent="⏳ جاري تحميل الرسائل...";
+ $("privateChatAdminSend").disabled=false;
+ try{const d=await callPrivateChat("thread",{customer_id:customerId});renderPrivateChatMessages($("privateChatAdminThread"),d.messages||[]);await loadPrivateChatConversations();}
+ catch(e){$("privateChatAdminThread").textContent="تعذر تحميل المحادثة: "+e.message;}
+}
+async function sendPrivateChatCustomer(){
+ const text=$("privateChatCustomerText").value.trim(),file=$("privateChatCustomerFile").files[0],button=$("privateChatCustomerSend");
+ if(!text&&!file){showMessage("اكتب رسالة أو اختر صورة أو فيديو.");return;}
+ button.disabled=true;
+ try{
+  let media=null;if(file){if(file.size>25*1024*1024)throw new Error("حجم الملف أكبر من 25 ميجابايت.");$("privateChatCustomerFileStatus").textContent="⏳ جاري رفع المرفق...";media=await uploadPrivateChatMedia(file);}
+  await callPrivateChat("send",{message:text,media_path:media?.media_path||null,media_type:media?.media_type||null});
+  $("privateChatCustomerText").value="";$("privateChatCustomerFile").value="";$("privateChatCustomerFileStatus").textContent="لم يتم اختيار ملف.";
+  showMessage("✅ تم إرسال رسالتك إلى الإدارة.",true);await loadPrivateChatCustomer();
+ }catch(e){showMessage("❌ تعذر إرسال الرسالة: "+e.message);}finally{button.disabled=false;}
+}
+async function sendPrivateChatAdmin(){
+ if(!privateChatSelectedCustomer){showMessage("اختر محادثة مستخدم أولًا.");return;}
+ const text=$("privateChatAdminText").value.trim(),file=$("privateChatAdminFile").files[0],button=$("privateChatAdminSend");
+ if(!text&&!file){showMessage("اكتب ردًا أو اختر صورة أو فيديو.");return;}
+ button.disabled=true;
+ try{
+  let media=null;if(file){if(file.size>25*1024*1024)throw new Error("حجم الملف أكبر من 25 ميجابايت.");$("privateChatAdminFileStatus").textContent="⏳ جاري رفع المرفق...";media=await uploadPrivateChatMedia(file,privateChatSelectedCustomer);}
+  await callPrivateChat("owner_send",{customer_id:privateChatSelectedCustomer,message:text,media_path:media?.media_path||null,media_type:media?.media_type||null});
+  $("privateChatAdminText").value="";$("privateChatAdminFile").value="";$("privateChatAdminFileStatus").textContent="لم يتم اختيار ملف.";
+  showMessage("✅ تم إرسال الرد للمستخدم.",true);await openPrivateChatThread(privateChatSelectedCustomer,$("privateChatAdminTitle").textContent.replace("💬 محادثة: ",""));
+ }catch(e){showMessage("❌ تعذر إرسال الرد: "+e.message);}finally{button.disabled=!privateChatSelectedCustomer;}
+}
+$("privateChatCustomerSend").addEventListener("click",sendPrivateChatCustomer);
+$("privateChatCustomerReload").addEventListener("click",loadPrivateChatCustomer);
+$("privateChatAdminReload").addEventListener("click",loadPrivateChatConversations);
+$("privateChatAdminSend").addEventListener("click",sendPrivateChatAdmin);
+$("privateChatCustomerFile").addEventListener("change",function(){const f=this.files[0];$("privateChatCustomerFileStatus").textContent=f?"تم اختيار: "+f.name:"لم يتم اختيار ملف.";});
+$("privateChatAdminFile").addEventListener("change",function(){const f=this.files[0];$("privateChatAdminFileStatus").textContent=f?"تم اختيار: "+f.name:"لم يتم اختيار ملف.";});
+
 /* مركز الرسائل الجماعية */
 async function callBroadcast(action,payload={}){
   if(!session?.access_token)throw new Error("سجّل الدخول أولًا.");
@@ -1562,7 +1692,10 @@ async function refreshAccess(){
   await loadMyOrders();
   await loadBroadcastFeed();
   await loadCustomGames();
+  await loadPrivateChatCustomer();
 }
+
+setInterval(function(){if(session?.access_token){if(platformIsOwner){if($("adminPanel")?.style.display==="block")loadPrivateChatConversations();}else{loadPrivateChatCustomer();}}},15000);
 
 /* إظهار وإخفاء النماذج */
 $("signupShowBtn").addEventListener("click",function(){
