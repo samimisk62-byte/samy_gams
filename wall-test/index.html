@@ -1332,6 +1332,7 @@ var redScore = 0;
 var blueScore = 0;
 var tournamentWins = 0;
 var completedStages = 0;
+var rewardedStages = [];
 var totalGoals = 0;
 
 var stage = 1;
@@ -1433,6 +1434,7 @@ if(data.selectedRedPaddle) selectedRedPaddle=data.selectedRedPaddle;
 if(data.selectedBluePaddle) selectedBluePaddle=data.selectedBluePaddle;
 tournamentWins = Number(data.tournamentWins)||0;
 completedStages = Number(data.completedStages)||0;
+rewardedStages = Array.isArray(data.rewardedStages) ? data.rewardedStages.filter(function(v){return Number.isInteger(v) && v >= 1;}) : [];
 totalGoals = Number(data.totalGoals)||0;
 if(Number.isInteger(data.unlockedStage) && data.unlockedStage>=1){
 unlockedStage=data.unlockedStage;
@@ -1507,6 +1509,7 @@ selectedRedPaddle:selectedRedPaddle,
 selectedBluePaddle:selectedBluePaddle,
 tournamentWins:tournamentWins,
 completedStages:completedStages,
+rewardedStages:rewardedStages,
 totalGoals:totalGoals,
 unlockedStage:unlockedStage,
 selectedStage:selectedStage
@@ -2877,14 +2880,18 @@ round++;
 if(round > 3){
 round = 1;
 completedStages++;
-coins+=100;
-updateCoins();
+var firstStageReward = rewardedStages.indexOf(stage) === -1;
+if(firstStageReward){
+  rewardedStages.push(stage);
+  coins += 100;
+  updateCoins();
+}
 unlockedStage = Math.max(unlockedStage,stage+1);
 selectedStage = unlockedStage;
 saveData();
 renderTrophies();
 renderStages();
-alert("🏆 ممتاز! أكملت المرحلة "+stage+" وحصلت على 100 عملة إضافية وفتحت المرحلة التالية.");
+alert(firstStageReward ? "🏆 ممتاز! أكملت المرحلة "+stage+" وحصلت على 100 عملة إضافية وفتحت المرحلة التالية." : "🏆 أكملت المرحلة "+stage+" مرة أخرى. مكافأة هذه المرحلة صُرفت سابقًا، ولم تُضف عملات جديدة.");
 showStageSelect();
 return;
 }
