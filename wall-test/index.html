@@ -1254,7 +1254,16 @@ html body .skiptranslate iframe{visibility:hidden!important}
 ⏸️ إيقاف
 </button>
 
-<button id="gameSoundSettingsButton" type="button">🔊 تحكم الصوت</button>
+<button id="gameSoundSettingsButton" type="button" aria-expanded="false">🔊 الصوت</button>
+<div id="gameQuickSoundPanel" style="display:none;flex:1 1 100%;max-width:360px;background:#172b39;color:#fff;border:2px solid #3d667c;border-radius:12px;padding:10px;margin:4px auto">
+ <label for="gameMasterVolume" style="display:block;font-weight:bold">🔊 مستوى الصوت العام: <span id="gameMasterVolumeValue">120%</span></label>
+ <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+  <button id="gameVolumeDown" type="button" aria-label="خفض الصوت" style="min-width:48px">➖</button>
+  <input id="gameMasterVolume" type="range" min="0" max="300" step="5" value="120" style="flex:1;min-width:100px;accent-color:#16a3d7">
+  <button id="gameVolumeUp" type="button" aria-label="رفع الصوت" style="min-width:48px">➕</button>
+ </div>
+ <div style="font-size:12px;margin-top:6px;color:#d5e4eb">التحكم السريع في جميع الأصوات معًا. التفاصيل والأنواع داخل ⚙️ الضبط.</div>
+</div>
 
 <button id="restart" type="button">
 🔄 إعادة
@@ -4226,6 +4235,35 @@ document.getElementById("ballVolumeControl").addEventListener("input",ballVolume
 document.getElementById("allSoundVolumeControl").addEventListener("input",allSoundVolumeChanged);
 document.getElementById("previewPaddleButton").addEventListener("click",previewPaddleSound);
 document.getElementById("previewBallButton").addEventListener("click",previewBallSound);
+(function(){
+ var btn=document.getElementById("gameSoundSettingsButton");
+ var panel=document.getElementById("gameQuickSoundPanel");
+ var slider=document.getElementById("gameMasterVolume");
+ var value=document.getElementById("gameMasterVolumeValue");
+ var settingsSlider=document.getElementById("allSoundVolumeControl");
+ function applyQuickVolume(v){
+  v=Math.max(0,Math.min(300,Math.round(Number(v)/5)*5));
+  allSoundVolume=v;
+  if(slider)slider.value=v;
+  if(value)value.textContent=v+"%";
+  if(settingsSlider)settingsSlider.value=v;
+  updateAllSoundVolumeLabel();
+  saveAudioPrefs();
+ }
+ if(slider){
+  slider.value=allSoundVolume;
+  if(value)value.textContent=allSoundVolume+"%";
+  slider.addEventListener("input",function(){applyQuickVolume(slider.value);});
+ }
+ if(btn&&panel)btn.addEventListener("click",function(){
+  var show=panel.style.display==="none";
+  panel.style.display=show?"block":"none";
+  btn.setAttribute("aria-expanded",show?"true":"false");
+  btn.textContent=show?"🔊 إخفاء الصوت":"🔊 الصوت";
+ });
+ document.getElementById("gameVolumeDown")?.addEventListener("click",function(){applyQuickVolume(allSoundVolume-10);});
+ document.getElementById("gameVolumeUp")?.addEventListener("click",function(){applyQuickVolume(allSoundVolume+10);});
+})();
 
 document.getElementById("startButton").addEventListener("click",function(){stageChosen=false;showStageSelect();});
 document.getElementById("stagesBack").addEventListener("click",showMenu);
@@ -4580,7 +4618,7 @@ document.getElementById("message").innerHTML =
 
 <div class="audioChoice">
 <label for="allSoundVolumeControl">🔊 مستوى جميع الأصوات: <span id="allSoundVolumeValue">120%</span></label>
-<input id="allSoundVolumeControl" type="range" min="10" max="150" step="5" value="120" style="width:92%;accent-color:#16a3d7">
+<input id="allSoundVolumeControl" type="range" min="0" max="300" step="5" value="120" style="width:92%;accent-color:#16a3d7">
 <div class="small">يتحكم في الموسيقى والكرة والمضارب والجمهور والمؤثرات معًا.</div>
 </div>
 
