@@ -913,8 +913,14 @@ html body .skiptranslate iframe{visibility:hidden!important}
 </select>
 <button id="previewMusicButton" type="button">▶️ تجربة الموسيقى</button>
 <label for="musicVolumeControl">🔊 مستوى صوت الموسيقى: <span id="musicVolumeValue">85%</span></label>
-<input id="musicVolumeControl" type="range" min="10" max="100" step="5" value="85" style="width:92%;accent-color:#16a3d7">
+<input id="musicVolumeControl" type="range" min="10" max="150" step="5" value="110" style="width:92%;accent-color:#16a3d7">
 <div class="small">حرّك المؤشر لليسار لخفض الصوت ولليمين لرفعه.</div>
+</div>
+
+<div class="audioChoice">
+<label for="allSoundVolumeControl">🔊 مستوى جميع الأصوات: <span id="allSoundVolumeValue">120%</span></label>
+<input id="allSoundVolumeControl" type="range" min="10" max="150" step="5" value="120" style="width:92%;accent-color:#16a3d7">
+<div class="small">يتحكم في الموسيقى والكرة والمضارب والجمهور والمؤثرات معًا.</div>
 </div>
 
 <div class="audioChoice">
@@ -1372,7 +1378,8 @@ var effects = true;
 var musicStyle = "classic";
 var paddleSoundStyle = "wood";
 var ballSoundStyle = "rubber";
-var musicVolume = 85;
+var musicVolume = 110;
+var allSoundVolume = 120;
 var AUDIO_PREFS_KEY = "al7aet_audio_wall_test";
 
 var coins = 500;
@@ -1985,7 +1992,7 @@ var a=getAudio();if(!a)return;
 try{
 var o=a.createOscillator(),g=a.createGain();
 o.type=track.wave;o.frequency.value=track.notes[index];
-g.gain.setValueAtTime(.09*(musicVolume/100),a.currentTime);
+g.gain.setValueAtTime(Math.min(.95,.14*(musicVolume/100)*(allSoundVolume/100)),a.currentTime);
 g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.28);
 o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+.3);
 }catch(e){}
@@ -3383,7 +3390,7 @@ var gain = ac.createGain();
 oscillator.type = waveform || "sine";
 oscillator.frequency.value = freq;
 
-gain.gain.value = volume || .07;
+gain.gain.value = Math.min(.95,(volume || .07)*(allSoundVolume/100)*1.35);
 
 oscillator.connect(gain);
 gain.connect(ac.destination);
@@ -3453,6 +3460,7 @@ try{
 localStorage.setItem(AUDIO_PREFS_KEY,JSON.stringify({
 musicStyle:musicStyle,
 musicVolume:musicVolume,
+allSoundVolume:allSoundVolume,
 paddleSoundStyle:paddleSoundStyle,
 ballSoundStyle:ballSoundStyle
 }));
@@ -3463,7 +3471,8 @@ function loadAudioPrefs(){
 try{
 var p=JSON.parse(localStorage.getItem(AUDIO_PREFS_KEY)||"{}");
 if(["classic","sport","fast","electro"].indexOf(p.musicStyle)>=0)musicStyle=p.musicStyle;
-if(Number.isFinite(Number(p.musicVolume)))musicVolume=Math.max(10,Math.min(100,Number(p.musicVolume)));
+if(Number.isFinite(Number(p.musicVolume)))musicVolume=Math.max(10,Math.min(150,Number(p.musicVolume)));
+if(Number.isFinite(Number(p.allSoundVolume)))allSoundVolume=Math.max(10,Math.min(150,Number(p.allSoundVolume)));
 if(["wood","pro","metal","soft"].indexOf(p.paddleSoundStyle)>=0)paddleSoundStyle=p.paddleSoundStyle;
 if(["rubber","crisp","hollow","electronic"].indexOf(p.ballSoundStyle)>=0)ballSoundStyle=p.ballSoundStyle;
 }catch(e){}
@@ -3471,11 +3480,14 @@ var m=document.getElementById("musicStyleSelect");
 var pdl=document.getElementById("paddleSoundSelect");
 var b=document.getElementById("ballSoundSelect");
 var vol=document.getElementById("musicVolumeControl");
+var allVol=document.getElementById("allSoundVolumeControl");
 if(m)m.value=musicStyle;
 if(pdl)pdl.value=paddleSoundStyle;
 if(b)b.value=ballSoundStyle;
 if(vol)vol.value=musicVolume;
+if(allVol)allVol.value=allSoundVolume;
 updateMusicVolumeLabel();
+updateAllSoundVolumeLabel();
 }
 
 function updateMusicVolumeLabel(){
@@ -3485,8 +3497,20 @@ if(out)out.textContent=musicVolume+"%";
 
 function musicVolumeChanged(){
 var el=document.getElementById("musicVolumeControl");
-musicVolume=el?Number(el.value):85;
+musicVolume=el?Number(el.value):110;
 updateMusicVolumeLabel();
+saveAudioPrefs();
+}
+
+function updateAllSoundVolumeLabel(){
+var out=document.getElementById("allSoundVolumeValue");
+if(out)out.textContent=allSoundVolume+"%";
+}
+
+function allSoundVolumeChanged(){
+var el=document.getElementById("allSoundVolumeControl");
+allSoundVolume=el?Number(el.value):120;
+updateAllSoundVolumeLabel();
 saveAudioPrefs();
 }
 
@@ -3618,7 +3642,7 @@ osc.frequency.value =
 track.notes[musicIndex];
 
 gain.gain.setValueAtTime(
-0.09 * (musicVolume / 100),
+Math.min(.95,0.14 * (musicVolume / 100) * (allSoundVolume / 100)),
 ac.currentTime
 );
 
@@ -4222,6 +4246,7 @@ document.getElementById("paddleSoundSelect").addEventListener("change",paddleSou
 document.getElementById("ballSoundSelect").addEventListener("change",ballSoundChanged);
 document.getElementById("previewMusicButton").addEventListener("click",previewMusic);
 document.getElementById("musicVolumeControl").addEventListener("input",musicVolumeChanged);
+document.getElementById("allSoundVolumeControl").addEventListener("input",allSoundVolumeChanged);
 document.getElementById("previewPaddleButton").addEventListener("click",previewPaddleSound);
 document.getElementById("previewBallButton").addEventListener("click",previewBallSound);
 
