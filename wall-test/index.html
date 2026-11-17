@@ -897,6 +897,39 @@ html body .skiptranslate iframe{visibility:hidden!important}
 💥 المؤثرات: تشغيل
 </button>
 
+<div class="audioChoice">
+<label for="musicStyleSelect">🎼 نغمة الموسيقى</label>
+<select id="musicStyleSelect">
+<option value="classic">كلاسيكية</option>
+<option value="sport">حماسية</option>
+<option value="fast">سريعة</option>
+<option value="electro">إلكترونية</option>
+</select>
+<button id="previewMusicButton" type="button">▶️ تجربة الموسيقى</button>
+</div>
+
+<div class="audioChoice">
+<label for="paddleSoundSelect">🎾 صوت المضرب</label>
+<select id="paddleSoundSelect">
+<option value="wood">خشبي</option>
+<option value="pro">احترافي</option>
+<option value="metal">معدني</option>
+<option value="soft">ناعم</option>
+</select>
+<button id="previewPaddleButton" type="button">▶️ تجربة صوت المضرب</button>
+</div>
+
+<div class="audioChoice">
+<label for="ballSoundSelect">🏓 صوت الكرة والحائط</label>
+<select id="ballSoundSelect">
+<option value="rubber">مطاطي</option>
+<option value="crisp">واضح</option>
+<option value="hollow">مجوف</option>
+<option value="electronic">إلكتروني</option>
+</select>
+<button id="previewBallButton" type="button">▶️ تجربة صوت الكرة</button>
+</div>
+
 </div>
 
 <div class="menuButtons">
@@ -1327,6 +1360,10 @@ var music = true;
 var ballSound = true;
 var crowd = true;
 var effects = true;
+var musicStyle = "classic";
+var paddleSoundStyle = "wood";
+var ballSoundStyle = "rubber";
+var AUDIO_PREFS_KEY = "al7aet_audio_wall_test";
 
 var coins = 500;
 
@@ -1908,6 +1945,43 @@ effects = !effects;
 document.getElementById("effectButton").innerHTML =
 "💥 المؤثرات: " + (effects ? "تشغيل" : "إيقاف");
 
+}
+
+function musicStyleChanged(){
+musicStyle=document.getElementById("musicStyleSelect").value;
+saveAudioPrefs();
+if(music && gameRunning && !paused)startMusic();
+}
+
+function paddleSoundChanged(){
+paddleSoundStyle=document.getElementById("paddleSoundSelect").value;
+saveAudioPrefs();
+previewPaddleSound();
+}
+
+function ballSoundChanged(){
+ballSoundStyle=document.getElementById("ballSoundSelect").value;
+saveAudioPrefs();
+previewBallSound();
+}
+
+function previewMusic(){
+var track=musicTracks[musicStyle] || musicTracks.classic;
+var ac=getAudio();if(!ac)return;
+for(var i=0;i<4;i++){
+(function(index){
+setTimeout(function(){
+var a=getAudio();if(!a)return;
+try{
+var o=a.createOscillator(),g=a.createGain();
+o.type=track.wave;o.frequency.value=track.notes[index];
+g.gain.setValueAtTime(.045,a.currentTime);
+g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.28);
+o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+.3);
+}catch(e){}
+},i*track.beat);
+})(i);
+}
 }
 
 /* =========================================
@@ -3283,7 +3357,7 @@ return null;
 
 }
 
-function tone(freq,duration,volume){
+function tone(freq,duration,volume,waveform){
 
 var ac = getAudio();
 
@@ -3296,7 +3370,7 @@ try{
 var oscillator = ac.createOscillator();
 var gain = ac.createGain();
 
-oscillator.type = "sine";
+oscillator.type = waveform || "sine";
 oscillator.frequency.value = freq;
 
 gain.gain.value = volume || .07;
@@ -3316,87 +3390,85 @@ ac.currentTime + duration
 
 function playBall(){
 
-if(ballSound){
+if(!ballSound)return;
 
-tone(
-430,
-.055,
-.07
-);
+var p = {
+rubber:[390,.055,.065,"sine"],
+crisp:[560,.045,.075,"triangle"],
+hollow:[250,.075,.09,"triangle"],
+electronic:[760,.04,.055,"square"]
+}[ballSoundStyle] || [390,.055,.065,"sine"];
 
-}
+tone(p[0],p[1],p[2],p[3]);
 
 }
 
 function playWall(){
 
-if(!ballSound){
-return;
-}
+if(!ballSound)return;
 
-tone(
-260,
-.06,
-.06
-);
+var p = {
+rubber:[235,410,"sine"],
+crisp:[520,740,"triangle"],
+hollow:[175,285,"triangle"],
+electronic:[680,920,"square"]
+}[ballSoundStyle] || [235,410,"sine"];
 
-setTimeout(
-function(){
-
-if(ballSound){
-
-tone(
-480,
-.08,
-.06
-);
-
-}
-
-},
-45
-);
+tone(p[0],.06,.06,p[2]);
+setTimeout(function(){
+if(ballSound)tone(p[1],.075,.055,p[2]);
+},45);
 
 }
 
 function playPaddle(){
 
-if(!ballSound){
-return;
+if(!ballSound)return;
+
+var p = {
+wood:[145,520,760,"triangle"],
+pro:[210,680,980,"sine"],
+metal:[330,880,1250,"square"],
+soft:[115,390,560,"sine"]
+}[paddleSoundStyle] || [145,520,760,"triangle"];
+
+tone(p[0],.045,.13,p[3]);
+setTimeout(function(){if(ballSound)tone(p[1],.045,.10,p[3]);},25);
+setTimeout(function(){if(ballSound)tone(p[2],.025,.05,p[3]);},55);
+
 }
 
-tone(
-125,
-.045,
-.13
-);
+function saveAudioPrefs(){
+try{
+localStorage.setItem(AUDIO_PREFS_KEY,JSON.stringify({
+musicStyle:musicStyle,
+paddleSoundStyle:paddleSoundStyle,
+ballSoundStyle:ballSoundStyle
+}));
+}catch(e){}
+}
 
-setTimeout(
-function(){
+function loadAudioPrefs(){
+try{
+var p=JSON.parse(localStorage.getItem(AUDIO_PREFS_KEY)||"{}");
+if(["classic","sport","fast","electro"].indexOf(p.musicStyle)>=0)musicStyle=p.musicStyle;
+if(["wood","pro","metal","soft"].indexOf(p.paddleSoundStyle)>=0)paddleSoundStyle=p.paddleSoundStyle;
+if(["rubber","crisp","hollow","electronic"].indexOf(p.ballSoundStyle)>=0)ballSoundStyle=p.ballSoundStyle;
+}catch(e){}
+var m=document.getElementById("musicStyleSelect");
+var pdl=document.getElementById("paddleSoundSelect");
+var b=document.getElementById("ballSoundSelect");
+if(m)m.value=musicStyle;
+if(pdl)pdl.value=paddleSoundStyle;
+if(b)b.value=ballSoundStyle;
+}
 
-tone(
-620,
-.045,
-.10
-);
+function previewPaddleSound(){
+var was=ballSound;ballSound=true;playPaddle();setTimeout(function(){playPaddle();},150);ballSound=was;
+}
 
-},
-25
-);
-
-setTimeout(
-function(){
-
-tone(
-900,
-.025,
-.05
-);
-
-},
-55
-);
-
+function previewBallSound(){
+var was=ballSound;ballSound=true;playBall();setTimeout(function(){playWall();},120);ballSound=was;
 }
 
 function playScore(){
@@ -3487,16 +3559,12 @@ tone(
 الموسيقى
 ========================================= */
 
-var musicNotes = [
-261.63,
-329.63,
-392.00,
-329.63,
-293.66,
-349.23,
-440.00,
-349.23
-];
+var musicTracks = {
+classic:{notes:[261.63,329.63,392.00,329.63,293.66,349.23,440.00,349.23],wave:"triangle",beat:480},
+sport:{notes:[392.00,493.88,587.33,659.25,587.33,493.88,440.00,587.33],wave:"square",beat:360},
+fast:{notes:[329.63,392.00,493.88,587.33,493.88,587.33,659.25,587.33],wave:"triangle",beat:280},
+electro:{notes:[220.00,329.63,440.00,659.25,440.00,329.63,523.25,659.25],wave:"sawtooth",beat:400}
+};
 
 var musicIndex = 0;
 
@@ -3517,9 +3585,10 @@ try{
 var osc = ac.createOscillator();
 var gain = ac.createGain();
 
-osc.type = "triangle";
+var track=musicTracks[musicStyle] || musicTracks.classic;
+osc.type = track.wave;
 osc.frequency.value =
-musicNotes[musicIndex];
+track.notes[musicIndex];
 
 gain.gain.setValueAtTime(
 0.035,
@@ -3539,7 +3608,7 @@ osc.stop(ac.currentTime + .45);
 
 musicIndex++;
 
-if(musicIndex >= musicNotes.length){
+if(musicIndex >= track.notes.length){
 musicIndex = 0;
 }
 
@@ -3561,10 +3630,11 @@ musicIndex = 0;
 
 musicBeat();
 
+var track=musicTracks[musicStyle] || musicTracks.classic;
 musicTimer =
 setInterval(
 musicBeat,
-480
+track.beat
 );
 
 }
@@ -4120,6 +4190,12 @@ document.getElementById("musicButton").addEventListener("click",musicToggle);
 document.getElementById("ballButton").addEventListener("click",ballToggle);
 document.getElementById("crowdButton").addEventListener("click",crowdToggle);
 document.getElementById("effectButton").addEventListener("click",effectToggle);
+document.getElementById("musicStyleSelect").addEventListener("change",musicStyleChanged);
+document.getElementById("paddleSoundSelect").addEventListener("change",paddleSoundChanged);
+document.getElementById("ballSoundSelect").addEventListener("change",ballSoundChanged);
+document.getElementById("previewMusicButton").addEventListener("click",previewMusic);
+document.getElementById("previewPaddleButton").addEventListener("click",previewPaddleSound);
+document.getElementById("previewBallButton").addEventListener("click",previewBallSound);
 
 document.getElementById("startButton").addEventListener("click",function(){stageChosen=false;showStageSelect();});
 document.getElementById("stagesBack").addEventListener("click",showMenu);
@@ -4381,6 +4457,7 @@ endTouch();
 ========================================= */
 
 loadData();
+loadAudioPrefs();
 loadAuth();
 applySkin();
 applyPaddleUpgrades();
