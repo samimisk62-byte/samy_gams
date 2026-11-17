@@ -2697,6 +2697,16 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   clock.classList.remove("clock-purple","clock-teal","clock-gold","clock-dark","clock-small","clock-large");
   if(cfg.color!=="blue")clock.classList.add("clock-"+cfg.color);
   if(cfg.size!=="normal")clock.classList.add("clock-"+cfg.size);
+  /* تطبيق الحجم مباشرة على العناصر لضمان ظهوره على كل المتصفحات والهواتف */
+  var timeEl=$("platformClockTime"),dateEl=$("platformClockDate");
+  var iconEl=clock.querySelector(".clockIcon");
+  var sizeMap={small:{time:"22px",icon:"23px",date:"11px",pad:"8px 10px",gap:"7px"},normal:{time:"31px",icon:"28px",date:"13px",pad:"13px 16px",gap:"12px"},large:{time:"40px",icon:"36px",date:"15px",pad:"18px 20px",gap:"15px"}};
+  var sz=sizeMap[cfg.size]||sizeMap.normal;
+  if(timeEl)timeEl.style.setProperty("font-size",sz.time,"important");
+  if(iconEl)iconEl.style.setProperty("font-size",sz.icon,"important");
+  if(dateEl)dateEl.style.setProperty("font-size",sz.date,"important");
+  clock.style.setProperty("padding",sz.pad,"important");
+  clock.style.setProperty("gap",sz.gap,"important");
   controls.visible.checked=!!cfg.visible;
   controls.zone.value=cfg.zone;
   controls.format.value=cfg.format;
