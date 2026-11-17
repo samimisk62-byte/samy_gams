@@ -1439,6 +1439,12 @@ totalGoals = Number(data.totalGoals)||0;
 if(Number.isInteger(data.unlockedStage) && data.unlockedStage>=1){
 unlockedStage=data.unlockedStage;
 }
+/* ترحيل آمن للبيانات القديمة: المراحل المكتملة سابقًا لا تحصل على مكافأة ثانية. */
+if(!Array.isArray(data.rewardedStages) && completedStages > 0){
+  for(var oldRewardStage=1; oldRewardStage<=Math.min(completedStages,unlockedStage-1); oldRewardStage++){
+    if(rewardedStages.indexOf(oldRewardStage)===-1) rewardedStages.push(oldRewardStage);
+  }
+}
 selectedStage=Math.min(unlockedStage,Math.max(1,Number(data.selectedStage)||1));
 
 }catch(e){}
