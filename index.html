@@ -260,6 +260,14 @@ html body .skiptranslate iframe{visibility:hidden!important}
 .welcomeIntroItems span{background:rgba(7,24,38,.48);border:1px solid #54869b;border-radius:20px;padding:7px 11px;font-size:13px;color:#fff}
 .welcomeIntro .welcomeIntroEnd{color:#ffe39a;font-weight:700;margin-top:10px}
 
+
+/* ألوان وأحجام الساعة الشخصية */
+.platformClock.clock-purple{background:linear-gradient(120deg,#30204d,#563b78 55%,#292b59)}
+.platformClock.clock-teal{background:linear-gradient(120deg,#103b3c,#176b70 55%,#174b63)}
+.platformClock.clock-gold{background:linear-gradient(120deg,#493517,#80602a 55%,#3d3447)}
+.platformClock.clock-dark{background:linear-gradient(120deg,#111820,#26323d 55%,#182536)}
+.platformClock.clock-small .clockTime{font-size:22px}
+.platformClock.clock-large .clockTime{font-size:clamp(30px,7vw,40px)}
 </style>
 </head>
 
@@ -2242,6 +2250,22 @@ document.querySelectorAll("[data-share-game]").forEach(function(btn){
 <label><input id="usMotion" type="checkbox" style="width:auto;transform:scale(1.2);margin-left:8px"> تقليل الحركة والمؤثرات البصرية</label>
 <div class="us-row"><button id="usFullscreen" type="button">⛶ ملء الشاشة</button><button id="usReset" type="button" style="background:#b83d45">إعادة الضبط</button><button id="usClose" type="button" class="us-close">إغلاق</button></div>
 
+<div id="clockUserSettings" style="margin-top:14px;padding-top:12px;border-top:1px solid #496273">
+<h3 style="margin:0 0 6px;font-size:17px">🕰️ إعدادات الساعة الشخصية</h3>
+<p style="margin:0 0 8px">هذه الاختيارات خاصة بحسابك على هذا الجهاز، ولا تغيّر إعدادات بقية المستخدمين.</p>
+<label><input id="clockVisible" type="checkbox" checked style="width:auto;margin-left:8px"> إظهار الساعة أعلى المنصة</label>
+<label for="clockZoneSelect">🌍 المنطقة الزمنية</label>
+<select id="clockZoneSelect">
+<option value="Africa/Cairo">القاهرة – مصر</option><option value="Asia/Riyadh">الرياض – السعودية</option><option value="Asia/Dubai">دبي – الإمارات</option><option value="Europe/London">لندن</option><option value="UTC">التوقيت العالمي UTC</option><option value="America/New_York">نيويورك</option>
+</select>
+<label for="clockFormatSelect">🕒 نظام عرض الوقت</label>
+<select id="clockFormatSelect"><option value="12">12 ساعة</option><option value="24">24 ساعة</option></select>
+<label for="clockColorSelect">🎨 لون الساعة</label>
+<select id="clockColorSelect"><option value="blue">أزرق ملكي</option><option value="purple">بنفسجي</option><option value="teal">فيروزي</option><option value="gold">ذهبي</option><option value="dark">داكن هادئ</option></select>
+<label for="clockSizeSelect">🔠 حجم الساعة</label>
+<select id="clockSizeSelect"><option value="small">صغير</option><option value="normal">متوسط</option><option value="large">كبير</option></select>
+<div class="us-row"><button id="clockReset" type="button" style="background:#b88322">↩️ استعادة إعدادات الساعة</button></div>
+</div>
 <div id="usGameControls" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid #496273">
 <h3 style="margin:0 0 6px;font-size:17px">🎮 إعدادات اللعبة الحالية</h3>
 <p style="margin:0 0 8px">اختصارات للإعدادات الموجودة داخل اللعبة نفسها.</p>
@@ -2646,5 +2670,62 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
  setInterval(updatePlatformClock,1000);
 })();
 </script>
+
+<script id="personalClockSettings">
+(function(){
+ "use strict";
+ var clock=document.getElementById("platformClock");
+ if(!clock)return;
+ var $=function(id){return document.getElementById(id);};
+ var account="guest";
+ try{
+  var raw=localStorage.getItem("game_platform_session");
+  var session=raw?JSON.parse(raw):null;
+  account=(session&&session.user&&(session.user.id||session.user.email))||"guest";
+ }catch(e){}
+ var key="platform_clock_settings_v1_"+String(account).toLowerCase();
+ var defaults={visible:true,zone:"Africa/Cairo",format:"12",color:"blue",size:"normal"};
+ var cfg={...defaults};
+ try{cfg={...defaults,...JSON.parse(localStorage.getItem(key)||"{}")};}catch(e){}
+ var controls={visible:$("clockVisible"),zone:$("clockZoneSelect"),format:$("clockFormatSelect"),color:$("clockColorSelect"),size:$("clockSizeSelect")};
+ function save(){
+  try{localStorage.setItem(key,JSON.stringify(cfg));}catch(e){}
+  apply();
+ }
+ function apply(){
+  clock.style.display=cfg.visible?"flex":"none";
+  clock.classList.remove("clock-purple","clock-teal","clock-gold","clock-dark","clock-small","clock-large");
+  if(cfg.color!=="blue")clock.classList.add("clock-"+cfg.color);
+  if(cfg.size!=="normal")clock.classList.add("clock-"+cfg.size);
+  controls.visible.checked=!!cfg.visible;
+  controls.zone.value=cfg.zone;
+  controls.format.value=cfg.format;
+  controls.color.value=cfg.color;
+  controls.size.value=cfg.size;
+  update();
+ }
+ function update(){
+  var t=$("platformClockTime"),d=$("platformClockDate");
+  if(!t||!d)return;
+  try{
+   var now=new Date();
+   t.textContent=new Intl.DateTimeFormat("ar-EG",{timeZone:cfg.zone,hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:cfg.format==="12"}).format(now);
+   d.textContent=new Intl.DateTimeFormat("ar-EG",{timeZone:cfg.zone,weekday:"long",year:"numeric",month:"long",day:"numeric"}).format(now);
+   var names={"Africa/Cairo":"القاهرة","Asia/Riyadh":"الرياض","Asia/Dubai":"دبي","Europe/London":"لندن","UTC":"UTC","America/New_York":"نيويورك"};
+   var z=clock.querySelector(".clockZone");if(z)z.textContent="🌍 "+(names[cfg.zone]||cfg.zone);
+  }catch(e){t.textContent="--:--:--";d.textContent="تحقق من المنطقة الزمنية";}
+ }
+ Object.keys(controls).forEach(function(k){
+  controls[k].addEventListener("change",function(){
+   cfg[k]=k==="visible"?controls[k].checked:controls[k].value;
+   save();
+  });
+ });
+ $("clockReset").addEventListener("click",function(){cfg={...defaults};save();});
+ apply();
+ setInterval(update,1000);
+})();
+</script>
+
 </body>
 </html>
