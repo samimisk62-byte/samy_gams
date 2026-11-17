@@ -814,7 +814,10 @@ html body .skiptranslate iframe{visibility:hidden!important}
 </div>
 
 <div class="coin">
-💰 <span id="coins">500</span>
+💰 رصيد المحفظة: <span id="coins">0</span>
+</div>
+<div class="coin">
+⭐ نقاط اللعب: <span id="gamePoints">0</span>
 </div>
 
 <div class="box">
@@ -1315,7 +1318,8 @@ var ballSound = true;
 var crowd = true;
 var effects = true;
 
-var coins = 500;
+var coins = 0;
+var gamePoints = 0;
 
 /* مزامنة رصيد المتجر والتطويرات مع حساب اللاعب */
 var cloudWalletReady = false;
@@ -1414,8 +1418,8 @@ JSON.parse(
 localStorage.getItem(DATA_KEY) || "{}"
 );
 
-if(typeof data.coins === "number"){
-coins = data.coins;
+if(typeof data.gamePoints === "number"){
+gamePoints = Math.max(0,Number(data.gamePoints)||0);
 }
 
 if(data.owned){
@@ -1496,8 +1500,7 @@ try{
 localStorage.setItem(
 DATA_KEY,
 JSON.stringify({
-coins:coins,
-owned:owned,
+gamePoints:gamePoints,
 selectedSkin:selectedSkin,
 selectedRedPaddle:selectedRedPaddle,
 selectedBluePaddle:selectedBluePaddle,
@@ -1567,6 +1570,7 @@ function updateCoins(){
 
 document.getElementById("coins").innerHTML = coins;
 document.getElementById("storeCoins").innerHTML = coins;
+var gp=document.getElementById("gamePoints");if(gp)gp.textContent=gamePoints;
 
 }
 
@@ -2412,7 +2416,7 @@ playScore();
 impactEffect("smash");
 totalGoals++;
 
-coins += 5;
+gamePoints += 5;
 
 saveData();
 updateCoins();
@@ -2832,8 +2836,8 @@ var winner;
 var rewardText="";
 if(redScore > blueScore){
 tournamentWins++;
-coins+=25;
-rewardText="<br><br>🎁 مكافأة الفوز: +25 عملة";
+gamePoints+=25;
+rewardText="<br><br>🎁 مكافأة الفوز: +25 نقطة لعب";
 saveData();updateCoins();
 winner = "🏆 الفائز: " + redName;
 }else if(blueScore > redScore){
@@ -2871,14 +2875,14 @@ round++;
 if(round > 3){
 round = 1;
 completedStages++;
-coins+=100;
+gamePoints+=100;
 updateCoins();
 unlockedStage = Math.max(unlockedStage,stage+1);
 selectedStage = unlockedStage;
 saveData();
 renderTrophies();
 renderStages();
-alert("🏆 ممتاز! أكملت المرحلة "+stage+" وحصلت على 100 عملة إضافية وفتحت المرحلة التالية.");
+alert("🏆 ممتاز! أكملت المرحلة "+stage+" وحصلت على 100 نقطة لعب وفتحت المرحلة التالية.");
 showStageSelect();
 return;
 }
