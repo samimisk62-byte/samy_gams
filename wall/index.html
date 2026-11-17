@@ -4453,123 +4453,70 @@ document.getElementById("resultHome")
 .addEventListener("click",showStageSelect);
 
 /* =========================================
-لمس الأحمر
+تحكم موحد باللمس والمؤشر — يعمل أفقيًا ورأسيًا
 ========================================= */
+var activePaddleControl = "";
+var activePaddlePointerId = null;
 
-var redPlayer =
-document.getElementById("redPlayer");
+var field = document.getElementById("field");
+field.style.touchAction = "none";
+document.getElementById("redPlayer").style.touchAction = "none";
+document.getElementById("bluePlayer").style.touchAction = "none";
 
-redPlayer.addEventListener(
-"touchstart",
-startTouch,
-{passive:false}
-);
+field.addEventListener("pointerdown", function(e){
+  if(!gameRunning || paused || onlineRole === "guest") return;
+  var target = e.target;
+  var redHit = target.closest && target.closest("#redPlayer");
+  var blueHit = target.closest && target.closest("#bluePlayer");
 
-redPlayer.addEventListener(
-"touchmove",
-moveTouch,
-{passive:false}
-);
+  if(playerCount === 1){
+    activePaddleControl = "red";
+  }else if(playerCount === 2){
+    if(onlineMode && onlineRole === "host"){
+      if(blueHit) return;
+      activePaddleControl = redHit ? "red" : "";
+    }else{
+      activePaddleControl = redHit ? "red" : (blueHit ? "blue" : "");
+    }
+  }
+  if(!activePaddleControl) return;
 
-redPlayer.addEventListener(
-"touchend",
-endTouch
-);
+  activePaddlePointerId = e.pointerId;
+  try{field.setPointerCapture(e.pointerId);}catch(err){}
+  if(activePaddleControl === "red") moveRed(e);
+  else moveBlue(e);
+  e.preventDefault();
+},{passive:false});
 
-redPlayer.addEventListener(
-"mousedown",
-startTouch
-);
+document.addEventListener("pointermove", function(e){
+  if(!activePaddleControl || e.pointerId !== activePaddlePointerId) return;
+  if(!gameRunning || paused) return;
+  if(activePaddleControl === "red") moveRed(e);
+  else if(activePaddleControl === "blue") moveBlue(e);
+  e.preventDefault();
+},{passive:false});
 
-document.addEventListener(
-"mousemove",
-function(e){
-
-if(dragging){
-moveTouch(e);
+function stopPaddlePointer(e){
+  if(activePaddlePointerId === null) return;
+  if(e && e.pointerId !== undefined && e.pointerId !== activePaddlePointerId) return;
+  activePaddleControl = "";
+  activePaddlePointerId = null;
+  dragging = false;
+  blueDragging = false;
 }
+document.addEventListener("pointerup", stopPaddlePointer);
+document.addEventListener("pointercancel", stopPaddlePointer);
+document.addEventListener("lostpointercapture", stopPaddlePointer);
 
+/* دعم المتصفحات القديمة التي لا تدعم Pointer Events */
+if(!window.PointerEvent){
+  document.getElementById("redPlayer").addEventListener("touchstart",startTouch,{passive:false});
+  document.getElementById("redPlayer").addEventListener("touchmove",moveTouch,{passive:false});
+  document.getElementById("redPlayer").addEventListener("touchend",endTouch);
+  document.getElementById("bluePlayer").addEventListener("touchstart",startBlueTouch,{passive:false});
+  document.getElementById("bluePlayer").addEventListener("touchmove",moveBlueTouch,{passive:false});
+  document.getElementById("bluePlayer").addEventListener("touchend",endBlueTouch);
 }
-);
-
-document.addEventListener(
-"mouseup",
-endTouch
-);
-
-/* =========================================
-لمس الأزرق
-========================================= */
-
-var bluePlayer =
-document.getElementById("bluePlayer");
-
-bluePlayer.addEventListener(
-"touchstart",
-startBlueTouch,
-{passive:false}
-);
-
-bluePlayer.addEventListener(
-"touchmove",
-moveBlueTouch,
-{passive:false}
-);
-
-bluePlayer.addEventListener(
-"touchend",
-endBlueTouch
-);
-
-bluePlayer.addEventListener(
-"mousedown",
-startBlueTouch
-);
-
-/* =========================================
-السحب من أرض الملعب
-========================================= */
-
-var field =
-document.getElementById("field");
-
-field.addEventListener(
-"touchstart",
-function(e){
-
-if(playerCount === 1){
-startTouch(e);
-}
-
-},
-{passive:false}
-);
-
-field.addEventListener(
-"touchmove",
-function(e){
-
-if(gameRunning){
-
-if(playerCount === 1){
-moveTouch(e);
-}
-
-e.preventDefault();
-
-}
-
-},
-{passive:false}
-);
-
-field.addEventListener(
-"touchend",
-function(){
-endTouch();
-}
-);
-
 /* =========================================
 التهيئة
 ========================================= */
