@@ -1206,7 +1206,18 @@ async function loadMyOrders(){
 }
 
 /* فتح لوحة الإدارة بطريقة مباشرة مع إظهار نتيجة التحميل داخل اللوحة */
+function ensureGameBackButtons(){
+ document.querySelectorAll("#gamesSection .games > .game").forEach(card=>{
+  if(card.querySelector(".gameBackToList"))return;
+  const back=document.createElement("button");
+  back.type="button";back.className="gray gameBackToList";
+  back.textContent="↩️ العودة إلى قائمة الألعاب";
+  back.style.display="none";back.style.width="100%";back.style.margin="8px 0";
+  card.insertBefore(back,card.firstChild);
+ });
+}
 function showPlatformGame(code){
+ ensureGameBackButtons();
  const cards=document.querySelectorAll("#gamesSection .games > .game");let found=null;
  const aliases={mat3amy:"matamy",matamy:"matamy"};
  const wanted=aliases[code]||code;
@@ -1216,14 +1227,20 @@ function showPlatformGame(code){
   const title=(card.querySelector("h3")?.textContent||"").trim();
   const match=(aliases[gameCode]||gameCode)===wanted || (wanted==="matamy"&&title.includes("مطعمي"));
   card.style.display=match?"":"none";
+  const back=card.querySelector(".gameBackToList");if(back)back.style.display=match?"block":"none";
   if(match)found=card;
  });
  const section=document.getElementById("gamesSection");
  if(section)section.scrollIntoView({behavior:"smooth",block:"start"});
- if(found){found.scrollIntoView({behavior:"smooth",block:"center"});}
+ if(found)found.scrollIntoView({behavior:"smooth",block:"center"});
  else showMessage("لم أجد بطاقة اللعبة المطلوبة. راجع اسم اللعبة في قائمة المنصة.");
 }
-function showAllPlatformGames(){document.querySelectorAll("#gamesSection .games > .game").forEach(card=>card.style.display="");}
+function showAllPlatformGames(){
+ ensureGameBackButtons();
+ document.querySelectorAll("#gamesSection .games > .game").forEach(card=>{
+  card.style.display="";const back=card.querySelector(".gameBackToList");if(back)back.style.display="none";
+ });
+}
 function showOwnerAdminPage(id){
  const menu=document.getElementById("ownerAdminMenu");
  if(menu)menu.style.display=id?"none":"block";
@@ -1248,6 +1265,7 @@ window.openPlatformAdminPanel = function(){
 };
  
 document.addEventListener("click",function(event){
+ if(event.target.closest(".gameBackToList")){showAllPlatformGames();document.getElementById("gamesSection")?.scrollIntoView({behavior:"smooth",block:"start"});return;}
  const openSettings=event.target.closest("#ownerOpenSettings");
  if(openSettings){const s=document.getElementById("universalSettingsButton");if(s)s.click();return;}
  if(event.target.closest("#ownerGamesShortcut")){showOwnerAdminPage("ownerPlatformGames");return;}
