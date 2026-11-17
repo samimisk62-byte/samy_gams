@@ -728,6 +728,14 @@ font-size:12px;
 user-select:none;
 }
 
+/* السماح باللعب الكامل في الوضعين الرأسي والأفقي */
+@media (orientation:portrait) and (max-width:700px){
+  #game.running #rotateNotice{display:none!important;}
+  #game.running #field,
+  #game.running #top,
+  #game.running #buttons{filter:none!important;}
+}
+
 /* ================= إذا أصبح الجهاز أفقيًا ================= */
 
 body.isLandscape #rotateNotice{
