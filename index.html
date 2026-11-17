@@ -1637,6 +1637,22 @@ async function runPrivateMessageAction(action,id,side){
  if(side==="Customer")await loadPrivateChatCustomer();
  else await openPrivateChatThread(privateChatSelectedCustomer,$("privateChatAdminTitle").textContent.replace("💬 محادثة: ",""));
 }
+async function downloadChatAttachment(url,kind="image"){
+ try{
+  const response=await fetch(url);
+  if(!response.ok)throw new Error("تعذر جلب الملف");
+  const blob=await response.blob();
+  const ext=kind==="video"?(blob.type.includes("mp4")?"mp4":"webm"):(blob.type.includes("png")?"png":blob.type.includes("webp")?"webp":"jpg");
+  const objectUrl=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=objectUrl;a.download="منصة-ألعابي-مرفق-"+Date.now()+"."+ext;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(objectUrl),1500);
+  showMessage("بدأ تنزيل المرفق. ابحث عنه في مجلد التنزيلات بالهاتف.",true);
+ }catch(e){
+  showMessage("لم يبدأ التنزيل المباشر؛ سنفتح الملف لتتمكن من حفظه من قائمة الهاتف.");
+  window.open(url,"_blank","noopener,noreferrer");
+ }
+}
 function renderPrivateChatMessages(box,messages,side="Customer",inTrash=false){
 
  box.textContent="";
@@ -1648,6 +1664,9 @@ function renderPrivateChatMessages(box,messages,side="Customer",inTrash=false){
   if(m.media_url){
    if(m.media_type==="video"){const v=document.createElement("video");v.src=m.media_url;v.controls=true;v.playsInline=true;bubble.appendChild(v);}
    else{const img=document.createElement("img");img.src=m.media_url;img.alt="مرفق المحادثة";img.loading="lazy";bubble.appendChild(img);}
+   const save=document.createElement("button");save.type="button";save.className="gray";save.textContent="⬇️ تنزيل الصورة / الفيديو على الهاتف";
+   save.onclick=()=>downloadChatAttachment(m.media_url,m.media_type||"image");
+   bubble.appendChild(save);
   }
   const meta=document.createElement("div");meta.className="privateChatMeta";meta.textContent=m.created_at?new Date(m.created_at).toLocaleString("ar-EG"):"";bubble.appendChild(meta);
   const actions=document.createElement("div");actions.className="row";
@@ -1764,6 +1783,9 @@ function renderBroadcastCard(parent,item,adminMode=false,inTrash=false){
   if(item.media_url){
     if(item.media_type==="video"){const v=document.createElement("video");v.src=item.media_url;v.controls=true;v.playsInline=true;card.appendChild(v);}
     else{const img=document.createElement("img");img.src=item.media_url;img.alt="مرفق الرسالة";img.loading="lazy";card.appendChild(img);}
+    const save=document.createElement("button");save.type="button";save.className="gray";save.textContent="⬇️ تنزيل الصورة / الفيديو على الهاتف";
+    save.onclick=()=>downloadChatAttachment(item.media_url,item.media_type||"image");
+    card.appendChild(save);
   }
   const ownAction=document.createElement("button");ownAction.type="button";ownAction.className=inTrash?"green":"gray";
   ownAction.textContent=inTrash?"↩️ استعادة عندي":"🗑️ حذف عندي";
