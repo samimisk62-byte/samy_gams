@@ -3673,6 +3673,7 @@ Supabase
 ========================================= */
 
 async function supabaseRequest(path,options){
+  throw new Error("الاتصال بالخدمات السحابية غير مفعل في نسخة الاختبار المحلية.");
 
 var opts = options || {};
 
