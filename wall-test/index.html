@@ -792,9 +792,26 @@ html body .skiptranslate iframe{visibility:hidden!important}
 </style>
 
 <style id="wall-test-mobile-input-fix">
-/* Test build: prevent the portrait rotation overlay from blocking all game controls. */
-#game.running #rotateNotice{display:none!important;pointer-events:none!important;}
+/* Test build: support both portrait and landscape without forcing rotation. */
+#rotateNotice{display:none!important;pointer-events:none!important;}
 #game.running #field,#game.running #top,#game.running #buttons{filter:none!important;}
+@media (orientation:portrait) and (max-width:700px){
+  #game{height:100dvh;min-height:520px;}
+  #top{min-height:76px;padding:5px 3px;gap:3px;font-size:11px;align-content:center;}
+  #top button{font-size:11px;padding:6px 7px;margin:1px;}
+  #field{top:82px;bottom:116px;left:2%;right:2%;border-width:3px;}
+  #buttons{min-height:110px;padding:5px 3px;gap:2px;align-content:center;}
+  #buttons button{font-size:12px;padding:8px 7px;margin:2px;min-width:0;}
+  #strong,#strongBlue{min-width:104px;}
+  .player{transform:scale(.82);transform-origin:bottom center;}
+  #message{top:12px;font-size:11px;padding:6px 9px;max-width:90%;white-space:normal;text-align:center;}
+}
+@media (orientation:landscape) and (max-width:900px){
+  #game{height:100dvh;min-height:280px;}
+  #top{min-height:48px;}
+  #field{top:52px;bottom:70px;}
+  #buttons{min-height:66px;}
+}
 </style>
 </head>
 
@@ -2165,8 +2182,7 @@ if(music){
 startMusic();
 }
 
-/* محاولة الوضع الأفقي بعد ضغطة المستخدم */
-await lockLandscape();
+/* لا نفرض اتجاهًا على الهاتف؛ اترك اللعبة تعمل في الوضع الحالي */
 
 }
 
