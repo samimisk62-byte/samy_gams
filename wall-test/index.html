@@ -2701,6 +2701,7 @@ sendGuestPaddlePosition();
 
 function startTouch(e){
 
+if(!gameRunning || paused)return;
 dragging = true;
 moveRed(e);
 
@@ -2730,6 +2731,7 @@ dragging = false;
 
 function startBlueTouch(e){
 
+if(!gameRunning || paused)return;
 if(playerCount !== 2){
 return;
 }
@@ -4440,6 +4442,24 @@ document.addEventListener(
 "mouseup",
 endTouch
 );
+
+/* إصلاح تعليق المضارب عند انتهاء اللمس خارج منطقة المضرب أو انقطاع اللمس */
+document.addEventListener("touchend",function(){
+ endTouch();
+ endBlueTouch();
+},{passive:true});
+document.addEventListener("touchcancel",function(){
+ endTouch();
+ endBlueTouch();
+},{passive:true});
+window.addEventListener("blur",function(){
+ endTouch();
+ endBlueTouch();
+});
+document.addEventListener("visibilitychange",function(){
+ if(document.hidden){endTouch();endBlueTouch();}
+});
+
 
 /* =========================================
 لمس الأزرق
