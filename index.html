@@ -230,6 +230,24 @@ html body .skiptranslate iframe{visibility:hidden!important}
 #privateChatAdminText{min-height:170px}
 
 
+.platformClock{
+ position:relative;overflow:hidden;display:flex;align-items:center;
+ justify-content:center;gap:12px;flex-wrap:wrap;
+ margin:0 auto 14px;padding:13px 16px;max-width:100%;
+ border:1px solid rgba(126,220,255,.45);border-radius:18px;
+ background:linear-gradient(120deg,#102b40,#174b63 48%,#24395d);
+ box-shadow:0 8px 22px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.12);
+ text-align:center;
+}
+.platformClock:before{content:"";position:absolute;width:170px;height:170px;border-radius:50%;background:rgba(82,203,255,.10);top:-115px;right:-45px}
+.clockIcon{font-size:28px;filter:drop-shadow(0 2px 5px #000)}
+.clockInfo{position:relative;display:flex;flex-direction:column;gap:3px}
+.clockLabel{font-size:12px;color:#bcecff;font-weight:bold;letter-spacing:.4px}
+.clockTime{font-size:clamp(23px,5vw,31px);font-weight:800;letter-spacing:1px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.4);font-variant-numeric:tabular-nums;direction:ltr}
+.clockDate{font-size:13px;color:#e0f4ff}
+.clockZone{font-size:11px;color:#9dd9ef}
+@media(max-width:480px){.platformClock{gap:8px;padding:11px 8px}.clockIcon{font-size:24px}.clockDate{font-size:12px}}
+
 </style>
 </head>
 
@@ -240,6 +258,16 @@ html body .skiptranslate iframe{visibility:hidden!important}
 <h1>🎮 منصة ألعابي</h1>
 <p>ألعابك كلها في مكان واحد</p>
 </header>
+
+<div class="platformClock" id="platformClock" role="timer" aria-label="الوقت والتاريخ في مصر">
+ <span class="clockIcon" aria-hidden="true">🕰️</span>
+ <div class="clockInfo">
+  <span class="clockLabel">⏰ التوقيت المحلي في مصر</span>
+  <span class="clockTime" id="platformClockTime">--:--:--</span>
+  <span class="clockDate" id="platformClockDate">جارٍ ضبط التاريخ...</span>
+  <span class="clockZone">🇪🇬 القاهرة • مصر</span>
+ </div>
+</div>
 
 <!-- أدوات الإنترنت والتواصل الاجتماعي -->
 <div id="internetTools" class="panel">
@@ -2571,6 +2599,24 @@ function init(){
  });
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+})();
+
+/* ساعة المنصة: توقيت القاهرة والتاريخ لجميع الزوار */
+(function(){
+ function updatePlatformClock(){
+  var timeNode=document.getElementById("platformClockTime");
+  var dateNode=document.getElementById("platformClockDate");
+  if(!timeNode||!dateNode)return;
+  var now=new Date();
+  timeNode.textContent=new Intl.DateTimeFormat("ar-EG",{
+   timeZone:"Africa/Cairo",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true
+  }).format(now);
+  dateNode.textContent=new Intl.DateTimeFormat("ar-EG",{
+   timeZone:"Africa/Cairo",weekday:"long",year:"numeric",month:"long",day:"numeric"
+  }).format(now);
+ }
+ updatePlatformClock();
+ setInterval(updatePlatformClock,1000);
 })();
 </script>
 </body>
