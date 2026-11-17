@@ -41,6 +41,16 @@ html body .skiptranslate iframe{visibility:hidden!important}
 #universalLanguageButton:focus-visible,#universalSettingsButton:focus-visible{outline:3px solid #ffd166;outline-offset:3px}
 @media(max-width:500px){#universalLanguageButton{width:49px;height:49px;left:9px;bottom:10px}}
 
+
+.storeWelcome{margin:12px 0 14px;padding:17px 15px;border-radius:17px;text-align:center;background:linear-gradient(135deg,#103c36,#17634e 55%,#214b5a);border:1px solid #54a98b;box-shadow:0 7px 20px rgba(0,0,0,.2);color:#fff}
+.storeWelcomeTitle{font-size:22px;font-weight:800;color:#ffe39a;margin-bottom:7px}
+.storeWelcomeLead{font-size:17px;font-weight:700;color:#c6f5e5;margin:5px 0 9px}
+.storeWelcome p{line-height:1.8;margin:7px 0;color:#f1faf6}
+.storeWelcomeItems{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:12px 0}
+.storeWelcomeItems span{background:rgba(4,30,24,.45);border:1px solid #66a98e;border-radius:20px;padding:7px 11px;font-size:13px}
+.storeWelcome .storeWelcomeEnd{color:#ffe39a;font-weight:700}
+.storeWelcome small{display:block;color:#c6e6dc;line-height:1.7}
+
 </style>
 </head>
 <body>
@@ -48,6 +58,14 @@ html body .skiptranslate iframe{visibility:hidden!important}
 <header>
 <h1>🛍️ المتجر الشامل</h1>
 <p class="muted">اعرض منتجاتك أو ابحث عن منتج تريده. الاتفاق على السعر والدفع والتسليم يتم مباشرة بين البائع والمشتري.</p>
+<section class="storeWelcome" aria-label="مقدمة المتجر الشامل">
+ <div class="storeWelcomeTitle">🌟 أهلاً بك في المتجر الشامل!</div>
+ <div class="storeWelcomeLead">مكانك لعرض منتجاتك واكتشاف ما تبحث عنه!</div>
+ <p>هنا يلتقي البائع بالمشتري في مكان واحد. اعرض منتجاتك بالصور والفيديو، أو تصفح الأقسام وابحث بسهولة عما تحتاج إليه.</p>
+ <div class="storeWelcomeItems"><span>📸 عرض بالصور والفيديو</span><span>🔎 بحث واكتشاف المنتجات</span><span>📝 إدارة إعلاناتك</span><span>📲 تواصل مباشر عبر واتساب</span></div>
+ <p class="storeWelcomeEnd">اعرض منتجك، اكتشف العروض، وتواصل مباشرة! ❤️</p>
+ <small>الاتفاق على السعر والدفع والتسليم يتم مباشرة بين البائع والمشتري.</small>
+</section>
 <div class="row">
 <a class="btn gray" href="./">🎮 العودة إلى منصة ألعابي</a>
 <button class="green" id="refreshBtn">🔄 تحديث المنتجات</button>
@@ -328,6 +346,12 @@ document.addEventListener("change",function(e){
 "use strict";
 var phrases={
 "🛍️ المتجر الشامل":"🛍️ Marketplace",
+"🌟 أهلاً بك في المتجر الشامل!":"🌟 Welcome to the Marketplace!",
+"مكانك لعرض منتجاتك واكتشاف ما تبحث عنه!":"Your place to list products and discover what you need!",
+"هنا يلتقي البائع بالمشتري في مكان واحد. اعرض منتجاتك بالصور والفيديو، أو تصفح الأقسام وابحث بسهولة عما تحتاج إليه.":"Buyers and sellers meet in one place. List products with photos and videos, or browse categories to find what you need.",
+"📸 عرض بالصور والفيديو":"📸 Photos and videos","🔎 بحث واكتشاف المنتجات":"🔎 Search products","📝 إدارة إعلاناتك":"📝 Manage your listings","📲 تواصل مباشر عبر واتساب":"📲 Contact directly on WhatsApp",
+"اعرض منتجك، اكتشف العروض، وتواصل مباشرة! ❤️":"List your product, discover offers, and connect directly! ❤️",
+"الاتفاق على السعر والدفع والتسليم يتم مباشرة بين البائع والمشتري.":"Price, payment, and delivery are agreed directly between buyer and seller.",
 "اعرض منتجاتك أو ابحث عن منتج تريده. الاتفاق على السعر والدفع والتسليم يتم مباشرة بين البائع والمشتري.":"List your products or search for something you need. Price, payment, and delivery are agreed directly between buyer and seller.",
 "🎮 العودة إلى منصة ألعابي":"🎮 Back to My Games Platform",
 "🔄 تحديث المنتجات":"🔄 Refresh products",
