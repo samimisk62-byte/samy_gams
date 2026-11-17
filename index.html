@@ -111,8 +111,8 @@ button{font-size:14px}
 #internetTools h2{margin-bottom:6px}
 #webSearchForm{gap:7px}
 #webSearchForm input{margin:5px 0;flex:2}
-.internetButtons{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:9px;margin-top:12px}
-.internetButton{display:flex;align-items:center;justify-content:center;min-height:48px;padding:12px 8px;border-radius:12px;text-decoration:none;color:#fff;font-weight:bold;text-align:center;border:1px solid #ffffff28;box-shadow:0 3px 8px #0003}
+.internetButtons{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin-top:10px}
+.internetButton{display:flex;align-items:center;justify-content:center;min-height:46px;padding:10px 7px;border-radius:12px;text-decoration:none;color:#fff;font-weight:bold;text-align:center;border:1px solid #ffffff28;box-shadow:0 3px 8px #0003}
 .internetButton:active{transform:scale(.98)}
 .browserButton{background:#2869b2}
 .facebookButton{background:#1877f2}
@@ -121,7 +121,7 @@ button{font-size:14px}
 .youtubeButton{background:#c5222a}
 .tiktokButton{background:#191919;border-color:#36e7e7}
 .telegramButton{background:#168ac4}
-@media(max-width:420px){.internetButtons{grid-template-columns:repeat(2,minmax(0,1fr))}#webSearchForm button{min-width:100%}}
+@media(max-width:420px){#internetTools{padding:10px}#internetTools h2{font-size:18px}.internetButtons{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.internetButton{min-height:44px;padding:9px 5px;font-size:13px}#webSearchForm button{min-width:100%}}
 .gameShare{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.gameShare button,.gameShare a{flex:1;min-width:90px;font-size:13px;padding:9px 6px;text-align:center}
 
 #universalSettingsButton{position:fixed;right:12px;bottom:14px;z-index:2147483000;border:0;border-radius:50%;width:58px;height:58px;background:#087fbb;color:#fff;font-size:26px;box-shadow:0 4px 18px #0008;cursor:pointer}
@@ -196,6 +196,28 @@ html body .skiptranslate iframe{visibility:hidden!important}
 <h1>🎮 منصة ألعابي</h1>
 <p>ألعابك كلها في مكان واحد</p>
 </header>
+
+<!-- أدوات الإنترنت والتواصل الاجتماعي -->
+<div id="internetTools" class="panel">
+  <h2>🌐 الإنترنت والتواصل الاجتماعي</h2>
+  <p class="small">ابحث في الإنترنت أو افتح الموقع الذي تريده. ستُفتح المواقع الخارجية في صفحة جديدة.</p>
+  <form id="webSearchForm" class="row" style="align-items:center">
+    <input id="webSearchInput" type="search" placeholder="🔎 اكتب ما تريد البحث عنه..." aria-label="بحث في الإنترنت" style="flex:1;min-width:180px">
+    <button type="submit" class="green" style="flex:1">🔎 بحث في الإنترنت</button>
+  </form>
+  <div class="internetButtons">
+    <a class="internetButton browserButton" href="https://www.google.com/" target="_blank" rel="noopener noreferrer">🌐 متصفح الإنترنت</a>
+    <a class="internetButton" href="./store.html" style="background:#087f5b;color:#fff">🛍️ المتجر الشامل للبيع والشراء</a>
+    <a class="internetButton facebookButton" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">📘 فيسبوك</a>
+    <a class="internetButton whatsappButton" href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer">🟢 واتساب ويب</a>
+    <a class="internetButton instagramButton" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">📸 إنستجرام</a>
+    <a class="internetButton youtubeButton" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">▶️ يوتيوب</a>
+    <a class="internetButton tiktokButton" href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">🎵 تيك توك</a>
+    <a class="internetButton telegramButton" href="https://web.telegram.org/" target="_blank" rel="noopener noreferrer">✈️ تيليجرام</a>
+  </div>
+  <p class="small">ملاحظة: تشغيل المواقع والتطبيقات يحتاج إلى الإنترنت، وقد يطلب الموقع تسجيل الدخول. زر المتصفح يفتح Google؛ أما التصفح داخل صفحة المنصة نفسها فبعض المواقع لا تسمح به.</p>
+</div>
+
 
 <div id="message" role="status" aria-live="polite"></div>
 
@@ -283,27 +305,6 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <div id="privateChatCustomerFileActions" class="privateChatFileActions"><button id="privateChatCustomerFileChange" class="orange" type="button">🔄 تغيير المرفق</button><button id="privateChatCustomerFileClear" class="red" type="button">✖ إلغاء المرفق</button></div>
 <div class="row"><button id="privateChatCustomerSend" class="green" type="button">📨 إرسال للإدارة</button><button id="privateChatCustomerReload" class="gray" type="button">🔄 تحديث المحادثة</button></div>
 </section>
-
-<!-- أدوات الإنترنت والتواصل الاجتماعي -->
-<div id="internetTools" class="panel">
-  <h2>🌐 الإنترنت والتواصل الاجتماعي</h2>
-  <p class="small">ابحث في الإنترنت أو افتح الموقع الذي تريده. ستُفتح المواقع الخارجية في صفحة جديدة.</p>
-  <form id="webSearchForm" class="row" style="align-items:center">
-    <input id="webSearchInput" type="search" placeholder="🔎 اكتب ما تريد البحث عنه..." aria-label="بحث في الإنترنت" style="flex:1;min-width:180px">
-    <button type="submit" class="green" style="flex:1">🔎 بحث في الإنترنت</button>
-  </form>
-  <div class="internetButtons">
-    <a class="internetButton browserButton" href="https://www.google.com/" target="_blank" rel="noopener noreferrer">🌐 متصفح الإنترنت</a>
-    <a class="internetButton" href="./store.html" style="background:#087f5b;color:#fff">🛍️ المتجر الشامل للبيع والشراء</a>
-    <a class="internetButton facebookButton" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">📘 فيسبوك</a>
-    <a class="internetButton whatsappButton" href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer">🟢 واتساب ويب</a>
-    <a class="internetButton instagramButton" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">📸 إنستجرام</a>
-    <a class="internetButton youtubeButton" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">▶️ يوتيوب</a>
-    <a class="internetButton tiktokButton" href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">🎵 تيك توك</a>
-    <a class="internetButton telegramButton" href="https://web.telegram.org/" target="_blank" rel="noopener noreferrer">✈️ تيليجرام</a>
-  </div>
-  <p class="small">ملاحظة: تشغيل المواقع والتطبيقات يحتاج إلى الإنترنت، وقد يطلب الموقع تسجيل الدخول. زر المتصفح يفتح Google؛ أما التصفح داخل صفحة المنصة نفسها فبعض المواقع لا تسمح به.</p>
-</div>
 
 <div id="adminPanel" class="panel">
 <h2>🛠️ لوحة إدارة الاشتراكات</h2>
@@ -1226,7 +1227,7 @@ function showPlatformGame(code){
   const gameCode=launch?launch.getAttribute("data-game"):"";
   const title=(card.querySelector("h3")?.textContent||"").trim();
   const match=(aliases[gameCode]||gameCode)===wanted || (wanted==="matamy"&&title.includes("مطعمي"));
-  card.style.display=match?"":"none";
+  card.style.display=match?"flex":"none";
   const back=card.querySelector(".gameBackToList");if(back)back.style.display=match?"block":"none";
   if(match)found=card;
  });
@@ -1238,7 +1239,7 @@ function showPlatformGame(code){
 function showAllPlatformGames(){
  ensureGameBackButtons();
  document.querySelectorAll("#gamesSection .games > .game").forEach(card=>{
-  card.style.display="";const back=card.querySelector(".gameBackToList");if(back)back.style.display="none";
+  card.style.display="flex";const back=card.querySelector(".gameBackToList");if(back)back.style.display="none";
  });
 }
 function showOwnerAdminPage(id){
