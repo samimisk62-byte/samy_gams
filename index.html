@@ -300,8 +300,8 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <h2>💬 مراسلة الإدارة — محادثتك الخاصة</h2>
 <p class="small">هذه المحادثة خاصة بك وبإدارة المنصة فقط. لا يستطيع أي مستخدم آخر رؤية رسائلك.</p>
 <div class="row"><button id="privateChatCustomerTrash" class="gray" type="button">🗑️ سلة المهملات</button><button id="privateChatCustomerBack" class="green" type="button" style="display:none">↩️ العودة إلى المحادثة</button></div><div id="privateChatCustomerThread" class="privateChatThread">جاري تحميل المحادثة...</div>
-<label>اكتب رسالتك</label><textarea id="privateChatCustomerText" rows="3" maxlength="5000" placeholder="اكتب رسالتك للإدارة..."></textarea>
-<label>إرفاق صورة أو فيديو (حتى 25 ميجابايت)</label><input id="privateChatCustomerFile" type="file" accept="image/*,video/*">
+<label>اكتب رسالتك</label><textarea id="privateChatCustomerText" rows="3" maxlength="5000" placeholder="اكتب رسالتك أو الصق نصًا من تطبيق آخر..."></textarea><button id="privateChatCustomerPasteText" class="orange" type="button">📋 استيراد نص من تطبيق آخر</button>
+<label>إرفاق صورة أو فيديو (حتى 25 ميجابايت)</label><input id="privateChatCustomerFile" type="file" accept="image/*,video/*"><button id="privateChatCustomerChooseFile" class="orange" type="button">📁 اختيار من الملفات أو التنزيلات</button>
 <div id="privateChatCustomerFileStatus" class="small">لم يتم اختيار ملف.</div>
 <div id="privateChatCustomerFilePreview" class="privateChatFilePreview"></div>
 <div id="privateChatCustomerFileActions" class="privateChatFileActions"><button id="privateChatCustomerFileChange" class="orange" type="button">🔄 تغيير المرفق</button><button id="privateChatCustomerFileClear" class="red" type="button">✖ إلغاء المرفق</button></div>
@@ -391,8 +391,8 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <hr>
 <h3 id="privateChatAdminTitle">اختر محادثة من القائمة</h3>
 <div class="row"><button id="privateChatAdminTrash" class="gray" type="button">🗑️ سلة مهملات هذه المحادثة</button><button id="privateChatAdminBack" class="green" type="button" style="display:none">↩️ العودة إلى المحادثة</button></div><div id="privateChatAdminThread" class="privateChatThread">لم يتم اختيار مستخدم بعد.</div>
-<label>رد الإدارة</label><textarea id="privateChatAdminText" rows="3" maxlength="5000" placeholder="اكتب ردك للمستخدم..."></textarea>
-<label>إرفاق صورة أو فيديو (حتى 25 ميجابايت)</label><input id="privateChatAdminFile" type="file" accept="image/*,video/*">
+<label>رد الإدارة</label><textarea id="privateChatAdminText" rows="3" maxlength="5000" placeholder="اكتب ردك أو الصق نصًا من تطبيق آخر..."></textarea><button id="privateChatAdminPasteText" class="orange" type="button">📋 استيراد نص من تطبيق آخر</button>
+<label>إرفاق صورة أو فيديو (حتى 25 ميجابايت)</label><input id="privateChatAdminFile" type="file" accept="image/*,video/*"><button id="privateChatAdminChooseFile" class="orange" type="button">📁 اختيار من الملفات أو التنزيلات</button>
 <div id="privateChatAdminFileStatus" class="small">لم يتم اختيار ملف.</div>
 <div id="privateChatAdminFilePreview" class="privateChatFilePreview"></div>
 <div id="privateChatAdminFileActions" class="privateChatFileActions"><button id="privateChatAdminFileChange" class="orange" type="button">🔄 تغيير المرفق</button><button id="privateChatAdminFileClear" class="red" type="button">✖ إلغاء المرفق</button></div>
@@ -1707,6 +1707,17 @@ function showPrivateChatFilePreview(side){
  preview.appendChild(media);preview.style.display="block";actions.style.display="flex";
  status.textContent="تم اختيار: "+file.name+" — "+(file.size/1024/1024).toFixed(2)+" ميجابايت. هذه معاينة قبل الإرسال.";
 }
+async function pasteTextFromOtherApp(targetId){
+ const field=$(targetId);
+ try{
+  if(navigator.clipboard&&navigator.clipboard.readText){
+   const value=await navigator.clipboard.readText();
+   if(value){const start=field.selectionStart??field.value.length;const end=field.selectionEnd??field.value.length;field.setRangeText(value,start,end,"end");field.focus();showMessage("تم استيراد النص من الحافظة. راجعه قبل الإرسال.",true);return;}
+  }
+ }catch(e){}
+ field.focus();
+ showMessage("انسخ الرسالة من التطبيق الآخر، ثم ارجع واضغط مطولًا داخل خانة الرسالة واختر «لصق».");
+}
 function bindPrivateChatFileControls(side){
  $("privateChat"+side+"File").addEventListener("change",()=>showPrivateChatFilePreview(side));
  $("privateChat"+side+"FileChange").addEventListener("click",()=>$("privateChat"+side+"File").click());
@@ -1863,6 +1874,10 @@ $("broadcastAdminBack").addEventListener("click",loadBroadcastAdmin);
 $("broadcastAdminArchive").addEventListener("click",loadBroadcastAdminArchive);
 bindPrivateChatFileControls("Customer");
 bindPrivateChatFileControls("Admin");
+$("privateChatCustomerChooseFile").addEventListener("click",()=>$("privateChatCustomerFile").click());
+$("privateChatAdminChooseFile").addEventListener("click",()=>$("privateChatAdminFile").click());
+$("privateChatCustomerPasteText").addEventListener("click",()=>pasteTextFromOtherApp("privateChatCustomerText"));
+$("privateChatAdminPasteText").addEventListener("click",()=>pasteTextFromOtherApp("privateChatAdminText"));
 
 /* مركز الرسائل الجماعية */
 async function callBroadcast(action,payload={}){
