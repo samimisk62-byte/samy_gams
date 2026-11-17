@@ -1350,6 +1350,9 @@ var selectedStage = 1;
 var stageChosen = false;
 var unlockedStage = 1;
 var stagePage = 0;
+var stageLaunchBusy = false;
+var stageNavigationBusy = false;
+var roundNavigationBusy = false;
 var STAGES_PER_PAGE = 20;
 
 var gameRunning = false;
@@ -1563,7 +1566,7 @@ for(var i=first;i<first+STAGES_PER_PAGE;i++){
  var title=document.createElement("strong");title.textContent=arabicNumber(i);
  var detail=document.createElement("small");detail.textContent=i>unlockedStage?"🔒 مغلقة":(i===unlockedStage?"🔓 مفتوحة":"✅ تم فتحها");
  b.appendChild(title);b.appendChild(detail);
- if(i<=unlockedStage)b.addEventListener("click",(function(n){return function(){selectedStage=n;saveData();renderStages();openSelectedStage();};})(i));
+ if(i<=unlockedStage)b.addEventListener("click",(function(n){return function(){if(stageLaunchBusy)return;selectedStage=n;saveData();renderStages();openSelectedStage();};})(i));
  grid.appendChild(b);
 }
 document.getElementById("stagePrevPage").disabled=stagePage===0;
@@ -1571,6 +1574,8 @@ document.getElementById("stagePrevPage").style.opacity=stagePage===0?".45":"1";
 document.getElementById("stageNextPage").disabled=false;
 document.getElementById("stageNextPage").style.opacity="1";
 }
+
+function safeShowStageSelect(){if(stageNavigationBusy)return;stageNavigationBusy=true;try{showStageSelect();}finally{setTimeout(function(){stageNavigationBusy=false;},350);}}
 
 function showStageSelect(){
 stopGameTimers();stopMusic();
@@ -1582,13 +1587,16 @@ unlockLandscape();
 window.scrollTo(0,0);
 }
 
-function openSelectedStage(){
+async function openSelectedStage(){
+if(stageLaunchBusy)return;
 if(selectedStage<1||selectedStage>unlockedStage){alert("المرحلة مغلقة. أكمل المرحلة السابقة أولًا.");return;}
-/* تفعيل الصوت من ضغطة المستخدم حتى تسمح به متصفحات الهاتف */
-var ac=getAudio();
-if(ac && ac.state==="suspended"){try{ac.resume();}catch(e){}}
-stageChosen=true;
-startGame();
+stageLaunchBusy=true;
+try{
+ var ac=getAudio();
+ if(ac && ac.state==="suspended"){try{ac.resume();}catch(e){}}
+ stageChosen=true;
+ await startGame();
+}finally{setTimeout(function(){stageLaunchBusy=false;},450);}
 }
 
 function updateCoins(){
@@ -4263,8 +4271,8 @@ refreshGameSoundButton();
 
 
 document.getElementById("stagesBack").addEventListener("click",showMenu);
-document.getElementById("stagePrevPage").addEventListener("click",function(){if(stagePage>0){stagePage--;renderStages();}});
-document.getElementById("stageNextPage").addEventListener("click",function(){stagePage++;renderStages();});
+document.getElementById("stagePrevPage").addEventListener("click",function(){if(stageNavigationBusy||stagePage<=0)return;stageNavigationBusy=true;stagePage--;renderStages();setTimeout(function(){stageNavigationBusy=false;},180);});
+document.getElementById("stageNextPage").addEventListener("click",function(){if(stageNavigationBusy)return;stageNavigationBusy=true;stagePage++;renderStages();setTimeout(function(){stageNavigationBusy=false;},180);});
 document.getElementById("openStageButton").addEventListener("click",openSelectedStage);
 
 document.getElementById("storeButton").addEventListener("click",showStore);
@@ -4390,150 +4398,54 @@ document.getElementById("home")
 .addEventListener("click",showMenu);
 
 document.getElementById("exitToStages")
-.addEventListener("click",showStageSelect);
+.addEventListener("click",safeShowStageSelect);
 
 document.getElementById("resultNext")
-.addEventListener("click",nextRound);
+.addEventListener("click",function(){if(roundNavigationBusy)return;roundNavigationBusy=true;try{nextRound();}finally{setTimeout(function(){roundNavigationBusy=false;},500);}});
 
 document.getElementById("resultHome")
-.addEventListener("click",showStageSelect);
+.addEventListener("click",safeShowStageSelect);
 
-/* =========================================
-لمس الأحمر
-========================================= */
-
-var redPlayer =
-document.getElementById("redPlayer");
-
-redPlayer.addEventListener(
-"touchstart",
-startTouch,
-{passive:false}
-);
-
-redPlayer.addEventListener(
-"touchmove",
-moveTouch,
-{passive:false}
-);
-
-redPlayer.addEventListener(
-"touchend",
-endTouch
-);
-
-redPlayer.addEventListener(
-"mousedown",
-startTouch
-);
-
-document.addEventListener(
-"mousemove",
-function(e){
-
-if(dragging){
-moveTouch(e);
+/* Unified pointer control: touch, pen and mouse */
+var activePaddlePointerId=null;
+var activePaddleSide=null;
+var paddleField=document.getElementById("field");
+if(paddleField){
+ paddleField.style.touchAction="none";
+ paddleField.addEventListener("pointerdown",function(e){
+  if(!gameRunning||paused||activePaddlePointerId!==null)return;
+  var rect=paddleField.getBoundingClientRect();
+  if(!rect.width)return;
+  if(playerCount===1)activePaddleSide="red";
+  else if(onlineMode)activePaddleSide=onlineRole==="guest"?"blue":"red";
+  else activePaddleSide=e.clientX<rect.left+rect.width/2?"red":"blue";
+  if(activePaddleSide==="blue"&&playerCount!==2&&!onlineMode){activePaddleSide=null;return;}
+  activePaddlePointerId=e.pointerId;
+  try{paddleField.setPointerCapture(e.pointerId);}catch(err){}
+  if(activePaddleSide==="red"){dragging=true;moveRed(e);}
+  else{blueDragging=true;moveBlue(e);}
+  if(e.cancelable)e.preventDefault();
+ });
 }
-
+document.addEventListener("pointermove",function(e){
+ if(activePaddlePointerId===null||e.pointerId!==activePaddlePointerId)return;
+ if(!gameRunning||paused){dragging=false;blueDragging=false;activePaddlePointerId=null;activePaddleSide=null;return;}
+ if(activePaddleSide==="red")moveRed(e);else if(activePaddleSide==="blue")moveBlue(e);
+ if(e.cancelable)e.preventDefault();
+},{passive:false});
+function releasePaddlePointer(e){
+ if(activePaddlePointerId===null)return;
+ if(e&&e.pointerId!==undefined&&e.pointerId!==activePaddlePointerId)return;
+ dragging=false;blueDragging=false;
+ var oldId=activePaddlePointerId;
+ activePaddlePointerId=null;activePaddleSide=null;
+ try{if(paddleField&&paddleField.hasPointerCapture(oldId))paddleField.releasePointerCapture(oldId);}catch(err){}
 }
-);
-
-document.addEventListener(
-"mouseup",
-endTouch
-);
-
-/* إصلاح تعليق المضارب عند انتهاء اللمس خارج منطقة المضرب أو انقطاع اللمس */
-document.addEventListener("touchend",function(){
- endTouch();
- endBlueTouch();
-},{passive:true});
-document.addEventListener("touchcancel",function(){
- endTouch();
- endBlueTouch();
-},{passive:true});
-window.addEventListener("blur",function(){
- endTouch();
- endBlueTouch();
-});
-document.addEventListener("visibilitychange",function(){
- if(document.hidden){endTouch();endBlueTouch();}
-});
-
-
-/* =========================================
-لمس الأزرق
-========================================= */
-
-var bluePlayer =
-document.getElementById("bluePlayer");
-
-bluePlayer.addEventListener(
-"touchstart",
-startBlueTouch,
-{passive:false}
-);
-
-bluePlayer.addEventListener(
-"touchmove",
-moveBlueTouch,
-{passive:false}
-);
-
-bluePlayer.addEventListener(
-"touchend",
-endBlueTouch
-);
-
-bluePlayer.addEventListener(
-"mousedown",
-startBlueTouch
-);
-
-/* =========================================
-السحب من أرض الملعب
-========================================= */
-
-var field =
-document.getElementById("field");
-
-field.addEventListener(
-"touchstart",
-function(e){
-
-if(playerCount === 1){
-startTouch(e);
-}
-
-},
-{passive:false}
-);
-
-field.addEventListener(
-"touchmove",
-function(e){
-
-if(gameRunning){
-
-if(playerCount === 1){
-moveTouch(e);
-}
-
-e.preventDefault();
-
-}
-
-},
-{passive:false}
-);
-
-field.addEventListener(
-"touchend",
-function(){
-endTouch();
-}
-);
-
+document.addEventListener("pointerup",releasePaddlePointer);
+document.addEventListener("pointercancel",releasePaddlePointer);
+document.addEventListener("lostpointercapture",releasePaddlePointer);
+window.addEventListener("blur",function(){releasePaddlePointer();});
+document.addEventListener("visibilitychange",function(){if(document.hidden)releasePaddlePointer();});
 /* =========================================
 التهيئة
 ========================================= */
@@ -5068,7 +4980,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 (function(){
  function bindDirectGameButtons(){
   var start=document.getElementById("startButton");
-  if(start)start.onclick=function(){if(typeof showStageSelect==="function"){stageChosen=false;showStageSelect();}};
+  if(start)start.onclick=function(){if(typeof safeShowStageSelect==="function"){stageChosen=false;safeShowStageSelect();}};
   var sound=document.getElementById("gameSoundSettingsButton");
   if(sound)sound.onclick=function(){if(typeof toggleGameSoundButton==="function")toggleGameSoundButton();};
   if(typeof refreshGameSoundButton==="function")refreshGameSoundButton();
