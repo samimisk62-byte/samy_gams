@@ -1710,7 +1710,7 @@ function currentOnlineSnapshot(){return {running:gameRunning,paused:paused,bx:bx
 async function sendOnlineSnapshot(){
 if(!onlineMode||onlineRole!=="host"||!onlineRoomId||onlineSending)return;
 onlineSending=true;
-try{await authorizedRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineRoomId),{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({game_state:currentOnlineSnapshot(),status:!onlineMatchStarted?"waiting":(gameRunning?"playing":"finished"),updated_at:new Date().toISOString()})});}
+try{await authorizedRequest("/rest/v1/rpc/wall_host_update_room",{method:"POST",body:JSON.stringify({p_room_id:onlineRoomId,p_game_state:currentOnlineSnapshot(),p_status:!onlineMatchStarted?"waiting":(gameRunning?"playing":"finished")})});}
 catch(e){console.warn("Room sync:",e.message);}finally{onlineSending=false;}
 }
 async function pollOnlineRoom(){
@@ -1745,7 +1745,7 @@ setRoomStatus("🟢 متصل بالمباراة. أنت اللاعب الأزر�
 function sendGuestPaddlePosition(){
 if(!onlineMode||onlineRole!=="guest"||!onlineRoomId||onlineSending)return;
 onlineSending=true;
-authorizedRequest("/rest/v1/wall_online_rooms?id=eq."+encodeURIComponent(onlineRoomId),{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({guest_blue_x:blueX,updated_at:new Date().toISOString()})})
+authorizedRequest("/rest/v1/rpc/wall_guest_update_paddle",{method:"POST",body:JSON.stringify({p_room_id:onlineRoomId,p_blue_x:blueX})})
 .catch(function(e){console.warn("Paddle sync:",e.message);}).finally(function(){onlineSending=false;});
 }
 function applyOnlineSnapshot(st){
