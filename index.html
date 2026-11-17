@@ -247,6 +247,18 @@ html body .skiptranslate iframe{visibility:hidden!important}
 .clockDate{font-size:13px;color:#e0f4ff}
 .clockZone{font-size:11px;color:#9dd9ef}
 @media(max-width:480px){.platformClock{gap:8px;padding:11px 8px}.clockIcon{font-size:24px}.clockDate{font-size:12px}}
+ 
+.welcomeIntro{
+ margin:0 0 13px;padding:17px 16px;border-radius:18px;text-align:center;
+ background:linear-gradient(135deg,#19384b,#214e61 55%,#293b59);
+ border:1px solid #4a8297;box-shadow:0 7px 20px rgba(0,0,0,.22);
+}
+.welcomeIntroTitle{font-size:22px;font-weight:800;color:#ffe39a;margin-bottom:7px}
+.welcomeIntroLead{font-size:17px;font-weight:700;color:#bcecff;margin:5px 0 9px}
+.welcomeIntro p{line-height:1.8;margin:6px 0;color:#f0f7fa}
+.welcomeIntroItems{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:12px 0}
+.welcomeIntroItems span{background:rgba(7,24,38,.48);border:1px solid #54869b;border-radius:20px;padding:7px 11px;font-size:13px;color:#fff}
+.welcomeIntro .welcomeIntroEnd{color:#ffe39a;font-weight:700;margin-top:10px}
 
 </style>
 </head>
@@ -268,6 +280,16 @@ html body .skiptranslate iframe{visibility:hidden!important}
   <span class="clockZone">🇪🇬 القاهرة • مصر</span>
  </div>
 </div>
+
+<section class="welcomeIntro" aria-label="مقدمة منصة ألعابي">
+ <div class="welcomeIntroTitle">✨ أهلاً بك في منصة ألعابي!</div>
+ <p class="welcomeIntroLead">عالم من المتعة والتحدي والترفيه في مكان واحد!</p>
+ <p>اكتشف ألعابًا متنوعة تجمع المنافسة والذكاء والمغامرة والإبداع، واستمتع بتجربة تناسب كل الأذواق.</p>
+ <div class="welcomeIntroItems">
+  <span>🃏 ألعاب ورق وتحديات</span><span>🏓 مهارة ومنافسة</span><span>🐟 مغامرات ممتعة</span><span>🍔 إدارة وتطوير مطعمك</span>
+ </div>
+ <p class="welcomeIntroEnd">ابدأ اللعب، اكتشف التحديات، واجمع لحظات من المتعة! ❤️</p>
+</section>
 
 <!-- أدوات الإنترنت والتواصل الاجتماعي -->
 <div id="internetTools" class="panel">
@@ -2428,6 +2450,11 @@ document.addEventListener("change",function(e){
 "use strict";
 var phrases = {
 "🎮 منصة ألعابي":"🎮 My Games Platform","ألعابك كلها في مكان واحد":"All your games in one place",
+"✨ أهلاً بك في منصة ألعابي!":"✨ Welcome to My Games Platform!",
+"عالم من المتعة والتحدي والترفيه في مكان واحد!":"A world of fun, challenge, and entertainment in one place!",
+"اكتشف ألعابًا متنوعة تجمع المنافسة والذكاء والمغامرة والإبداع، واستمتع بتجربة تناسب كل الأذواق.":"Discover games full of competition, strategy, adventure, and creativity, with something for every taste.",
+"🃏 ألعاب ورق وتحديات":"🃏 Card games and challenges","🏓 مهارة ومنافسة":"🏓 Skill and competition","🐟 مغامرات ممتعة":"🐟 Fun adventures","🍔 إدارة وتطوير مطعمك":"🍔 Manage and grow your restaurant",
+"ابدأ اللعب، اكتشف التحديات، واجمع لحظات من المتعة! ❤️":"Start playing, discover challenges, and enjoy every moment! ❤️",
 "🔐 تسجيل الدخول":"🔐 Log in","🔑 دخول":"🔑 Log in","📝 إنشاء حساب":"📝 Create account",
 "🔁 نسيت كلمة المرور؟":"🔁 Forgot password?","🔁 استعادة كلمة المرور":"🔁 Reset password",
 "اكتب البريد الإلكتروني المسجل في حسابك، ثم اضغط إرسال رابط الاستعادة.":"Enter your account email, then send the recovery link.",
