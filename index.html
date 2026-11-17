@@ -824,7 +824,7 @@ function showResetForm(accessToken){
   showMessage("✅ تم التحقق من رابط الاستعادة. اكتب كلمة المرور الجديدة.",true);
 }
 
-/* اكتشاف رابط الاستعادة القادم من Gmail */
+/* اكتشاف روابط تأكيد البريد واستعادة كلمة المرور القادمة من Gmail */
 async function detectPasswordRecovery(){
   const params = new URLSearchParams(window.location.search);
 
@@ -833,6 +833,7 @@ async function detectPasswordRecovery(){
     : window.location.hash;
 
   const hash = new URLSearchParams(hashText);
+  const type = hash.get("type") || params.get("type");
 
   const errorCode =
     hash.get("error_code") || params.get("error_code");
@@ -842,19 +843,77 @@ async function detectPasswordRecovery(){
 
   if(errorCode || errorDescription){
     showMessage(
-      "❌ رابط الاستعادة منتهي الصلاحية أو غير صالح. اطلب رابطًا جديدًا من المنصة."
+      type === "signup"
+        ? "❌ تعذر تأكيد البريد الإلكتروني. قد يكون رابط التأكيد منتهي الصلاحية؛ تواصل مع إدارة المنصة."
+        : "❌ رابط الاستعادة منتهي الصلاحية أو غير صالح. اطلب رابطًا جديدًا من المنصة."
     );
     return false;
   }
-
-  const type = hash.get("type") || params.get("type");
 
   const accessToken =
     hash.get("access_token") || params.get("access_token");
 
   /*
-    الطريقة الأولى: Supabase يعيد access_token
-    داخل عنوان الصفحة بعد التحقق من البريد.
+    تأكيد البريد بالطريقة الحالية في Supabase:
+    بعد الضغط على ConfirmationURL يعود المستخدم إلى المنصة
+    ومعه access_token وrefresh_token داخل عنوان الصفحة.
+    نتحقق من access_token لدى Supabase قبل حفظ الجلسة.
+  */
+  if(type === "signup" && accessToken){
+    const refreshToken =
+      hash.get("refresh_token") || params.get("refresh_token");
+
+    if(!refreshToken){
+      showMessage("✅ وصل رابط تأكيد البريد، لكن لم تكتمل بيانات تسجيل الدخول. يمكنك الآن تسجيل الدخول بالبريد وكلمة المرور.",true);
+      try{history.replaceState(null,document.title,SITE_URL);}catch(e){}
+      return false;
+    }
+
+    try{
+      const userResponse = await fetch(SUPABASE_URL + "/auth/v1/user",{
+        method:"GET",
+        headers:{
+          "apikey":SUPABASE_KEY,
+          "Authorization":"Bearer " + accessToken
+        }
+      });
+
+      const userResult = await readResponse(userResponse);
+
+      if(!userResponse.ok || !userResult.data?.id){
+        throw new Error("تعذر التحقق من جلسة الحساب بعد تأكيد البريد.");
+      }
+
+      const expiresIn = Number(hash.get("expires_in") || params.get("expires_in") || 3600);
+
+      session = {
+        access_token:accessToken,
+        refresh_token:refreshToken,
+        token_type:hash.get("token_type") || params.get("token_type") || "bearer",
+        expires_in:expiresIn,
+        expires_at:Math.floor(Date.now()/1000) + expiresIn,
+        user:userResult.data
+      };
+
+      saveSession();
+      updateUI();
+
+      try{history.replaceState(null,document.title,SITE_URL);}catch(e){}
+
+      showMessage("✅ تم تأكيد البريد الإلكتروني وتفعيل تسجيل الدخول بنجاح. مرحبًا بك في منصة ألعابي.",true);
+      await refreshAccess();
+      return true;
+
+    }catch(error){
+      showMessage("❌ تم فتح رابط التأكيد، لكن تعذر إكمال تسجيل الدخول تلقائيًا. جرّب تسجيل الدخول بالبريد وكلمة المرور.");
+      try{history.replaceState(null,document.title,SITE_URL);}catch(e){}
+      return false;
+    }
+  }
+
+  /*
+    الطريقة الأولى لاستعادة كلمة المرور:
+    Supabase يعيد access_token داخل عنوان الصفحة.
   */
   if(type === "recovery" && accessToken){
     showResetForm(accessToken);
@@ -862,8 +921,9 @@ async function detectPasswordRecovery(){
   }
 
   /*
-    الطريقة الثانية: إذا أعاد Supabase token_hash
-    في عنوان الصفحة، نتحقق منه عبر واجهة verify.
+    الطريقة الثانية للاستعادة:
+    إذا أعاد Supabase token_hash في عنوان الصفحة،
+    نتحقق منه عبر واجهة verify.
   */
   const tokenHash =
     params.get("token_hash") || hash.get("token_hash");
@@ -901,10 +961,6 @@ async function detectPasswordRecovery(){
     }
   }
 
-  /*
-    إذا لم يحمل الرابط بيانات الاستعادة، لا نعرض نموذجًا
-    يوهم المستخدم بأنه يستطيع تغيير كلمة المرور.
-  */
   return false;
 }
 
