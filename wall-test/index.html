@@ -790,6 +790,12 @@ html body .skiptranslate iframe{visibility:hidden!important}
 @media(max-width:500px){#universalLanguageButton{width:49px;height:49px;left:9px;bottom:10px}}
 
 </style>
+
+<style id="wall-test-mobile-input-fix">
+/* Test build: prevent the portrait rotation overlay from blocking all game controls. */
+#game.running #rotateNotice{display:none!important;pointer-events:none!important;}
+#game.running #field,#game.running #top,#game.running #buttons{filter:none!important;}
+</style>
 </head>
 
 <body>
