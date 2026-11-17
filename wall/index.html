@@ -3825,7 +3825,17 @@ async function syncCloudWallet(){
       selectedSkin=w.selected_skin||selectedSkin;
       unlockedStage=Math.max(1,Number(w.unlocked_stage)||1);
     }else{
-      throw new Error("لا توجد محفظة محفوظة لهذا الحساب. لم ننشئ محفظة من بيانات الهاتف.");
+      var created=await authorizedRequest("/rest/v1/rpc/wall_get_or_create_wallet",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:"{}"
+      });
+      if(Array.isArray(created)) created=created[0];
+      if(!created || created.ok!==true) throw new Error("تعذر إنشاء محفظة البداية الآمنة.");
+      coins=Number.isFinite(Number(created.coins))?Math.max(0,Number(created.coins)):0;
+      owned=Object.assign({},created.owned||{});
+      selectedSkin=created.selected_skin||"red";
+      unlockedStage=Math.max(1,Number(created.unlocked_stage)||1);
     }
     cloudWalletReady=true;
     updateCoins();applySkin();applyPaddleUpgrades();renderStore();renderTrophies();saveData();
