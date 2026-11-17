@@ -183,6 +183,7 @@ border-radius:20px 20px 9px 9px;
 .blackSkin{background:#222}
 
 /* قائمة اختيار أنواع وألوان المضارب */
+#redPlayerSkin,#bluePlayerSkin{width:95%;max-width:360px;padding:11px;margin:9px auto;border-radius:10px;border:2px solid #7b9bab;background:#f7fbff;color:#17252b;font-size:16px;font-weight:bold;}
 #redPaddleStyle,#bluePaddleStyle{
 width:95%;max-width:360px;padding:11px;margin:9px auto;
 border-radius:10px;border:2px solid #7b9bab;background:#f7fbff;color:#17252b;
@@ -1017,7 +1018,14 @@ html body .skiptranslate iframe{visibility:hidden!important}
 </div>
 <button id="savePaddleChoices" type="button" onclick="savePaddleChoices()">💾 حفظ اختيارات المضارب</button>
 <hr>
-<h3>👕 ألوان الملابس</h3>
+<h3>👕 تخصيص ملابس كل لاعب</h3>
+<div class="storeItem"><strong>🔴 ملابس اللاعب الأول (الأحمر)</strong><br>
+<select id="redPlayerSkin" aria-label="ملابس اللاعب الأول" onchange="setPlayerSkin('red',this.value)">
+<option value="red">أحمر كلاسيكي</option><option value="blue">أزرق رياضي</option><option value="green">أخضر</option><option value="gold">ذهبي</option><option value="black">أسود</option></select></div>
+<div class="storeItem"><strong>🔵 ملابس اللاعب الثاني (الأزرق)</strong><br>
+<select id="bluePlayerSkin" aria-label="ملابس اللاعب الثاني" onchange="setPlayerSkin('blue',this.value)">
+<option value="blue">أزرق رياضي</option><option value="red">أحمر كلاسيكي</option><option value="green">أخضر</option><option value="gold">ذهبي</option><option value="black">أسود</option></select></div>
+<h3>🎨 ألوان سريعة للاعبين معًا</h3>
 <div class="skinGrid">
 
 <div class="skin">
@@ -1400,6 +1408,8 @@ wallUpgrade:false
 };
 
 var selectedSkin = "red";
+var selectedRedSkin = "red";
+var selectedBlueSkin = "blue";
 var selectedRedPaddle = "red";
 var selectedBluePaddle = "blue";
 
@@ -1430,6 +1440,8 @@ owned = Object.assign(owned,data.owned);
 if(data.selectedSkin){
 selectedSkin = data.selectedSkin;
 }
+selectedRedSkin = data.selectedRedSkin || selectedSkin || "red";
+selectedBlueSkin = data.selectedBlueSkin || "blue";
 if(data.selectedRedPaddle) selectedRedPaddle=data.selectedRedPaddle;
 if(data.selectedBluePaddle) selectedBluePaddle=data.selectedBluePaddle;
 tournamentWins = Number(data.tournamentWins)||0;
@@ -1511,6 +1523,8 @@ JSON.stringify({
 coins:coins,
 owned:owned,
 selectedSkin:selectedSkin,
+selectedRedSkin:selectedRedSkin,
+selectedBlueSkin:selectedBlueSkin,
 selectedRedPaddle:selectedRedPaddle,
 selectedBluePaddle:selectedBluePaddle,
 tournamentWins:tournamentWins,
@@ -3119,44 +3133,27 @@ list.appendChild(p);
 الملابس
 ========================================= */
 
+function skinColor(skin){
+var colors={red:"#e53935",blue:"#1976d2",green:"#18a558",gold:"#d5a900",black:"#222"};
+return colors[skin]||colors.red;
+}
 function setSkin(skin){
-
-selectedSkin = skin;
-
-saveData();
-applySkin();
-
+selectedSkin=skin;selectedRedSkin=skin;selectedBlueSkin=skin;
+saveData();applySkin();
 }
-
+function setPlayerSkin(player,skin){
+if(player==="red") selectedRedSkin=skin; else selectedBlueSkin=skin;
+selectedSkin=selectedRedSkin;saveData();applySkin();
+}
 function applySkin(){
-
-var body =
-document.querySelector("#redPlayer .body");
-
-if(!body){
-return;
-}
-
-if(selectedSkin === "red"){
-body.style.background = "#e53935";
-}
-
-if(selectedSkin === "blue"){
-body.style.background = "#1976d2";
-}
-
-if(selectedSkin === "green"){
-body.style.background = "#18a558";
-}
-
-if(selectedSkin === "gold"){
-body.style.background = "#d5a900";
-}
-
-if(selectedSkin === "black"){
-body.style.background = "#222";
-}
-
+var redBody=document.querySelector("#redPlayer .body");
+var blueBody=document.querySelector("#bluePlayer .body");
+if(redBody) redBody.style.background=skinColor(selectedRedSkin);
+if(blueBody) blueBody.style.background=skinColor(selectedBlueSkin);
+var redSelect=document.getElementById("redPlayerSkin");
+var blueSelect=document.getElementById("bluePlayerSkin");
+if(redSelect) redSelect.value=selectedRedSkin;
+if(blueSelect) blueSelect.value=selectedBlueSkin;
 }
 
 /* =========================================
