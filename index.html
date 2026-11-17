@@ -181,6 +181,10 @@ html body .skiptranslate iframe{visibility:hidden!important}
 .privateChatList{max-height:300px;overflow:auto;margin:10px 0}
 .privateChatConversation{display:block;width:100%;text-align:right;background:#1b3a4c;color:#fff;border:1px solid #52758a;border-radius:10px;padding:10px;margin:6px 0}
 .privateChatConversation.selected{border:2px solid #29b889;background:#164d46}
+.privateChatFilePreview{display:none;margin:8px 0;padding:10px;border:1px dashed #6b91a5;border-radius:12px;background:#102532}
+.privateChatFilePreview img,.privateChatFilePreview video{display:block;max-width:100%;max-height:260px;margin:0 auto;border-radius:9px;object-fit:contain}
+.privateChatFileActions{display:none;gap:8px;flex-wrap:wrap;margin:6px 0}
+.privateChatFileActions button{flex:1;min-width:120px}
 
 </style>
 </head>
@@ -275,6 +279,8 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <label>اكتب رسالتك</label><textarea id="privateChatCustomerText" rows="3" maxlength="5000" placeholder="اكتب رسالتك للإدارة..."></textarea>
 <label>إرفاق صورة أو فيديو (حتى 25 ميجابايت)</label><input id="privateChatCustomerFile" type="file" accept="image/*,video/*">
 <div id="privateChatCustomerFileStatus" class="small">لم يتم اختيار ملف.</div>
+<div id="privateChatCustomerFilePreview" class="privateChatFilePreview"></div>
+<div id="privateChatCustomerFileActions" class="privateChatFileActions"><button id="privateChatCustomerFileChange" class="orange" type="button">🔄 تغيير المرفق</button><button id="privateChatCustomerFileClear" class="red" type="button">✖ إلغاء المرفق</button></div>
 <div class="row"><button id="privateChatCustomerSend" class="green" type="button">📨 إرسال للإدارة</button><button id="privateChatCustomerReload" class="gray" type="button">🔄 تحديث المحادثة</button></div>
 </section>
 
@@ -356,6 +362,8 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <label>رد الإدارة</label><textarea id="privateChatAdminText" rows="3" maxlength="5000" placeholder="اكتب ردك للمستخدم..."></textarea>
 <label>إرفاق صورة أو فيديو (حتى 25 ميجابايت)</label><input id="privateChatAdminFile" type="file" accept="image/*,video/*">
 <div id="privateChatAdminFileStatus" class="small">لم يتم اختيار ملف.</div>
+<div id="privateChatAdminFilePreview" class="privateChatFilePreview"></div>
+<div id="privateChatAdminFileActions" class="privateChatFileActions"><button id="privateChatAdminFileChange" class="orange" type="button">🔄 تغيير المرفق</button><button id="privateChatAdminFileClear" class="red" type="button">✖ إلغاء المرفق</button></div>
 <button id="privateChatAdminSend" class="green" type="button" disabled>📨 إرسال الرد للمستخدم</button>
 </section>
 
@@ -497,8 +505,7 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <div id="subscriptionPanel" class="panel">
 <h2 id="subscriptionTitle">💳 الاشتراك في لعبة</h2>
 <p class="small">اختر مكان الدفع ثم أنشئ طلب الاشتراك. بعد التحويل، اكتب رقم العملية. لن يتفعّل الاشتراك إلا بعد تأكيد الإدارة.</p>
-<label for="paymentCountry" style="display:block;margin-top:10px;font-weight:bold;font-size:17px">🌍 اختار مكان الدفع (اضغط على المربع لاختيار العملة)</label>
-<select id="paymentCountry" aria-label="اختيار مكان الدفع والعملة" style="display:block;width:100%;min-height:54px;padding:12px 14px;margin:8px 0 14px;border:2px solid #10a85a;border-radius:10px;font-size:17px;font-weight:bold;background:#fff;color:#111;appearance:auto;-webkit-appearance:menulist;direction:rtl">
+<label for="paymentCountry" style="display:block;margin-top:10px;font-weight:bold;font-size:17px">🌍 اختار مكان الدفع (اضغط على المربع لاختيار العملة)</label><select id="paymentCountry" aria-label="اختيار مكان الدفع والعملة" style="display:block;width:100%;min-height:54px;padding:12px 14px;margin:8px 0 14px;border:2px solid #10a85a;border-radius:10px;font-size:17px;font-weight:bold;background:#fff;color:#111;appearance:auto;-webkit-appearance:menulist;direction:rtl">
 <option value="EG">🇪🇬 داخل مصر — 30 جنيهًا لمدة 30 يومًا</option>
 <option value="US">🌎 خارج مصر — 5 دولارات لمدة 30 يومًا</option>
 </select>
@@ -997,8 +1004,7 @@ async function resetPassword(){
         "Authorization":"Bearer " + recoveryAccessToken,
         "Content-Type":"application/json"
       },
-      body:JSON.stringify({password:password})
-    });
+      body:JSON.stringify({password:password})    });
 
     const result = await readResponse(response);
 
@@ -1497,8 +1503,7 @@ async function saveDataSetting(mode="save"){
 /* تشغيل اللعبة */
 async function openGame(button){
   const originalUrl=button.dataset.url;const gameCode=button.dataset.game;let url=originalUrl;try{const preferredLanguage=localStorage.getItem("platform_preferred_language")||"";if(preferredLanguage){const launchUrl=new URL(originalUrl,window.location.href);launchUrl.searchParams.set("platform_lang",preferredLanguage);url=launchUrl.toString();}}catch(languageError){}
-  if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا لتشغيل الألعاب.");return;}
-  const allowed=await checkGameAccess(gameCode);
+  if(!session?.access_token){showMessage("🔒 سجّل الدخول أولًا لتشغيل الألعاب.");return;}  const allowed=await checkGameAccess(gameCode);
   if(!allowed){showMessage("🔒 لا يوجد اشتراك فعال للعبة "+(GAME_NAMES[gameCode]||gameCode)+". اضغط اشتراك / تجديد أولًا.");return;}
   if(gameCode==="saed_al_samak"){
     const panel=$("embeddedFishingPanel");
@@ -1580,6 +1585,35 @@ $("customGameClear").addEventListener("click",clearCustomGameForm);
 
 /* المحادثات الخاصة بين كل مستخدم وإدارة المنصة */
 let privateChatCustomerMedia=null, privateChatAdminMedia=null, privateChatSelectedCustomer=null;
+const privateChatPreviewUrls={Customer:null,Admin:null};
+function clearPrivateChatFile(side,keepStatus=false){
+ const input=$("privateChat"+side+"File"),preview=$("privateChat"+side+"FilePreview"),actions=$("privateChat"+side+"FileActions"),status=$("privateChat"+side+"FileStatus");
+ if(privateChatPreviewUrls[side]){URL.revokeObjectURL(privateChatPreviewUrls[side]);privateChatPreviewUrls[side]=null;}
+ if(input)input.value="";
+ if(preview){preview.replaceChildren();preview.style.display="none";}
+ if(actions)actions.style.display="none";
+ if(status&&!keepStatus)status.textContent="لم يتم اختيار ملف.";
+}
+function showPrivateChatFilePreview(side){
+ const input=$("privateChat"+side+"File"),preview=$("privateChat"+side+"FilePreview"),actions=$("privateChat"+side+"FileActions"),status=$("privateChat"+side+"FileStatus");
+ const file=input&&input.files&&input.files[0];
+ if(!file){clearPrivateChatFile(side);return;}
+ if(file.size>25*1024*1024){clearPrivateChatFile(side,true);status.textContent="❌ حجم الملف أكبر من 25 ميجابايت. اختر ملفًا أصغر.";return;}
+ if(!file.type.startsWith("image/")&&!file.type.startsWith("video/")){clearPrivateChatFile(side,true);status.textContent="❌ اختر صورة أو فيديو فقط.";return;}
+ if(privateChatPreviewUrls[side])URL.revokeObjectURL(privateChatPreviewUrls[side]);
+ const url=URL.createObjectURL(file);privateChatPreviewUrls[side]=url;
+ preview.replaceChildren();
+ const media=document.createElement(file.type.startsWith("video/")?"video":"img");
+ media.src=url;media.alt="معاينة المرفق قبل الإرسال";
+ if(media.tagName==="VIDEO"){media.controls=true;media.playsInline=true;}
+ preview.appendChild(media);preview.style.display="block";actions.style.display="flex";
+ status.textContent="تم اختيار: "+file.name+" — "+(file.size/1024/1024).toFixed(2)+" ميجابايت. هذه معاينة قبل الإرسال.";
+}
+function bindPrivateChatFileControls(side){
+ $("privateChat"+side+"File").addEventListener("change",()=>showPrivateChatFilePreview(side));
+ $("privateChat"+side+"FileChange").addEventListener("click",()=>$("privateChat"+side+"File").click());
+ $("privateChat"+side+"FileClear").addEventListener("click",()=>clearPrivateChatFile(side));
+}
 async function callPrivateChat(action,payload={}){
  if(!session?.access_token)throw new Error("سجّل الدخول أولًا.");
  const response=await fetch(SUPABASE_URL+"/functions/v1/platform-private-chat",{method:"POST",headers:authHeaders(),body:JSON.stringify({action,...payload})});
@@ -1647,7 +1681,7 @@ async function sendPrivateChatCustomer(){
  try{
   let media=null;if(file){if(file.size>25*1024*1024)throw new Error("حجم الملف أكبر من 25 ميجابايت.");$("privateChatCustomerFileStatus").textContent="⏳ جاري رفع المرفق...";media=await uploadPrivateChatMedia(file);}
   await callPrivateChat("send",{message:text,media_path:media?.media_path||null,media_type:media?.media_type||null});
-  $("privateChatCustomerText").value="";$("privateChatCustomerFile").value="";$("privateChatCustomerFileStatus").textContent="لم يتم اختيار ملف.";
+  $("privateChatCustomerText").value="";clearPrivateChatFile("Customer");
   showMessage("✅ تم إرسال رسالتك إلى الإدارة.",true);await loadPrivateChatCustomer();
  }catch(e){showMessage("❌ تعذر إرسال الرسالة: "+e.message);}finally{button.disabled=false;}
 }
@@ -1659,7 +1693,7 @@ async function sendPrivateChatAdmin(){
  try{
   let media=null;if(file){if(file.size>25*1024*1024)throw new Error("حجم الملف أكبر من 25 ميجابايت.");$("privateChatAdminFileStatus").textContent="⏳ جاري رفع المرفق...";media=await uploadPrivateChatMedia(file,privateChatSelectedCustomer);}
   await callPrivateChat("owner_send",{customer_id:privateChatSelectedCustomer,message:text,media_path:media?.media_path||null,media_type:media?.media_type||null});
-  $("privateChatAdminText").value="";$("privateChatAdminFile").value="";$("privateChatAdminFileStatus").textContent="لم يتم اختيار ملف.";
+  $("privateChatAdminText").value="";clearPrivateChatFile("Admin");
   showMessage("✅ تم إرسال الرد للمستخدم.",true);await openPrivateChatThread(privateChatSelectedCustomer,$("privateChatAdminTitle").textContent.replace("💬 محادثة: ",""));
  }catch(e){showMessage("❌ تعذر إرسال الرد: "+e.message);}finally{button.disabled=!privateChatSelectedCustomer;}
 }
@@ -1667,8 +1701,8 @@ $("privateChatCustomerSend").addEventListener("click",sendPrivateChatCustomer);
 $("privateChatCustomerReload").addEventListener("click",loadPrivateChatCustomer);
 $("privateChatAdminReload").addEventListener("click",loadPrivateChatConversations);
 $("privateChatAdminSend").addEventListener("click",sendPrivateChatAdmin);
-$("privateChatCustomerFile").addEventListener("change",function(){const f=this.files[0];$("privateChatCustomerFileStatus").textContent=f?"تم اختيار: "+f.name:"لم يتم اختيار ملف.";});
-$("privateChatAdminFile").addEventListener("change",function(){const f=this.files[0];$("privateChatAdminFileStatus").textContent=f?"تم اختيار: "+f.name:"لم يتم اختيار ملف.";});
+bindPrivateChatFileControls("Customer");
+bindPrivateChatFileControls("Admin");
 
 /* مركز الرسائل الجماعية */
 async function callBroadcast(action,payload={}){
@@ -1997,7 +2031,6 @@ apply();
 })();
 
 </script>
-
 <script>
 function setPlatformLanguage(language){
  var preferred=(language==="en")?"en":"ar";
