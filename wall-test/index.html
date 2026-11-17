@@ -1295,7 +1295,7 @@ html body .skiptranslate iframe{visibility:hidden!important}
 الإعدادات
 ========================================= */
 
-var ACCESS_REQUIRED = true;
+var ACCESS_REQUIRED = false;
 var TEST_LOGIN_UNLOCK = false;
 
 var SUPABASE_URL =
@@ -4008,63 +4008,9 @@ async function checkAccess(){
 ========================================= */
 
 async function createPurchase(){
-
-if(!userEmail){
-
-alert("سجّل الدخول أولًا.");
-return;
-
+  alert("🧪 المشتريات غير مفعلة في نسخة الاختبار المحلية.");
 }
 
-var auth =
-JSON.parse(
-localStorage.getItem(AUTH_KEY) || "{}"
-);
-
-var token =
-auth.access_token || "";
-
-if(!token){
-
-alert("جلسة الدخول غير موجودة.");
-return;
-
-}
-
-try{
-
-var data =
-await authorizedRequest(
-"/functions/v1/create-game-order",
-{
-method:"POST",
-body:JSON.stringify({
-game_code:GAME_CODE
-})
-}
-);
-
-document.getElementById("accountMessage").innerHTML =
-"✅ تم إنشاء طلب الشراء. أكمل الدفع وانتظر اعتماد الإدارة.";
-
-if(data && data.payment_method){
-
-document.getElementById("accountMessage").innerHTML +=
-"<br>💳 طريقة الدفع: " +
-data.payment_method;
-
-}
-
-}catch(e){
-
-document.getElementById("accountMessage").innerHTML =
-(e.message && e.message.indexOf("Owner account does not need a subscription") !== -1)
-? "👑 حساب المالك لا يحتاج إلى شراء اشتراك. اضغط فحص الاشتراك لتفعيل الوصول المجاني."
-: "❌ " + e.message;
-
-}
-
-}
 
 /* =========================================
 تسجيل الخروج
@@ -4849,6 +4795,25 @@ function init(){
  });
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+})();
+
+/* حواجز نسخة الاختبار: لا غرف مباشرة ولا طلبات شراء أو مزامنة سحابية. */
+(function(){
+  function lockTestOnlyControls(){
+    var online=document.getElementById("online");
+    if(online){
+      online.disabled=true;
+      online.title="اللعب عبر الإنترنت غير متاح في نسخة الاختبار";
+      online.setAttribute("aria-disabled","true");
+    }
+    var rooms=document.getElementById("onlineRoomBox");
+    if(rooms) rooms.style.display="none";
+  }
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",lockTestOnlyControls,{once:true});
+  }else{
+    lockTestOnlyControls();
+  }
 })();
 </script>
 </body>
