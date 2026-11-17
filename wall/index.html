@@ -1511,7 +1511,7 @@ selectedStage:selectedStage
 
 }catch(e){}
 
-if(cloudWalletReady) scheduleCloudWalletSave();
+/* لا يُسمح للمتصفح بحفظ العملات أو المشتريات مباشرة في قاعدة البيانات. */
 
 }
 
@@ -3157,32 +3157,53 @@ wallUpgrade:300
 
 };
 
-function buyItem(name){
-
-if(owned[name]){
-
-alert("هذا التطوير موجود لديك بالفعل.");
-return;
-
+var purchaseInProgress = false;
+function makePurchaseRequestId(){
+  if(window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
+  var bytes=new Uint8Array(16);
+  if(window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(bytes);
+  else for(var i=0;i<16;i++) bytes[i]=Math.floor(Math.random()*256);
+  bytes[6]=(bytes[6]&15)|64; bytes[8]=(bytes[8]&63)|128;
+  var h=Array.from(bytes,function(b){return b.toString(16).padStart(2,"0");}).join("");
+  return h.slice(0,8)+"-"+h.slice(8,12)+"-"+h.slice(12,16)+"-"+h.slice(16,20)+"-"+h.slice(20);
 }
-
-var price = prices[name];
-
-if(coins < price){
-
-alert("💰 العملات غير كافية.");
-return;
-
-}
-
-coins -= price;
-owned[name] = true;
-applyPaddleUpgrades();
-
-saveData();
-updateCoins();
-renderStore();
-
+async function buyItem(name){
+  if(purchaseInProgress) return;
+  if(!Object.prototype.hasOwnProperty.call(prices,name)){
+    alert("هذا العنصر غير متاح للشراء."); return;
+  }
+  if(owned[name]){
+    alert("هذا التطوير موجود لديك بالفعل."); return;
+  }
+  if(!cloudWalletReady || !cloudUserId){
+    alert("تعذر تأكيد محفظتك من الخادم. سجّل الدخول واتصل بالإنترنت ثم أعد المحاولة."); return;
+  }
+  purchaseInProgress=true;
+  var buttonMap={redPaddle:"buyRedPaddle",bluePaddle:"buyBluePaddle",fastBall:"buyFastBall",strongPaddle:"buyStrongPaddle",controlPaddle:"buyControlPaddle",guardPaddle:"buyGuardPaddle",goldPaddle:"buyGoldPaddle",wallUpgrade:"buyWall"};
+  var button=document.getElementById(buttonMap[name]);
+  if(button) button.disabled=true;
+  try{
+    var result=await authorizedRequest("/rest/v1/rpc/wall_purchase_item",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({p_item:name,p_request_id:makePurchaseRequestId()})
+    });
+    if(Array.isArray(result)) result=result[0];
+    if(!result || result.ok!==true || Number(result.coins)<0) throw new Error("لم يؤكد الخادم عملية الشراء.");
+    coins=Number(result.coins);
+    owned[result.item||name]=true;
+    applyPaddleUpgrades();
+    updateCoins();
+    renderStore();
+    saveData();
+    alert(result.duplicate ? "تم تأكيد العملية السابقة دون خصم جديد." : "✅ تم الشراء وتحديث رصيدك من الخادم.");
+  }catch(e){
+    console.warn("Secure purchase failed:",e);
+    alert("لم يتم الشراء. لم نخصم شيئًا من اللعبة. السبب: "+String(e&&e.message||e));
+    renderStore();
+  }finally{
+    purchaseInProgress=false;
+  }
 }
 
 function renderStore(){
@@ -3755,33 +3776,10 @@ async function authorizedRequest(path, options){
   }
 }
 
-/* مزامنة العملات والتطويرات بين الأجهزة عند تسجيل الدخول */
-function scheduleCloudWalletSave(){
-  if(!cloudWalletReady || !cloudUserId) return;
-  if(cloudWalletSaveTimer) clearTimeout(cloudWalletSaveTimer);
-  cloudWalletSaveTimer=setTimeout(saveCloudWallet,700);
-}
-async function saveCloudWallet(){
-  if(!cloudWalletReady || !cloudUserId) return;
-  if(cloudWalletSaving){cloudWalletSaveAgain=true;return;}
-  cloudWalletSaving=true;
-  try{
-    var payload={
-      coins:Math.max(0,Math.floor(Number(coins)||0)),
-      owned:owned,
-      selected_skin:selectedSkin,
-      unlocked_stage:Math.max(1,Math.floor(Number(unlockedStage)||1)),
-      updated_at:new Date().toISOString()
-    };
-    await authorizedRequest("/rest/v1/wall_player_wallets?user_id=eq."+encodeURIComponent(cloudUserId),{
-      method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify(payload)
-    });
-  }catch(e){console.warn("Cloud wallet save:",e.message);}
-  finally{
-    cloudWalletSaving=false;
-    if(cloudWalletSaveAgain){cloudWalletSaveAgain=false;saveCloudWallet();}
-  }
-}
+/* الحفظ السحابي القديم كان يسمح للمتصفح بكتابة العملات والمشتريات.
+   أوقفناه في فرع الاختبار؛ الشراء فقط يمر عبر RPC الموثوق. */
+function scheduleCloudWalletSave(){}
+async function saveCloudWallet(){}
 async function syncCloudWallet(){
   var auth={};
   try{auth=JSON.parse(localStorage.getItem(AUTH_KEY)||"{}");}catch(e){}
@@ -3799,10 +3797,7 @@ async function syncCloudWallet(){
       selectedSkin=w.selected_skin||selectedSkin;
       unlockedStage=Math.max(1,Number(w.unlocked_stage)||1);
     }else{
-      await authorizedRequest("/rest/v1/wall_player_wallets",{
-        method:"POST",headers:{"Prefer":"return=minimal"},
-        body:JSON.stringify({user_id:cloudUserId,coins:Math.max(0,Math.floor(Number(coins)||0)),owned:owned,selected_skin:selectedSkin,unlocked_stage:Math.max(1,Math.floor(Number(unlockedStage)||1))})
-      });
+      throw new Error("لا توجد محفظة محفوظة لهذا الحساب. لم ننشئ محفظة من بيانات الهاتف.");
     }
     cloudWalletReady=true;
     updateCoins();applySkin();applyPaddleUpgrades();renderStore();renderTrophies();saveData();
