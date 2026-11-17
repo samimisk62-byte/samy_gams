@@ -346,7 +346,7 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <label>صورة أو فيديو (اختياري — حتى 25 ميجابايت)</label><input id="broadcastMedia" type="file" accept="image/*,video/*">
 <div id="broadcastMediaStatus" class="small">لم يتم اختيار ملف.</div>
 <div class="row"><button id="broadcastPublish" class="green" type="button">📢 نشر الرسالة لكل المستخدمين</button><button id="broadcastWhatsapp" class="orange" type="button">🟢 تجهيز رسالة واتساب</button></div>
-<hr><h3>📋 سجل الرسائل</h3><div id="broadcastAdminList" class="small">اضغط تحديث الرسائل لعرض السجل.</div>
+<hr><h3>📋 سجل الرسائل</h3><div class="row"><button id="broadcastAdminTrash" class="gray" type="button">🗑️ سلة مهملات رسائل الإدارة</button></div><div id="broadcastAdminList" class="small">اضغط تحديث الرسائل لعرض السجل.</div>
 <button id="broadcastReload" class="gray" type="button">🔄 تحديث سجل الرسائل</button>
 </section>
 
@@ -1750,7 +1750,7 @@ async function callBroadcast(action,payload={}){
   if(!response.ok||result.data?.error)throw new Error(getServerError(result,response));
   return result.data||{};
 }
-function renderBroadcastCard(parent,item,adminMode=false){
+function renderBroadcastCard(parent,item,adminMode=false,inTrash=false){
   const card=document.createElement("article");card.className="broadcastCard";
   const title=document.createElement("strong");title.textContent=item.title||"رسالة من إدارة المنصة";card.appendChild(title);
   const date=document.createElement("div");date.className="small";date.textContent=item.sent_at?new Date(item.sent_at).toLocaleString("ar-EG"):"";card.appendChild(date);
@@ -1759,12 +1759,42 @@ function renderBroadcastCard(parent,item,adminMode=false){
     if(item.media_type==="video"){const v=document.createElement("video");v.src=item.media_url;v.controls=true;v.playsInline=true;card.appendChild(v);}
     else{const img=document.createElement("img");img.src=item.media_url;img.alt="مرفق الرسالة";img.loading="lazy";card.appendChild(img);}
   }
+  const ownAction=document.createElement("button");ownAction.type="button";ownAction.className=inTrash?"green":"gray";
+  ownAction.textContent=inTrash?"↩️ استعادة عندي":"🗑️ حذف عندي";
+  ownAction.onclick=async()=>{try{
+    if(inTrash&&!confirm("استعادة هذه الرسالة إلى صندوق الرسائل؟"))return;
+    if(!inTrash&&!confirm("نقل الرسالة إلى سلة مهملاتك فقط؟ ستظل موجودة عند الآخرين."))return;
+    await callBroadcast(inTrash?"restore":"hide",{id:item.id});
+    if(adminMode){if(inTrash)await loadBroadcastAdminTrash();else await loadBroadcastAdmin();}
+    else{if(inTrash)await loadBroadcastCustomerTrash();else await loadBroadcastFeed();}
+    showMessage(inTrash?"تمت استعادة الرسالة.":"نُقلت الرسالة إلى سلتك.",true);
+  }catch(e){showMessage("تعذر تنفيذ الإجراء: "+e.message);}};
+  card.appendChild(ownAction);
+  if(inTrash){
+    const del=document.createElement("button");del.type="button";del.className="red";del.textContent="❌ حذف نهائي";
+    del.onclick=async()=>{if(!confirm("حذف هذه الرسالة نهائيًا من عندك فقط؟"))return;try{await callBroadcast("permanent",{id:item.id});await (adminMode?loadBroadcastAdminTrash():loadBroadcastCustomerTrash());showMessage("تم الحذف النهائي من سلتك.",true);}catch(e){showMessage("تعذر الحذف: "+e.message);}};
+    card.appendChild(del);
+  }
   if(adminMode&&item.is_active){
     const b=document.createElement("button");b.className="gray";b.textContent="📦 أرشفة الرسالة";
     b.onclick=async()=>{if(!confirm("أرشفة الرسالة وإخفاؤها من حسابات المستخدمين؟"))return;try{await callBroadcast("archive",{id:item.id});await loadBroadcastAdmin();await loadBroadcastFeed();showMessage("تمت أرشفة الرسالة.",true);}catch(e){showMessage("تعذر أرشفة الرسالة: "+e.message);}};
     card.appendChild(b);
   }
   parent.appendChild(card);
+}
+async function loadBroadcastCustomerTrash(){
+ const list=$("broadcastFeed");if(!list)return;list.textContent="⏳ جاري تحميل سلة المهملات...";
+ try{const d=await callBroadcast("trash_list");list.textContent="";const items=d.messages||[];
+ if(!items.length){list.textContent="سلة المهملات فارغة.";return;}
+ items.forEach(x=>renderBroadcastCard(list,x,false,true));
+ }catch(e){list.textContent="تعذر تحميل السلة: "+e.message;}
+}
+async function loadBroadcastAdminTrash(){
+ const list=$("broadcastAdminList");if(!list)return;list.textContent="⏳ جاري تحميل سلة المهملات...";
+ try{const d=await callBroadcast("trash_list");list.textContent="";const items=d.messages||[];
+ if(!items.length){list.textContent="سلة المهملات فارغة.";return;}
+ items.forEach(x=>renderBroadcastCard(list,x,true,true));
+ }catch(e){list.textContent="تعذر تحميل السلة: "+e.message;}
 }
 async function loadBroadcastFeed(){
   const box=$("broadcastInbox"),list=$("broadcastFeed");
@@ -1820,6 +1850,8 @@ $("broadcastWhatsapp").addEventListener("click",function(){
   window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener,noreferrer");
 });
 $("broadcastReload").addEventListener("click",loadBroadcastAdmin);
+$("broadcastCustomerTrash").addEventListener("click",loadBroadcastCustomerTrash);
+$("broadcastAdminTrash").addEventListener("click",loadBroadcastAdminTrash);
 
 async function refreshAccess(){
   if(!session?.access_token)return;
