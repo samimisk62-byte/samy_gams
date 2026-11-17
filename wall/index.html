@@ -1422,9 +1422,7 @@ if(typeof data.gamePoints === "number"){
 gamePoints = Math.max(0,Number(data.gamePoints)||0);
 }
 
-if(data.owned){
-owned = Object.assign(owned,data.owned);
-}
+/* لا نحمّل المشتريات من الهاتف؛ مصدر الملكية الوحيد هو محفظة الخادم. */
 
 if(data.selectedSkin){
 selectedSkin = data.selectedSkin;
