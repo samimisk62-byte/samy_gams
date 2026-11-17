@@ -4259,21 +4259,24 @@ document.getElementById("easy").addEventListener("click",easyMode);
 document.getElementById("medium").addEventListener("click",mediumMode);
 document.getElementById("hard").addEventListener("click",hardMode);
 
-document.getElementById("musicButton").addEventListener("click",musicToggle);
-document.getElementById("ballButton").addEventListener("click",ballToggle);
-document.getElementById("crowdButton").addEventListener("click",crowdToggle);
-document.getElementById("effectButton").addEventListener("click",effectToggle);
-document.getElementById("musicStyleSelect").addEventListener("change",musicStyleChanged);
-document.getElementById("paddleSoundSelect").addEventListener("change",paddleSoundChanged);
-document.getElementById("ballSoundSelect").addEventListener("change",ballSoundChanged);
-document.getElementById("previewMusicButton").addEventListener("click",previewMusic);
-document.getElementById("musicVolumeControl").addEventListener("input",musicVolumeChanged);
-document.getElementById("paddleVolumeControl").addEventListener("input",paddleVolumeChanged);
-document.getElementById("ballVolumeControl").addEventListener("input",ballVolumeChanged);
-document.getElementById("allSoundVolumeControl").addEventListener("input",allSoundVolumeChanged);
-document.getElementById("previewPaddleButton").addEventListener("click",previewPaddleSound);
-document.getElementById("previewBallButton").addEventListener("click",previewBallSound);
-refreshGameSoundButton();
+/* عناصر إعدادات الصوت موجودة أسفل الصفحة؛ اربطها بعد اكتمال بناء الصفحة حتى لا يتوقف السكربت الرئيسي. */
+document.addEventListener("DOMContentLoaded",function(){
+ document.getElementById("musicButton").addEventListener("click",musicToggle);
+ document.getElementById("ballButton").addEventListener("click",ballToggle);
+ document.getElementById("crowdButton").addEventListener("click",crowdToggle);
+ document.getElementById("effectButton").addEventListener("click",effectToggle);
+ document.getElementById("musicStyleSelect").addEventListener("change",musicStyleChanged);
+ document.getElementById("paddleSoundSelect").addEventListener("change",paddleSoundChanged);
+ document.getElementById("ballSoundSelect").addEventListener("change",ballSoundChanged);
+ document.getElementById("previewMusicButton").addEventListener("click",previewMusic);
+ document.getElementById("musicVolumeControl").addEventListener("input",musicVolumeChanged);
+ document.getElementById("paddleVolumeControl").addEventListener("input",paddleVolumeChanged);
+ document.getElementById("ballVolumeControl").addEventListener("input",ballVolumeChanged);
+ document.getElementById("allSoundVolumeControl").addEventListener("input",allSoundVolumeChanged);
+ document.getElementById("previewPaddleButton").addEventListener("click",previewPaddleSound);
+ document.getElementById("previewBallButton").addEventListener("click",previewBallSound);
+ refreshGameSoundButton();
+},{once:true});
 
 
 document.getElementById("stagesBack").addEventListener("click",showMenu);
