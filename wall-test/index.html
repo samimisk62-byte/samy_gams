@@ -889,14 +889,14 @@ html body .skiptranslate iframe{visibility:hidden!important}
 
 <button id="clothesButton" type="button">👕 الملابس</button>
 <button id="storeButton" type="button">🛒 المتجر</button>
-<button id="gameSoundSettingsButton" type="button" style="background:#167f9f">🔊 الصوت: تشغيل</button>
+<button id="gameSoundSettingsButton" type="button" style="background:#167f9f" onclick="toggleGameSoundButton()">🔊 الصوت: تشغيل</button>
 <button id="rewardsButton" type="button">🏆 الجوائز</button>
 <button id="accountButton" type="button">👤 الحساب</button>
 <button id="rulesButton" type="button">📖 القواعد</button>
 
 </div>
 
-<button id="startButton" class="start" type="button">
+<button id="startButton" class="start" type="button" onclick="stageChosen=false;showStageSelect()">
 ▶️ ابدأ المباراة
 </button>
 
@@ -1907,6 +1907,29 @@ effects = !effects;
 document.getElementById("effectButton").innerHTML =
 "💥 المؤثرات: " + (effects ? "تشغيل" : "إيقاف");
 
+}
+
+function refreshGameSoundButton(){
+ var b=document.getElementById("gameSoundSettingsButton");
+ if(b)b.textContent=soundMutedInGame?"🔇 الصوت: إيقاف":"🔊 الصوت: تشغيل";
+}
+
+function toggleGameSoundButton(){
+ if(soundMutedInGame){
+  soundMutedInGame=false;
+  allSoundVolume=Math.max(5,Math.min(300,lastAudibleMasterVolume||120));
+ }else{
+  if(allSoundVolume>0)lastAudibleMasterVolume=allSoundVolume;
+  soundMutedInGame=true;
+  allSoundVolume=0;
+ }
+ var v=document.getElementById("allSoundVolumeControl");
+ if(v)v.value=allSoundVolume;
+ updateAllSoundVolumeLabel();
+ saveAudioPrefs();
+ if(soundMutedInGame){stopMusic();}
+ else if(music&&gameRunning&&!paused){var ac=getAudio();if(ac&&ac.state==="suspended"){try{ac.resume();}catch(e){}}startMusic();}
+ refreshGameSoundButton();
 }
 
 function musicStyleChanged(){
@@ -3412,6 +3435,8 @@ musicVolume:musicVolume,
 paddleVolume:paddleVolume,
 ballVolume:ballVolume,
 allSoundVolume:allSoundVolume,
+soundMutedInGame:soundMutedInGame,
+lastAudibleMasterVolume:lastAudibleMasterVolume,
 paddleSoundStyle:paddleSoundStyle,
 ballSoundStyle:ballSoundStyle
 }));
@@ -3425,7 +3450,10 @@ if(["classic","sport","fast","electro"].indexOf(p.musicStyle)>=0)musicStyle=p.mu
 if(Number.isFinite(Number(p.musicVolume)))musicVolume=Math.max(10,Math.min(300,Number(p.musicVolume)));
 if(Number.isFinite(Number(p.paddleVolume)))paddleVolume=Math.max(10,Math.min(300,Number(p.paddleVolume)));
 if(Number.isFinite(Number(p.ballVolume)))ballVolume=Math.max(10,Math.min(300,Number(p.ballVolume)));
-if(Number.isFinite(Number(p.allSoundVolume)))allSoundVolume=Math.max(10,Math.min(150,Number(p.allSoundVolume)));
+if(Number.isFinite(Number(p.allSoundVolume)))allSoundVolume=Math.max(0,Math.min(300,Number(p.allSoundVolume)));
+ if(typeof p.soundMutedInGame==="boolean")soundMutedInGame=p.soundMutedInGame;
+ if(Number.isFinite(Number(p.lastAudibleMasterVolume)))lastAudibleMasterVolume=Math.max(5,Math.min(300,Number(p.lastAudibleMasterVolume)));
+ if(!soundMutedInGame&&allSoundVolume>0)lastAudibleMasterVolume=allSoundVolume;
 if(["wood","pro","metal","soft"].indexOf(p.paddleSoundStyle)>=0)paddleSoundStyle=p.paddleSoundStyle;
 if(["rubber","crisp","hollow","electronic"].indexOf(p.ballSoundStyle)>=0)ballSoundStyle=p.ballSoundStyle;
 }catch(e){}
@@ -4229,32 +4257,9 @@ document.getElementById("ballVolumeControl").addEventListener("input",ballVolume
 document.getElementById("allSoundVolumeControl").addEventListener("input",allSoundVolumeChanged);
 document.getElementById("previewPaddleButton").addEventListener("click",previewPaddleSound);
 document.getElementById("previewBallButton").addEventListener("click",previewBallSound);
-(function(){
- var btn=document.getElementById("gameSoundSettingsButton");
- var settingsSlider=document.getElementById("allSoundVolumeControl");
- function refreshSoundButton(){
-  if(btn)btn.textContent=soundMutedInGame?"🔇 الصوت: إيقاف":"🔊 الصوت: تشغيل";
- }
- if(btn)btn.addEventListener("click",function(){
-  if(soundMutedInGame){
-   soundMutedInGame=false;
-   allSoundVolume=Math.max(5,Math.min(300,lastAudibleMasterVolume||120));
-  }else{
-   lastAudibleMasterVolume=allSoundVolume>0?allSoundVolume:(lastAudibleMasterVolume||120);
-   soundMutedInGame=true;
-   allSoundVolume=0;
-  }
-  if(settingsSlider)settingsSlider.value=allSoundVolume;
-  updateAllSoundVolumeLabel();
-  saveAudioPrefs();
-  if(soundMutedInGame){stopMusic();}
-  else if(music&&gameRunning&&!paused){var ac=getAudio();if(ac&&ac.state==="suspended"){try{ac.resume();}catch(e){}}startMusic();}
-  refreshSoundButton();
- });
- refreshSoundButton();
-})();
+refreshGameSoundButton();
 
-document.getElementById("startButton").addEventListener("click",function(){stageChosen=false;showStageSelect();});
+
 document.getElementById("stagesBack").addEventListener("click",showMenu);
 document.getElementById("stagePrevPage").addEventListener("click",function(){if(stagePage>0){stagePage--;renderStages();}});
 document.getElementById("stageNextPage").addEventListener("click",function(){stagePage++;renderStages();});
@@ -5037,6 +5042,19 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   }else{
     lockTestOnlyControls();
   }
+})();
+</script>
+<script>
+(function(){
+ function bindDirectGameButtons(){
+  var start=document.getElementById("startButton");
+  if(start)start.onclick=function(){if(typeof showStageSelect==="function"){stageChosen=false;showStageSelect();}};
+  var sound=document.getElementById("gameSoundSettingsButton");
+  if(sound)sound.onclick=function(){if(typeof toggleGameSoundButton==="function")toggleGameSoundButton();};
+  if(typeof refreshGameSoundButton==="function")refreshGameSoundButton();
+ }
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bindDirectGameButtons,{once:true});
+ else bindDirectGameButtons();
 })();
 </script>
 </body>
