@@ -346,7 +346,7 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <label>صورة أو فيديو (اختياري — حتى 25 ميجابايت)</label><input id="broadcastMedia" type="file" accept="image/*,video/*">
 <div id="broadcastMediaStatus" class="small">لم يتم اختيار ملف.</div>
 <div class="row"><button id="broadcastPublish" class="green" type="button">📢 نشر الرسالة لكل المستخدمين</button><button id="broadcastWhatsapp" class="orange" type="button">🟢 تجهيز رسالة واتساب</button></div>
-<hr><h3>📋 سجل الرسائل</h3><div class="row"><button id="broadcastAdminTrash" class="gray" type="button">🗑️ سلة مهملات رسائل الإدارة</button><button id="broadcastAdminBack" class="green" type="button" style="display:none">↩️ العودة إلى سجل الرسائل</button></div><div id="broadcastAdminList" class="small">اضغط تحديث الرسائل لعرض السجل.</div>
+<hr><h3>📋 سجل الرسائل</h3><div class="row"><button id="broadcastAdminTrash" class="gray" type="button">🗑️ سلة مهملات رسائل الإدارة</button><button id="broadcastAdminArchive" class="orange" type="button">📦 الأرشيف</button><button id="broadcastAdminBack" class="green" type="button" style="display:none">↩️ العودة إلى سجل الرسائل</button></div><div id="broadcastAdminList" class="small">اضغط تحديث الرسائل لعرض السجل.</div>
 <button id="broadcastReload" class="gray" type="button">🔄 تحديث سجل الرسائل</button>
 </section>
 
@@ -1762,6 +1762,7 @@ $("privateChatCustomerBack").addEventListener("click",loadPrivateChatCustomer);
 $("privateChatAdminBack").addEventListener("click",()=>openPrivateChatThread(privateChatSelectedCustomer,$("privateChatAdminTitle").textContent.replace("💬 محادثة: ","")));
 $("broadcastCustomerBack").addEventListener("click",loadBroadcastFeed);
 $("broadcastAdminBack").addEventListener("click",loadBroadcastAdmin);
+$("broadcastAdminArchive").addEventListener("click",loadBroadcastAdminArchive);
 bindPrivateChatFileControls("Customer");
 bindPrivateChatFileControls("Admin");
 
@@ -1803,12 +1804,26 @@ function renderBroadcastCard(parent,item,adminMode=false,inTrash=false){
     del.onclick=async()=>{if(!confirm("حذف هذه الرسالة نهائيًا من عندك فقط؟"))return;try{await callBroadcast("permanent",{id:item.id});await (adminMode?loadBroadcastAdminTrash():loadBroadcastCustomerTrash());showMessage("تم الحذف النهائي من سلتك.",true);}catch(e){showMessage("تعذر الحذف: "+e.message);}};
     card.appendChild(del);
   }
+  if(adminMode&&!item.is_active){
+    const restoreArchive=document.createElement("button");restoreArchive.type="button";restoreArchive.className="green";restoreArchive.textContent="↩️ إلغاء الأرشفة وإعادة النشر";
+    restoreArchive.onclick=async()=>{if(!confirm("إعادة هذه الرسالة إلى رسائل المنصة الظاهرة للمستخدمين؟"))return;try{await callBroadcast("unarchive",{id:item.id});await loadBroadcastAdminArchive();showMessage("تم إلغاء الأرشفة وإعادة نشر الرسالة.",true);}catch(e){showMessage("تعذر إلغاء الأرشفة: "+e.message);}};
+    card.appendChild(restoreArchive);
+  }
   if(adminMode&&item.is_active){
     const b=document.createElement("button");b.className="gray";b.textContent="📦 أرشفة الرسالة";
     b.onclick=async()=>{if(!confirm("أرشفة الرسالة وإخفاؤها من حسابات المستخدمين؟"))return;try{await callBroadcast("archive",{id:item.id});await loadBroadcastAdmin();await loadBroadcastFeed();showMessage("تمت أرشفة الرسالة.",true);}catch(e){showMessage("تعذر أرشفة الرسالة: "+e.message);}};
     card.appendChild(b);
   }
   parent.appendChild(card);
+}
+async function loadBroadcastAdminArchive(){
+ const list=$("broadcastAdminList");if(!list)return;
+ $("broadcastAdminTrash").style.display="inline-block";$("broadcastAdminBack").style.display="none";
+ list.textContent="⏳ جاري تحميل الأرشيف...";
+ try{const d=await callBroadcast("archived_list");list.textContent="";const items=d.messages||[];
+ if(!items.length){list.textContent="الأرشيف فارغ حاليًا.";return;}
+ items.forEach(x=>{const wrap=document.createElement("div");renderBroadcastCard(wrap,x,true);const st=document.createElement("p");st.textContent="📦 محفوظة في الأرشيف — مخفية عن المستخدمين";wrap.appendChild(st);list.appendChild(wrap);});
+ }catch(e){list.textContent="تعذر تحميل الأرشيف: "+e.message;}
 }
 async function loadBroadcastCustomerTrash(){
  $("broadcastCustomerTrash").style.display="none";$("broadcastCustomerBack").style.display="inline-block";
