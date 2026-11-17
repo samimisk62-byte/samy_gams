@@ -1512,6 +1512,8 @@ selectedStage:selectedStage
 
 }catch(e){}
 
+scheduleCloudWalletSave();
+
 /* لا يُسمح للمتصفح بحفظ العملات أو المشتريات مباشرة في قاعدة البيانات. */
 
 }
@@ -3778,10 +3780,34 @@ async function authorizedRequest(path, options){
   }
 }
 
-/* الحفظ السحابي القديم كان يسمح للمتصفح بكتابة العملات والمشتريات.
-   أوقفناه في فرع الاختبار؛ الشراء فقط يمر عبر RPC الموثوق. */
-function scheduleCloudWalletSave(){}
-async function saveCloudWallet(){}
+/* حفظ التقدم فقط عبر RPC؛ العملات والمشتريات لا تُرسل من المتصفح مطلقًا. */
+function scheduleCloudWalletSave(){
+  if(!cloudWalletReady || !cloudUserId) return;
+  if(cloudWalletSaveTimer) clearTimeout(cloudWalletSaveTimer);
+  cloudWalletSaveTimer=setTimeout(function(){
+    cloudWalletSaveTimer=null;
+    saveCloudWallet();
+  },900);
+}
+async function saveCloudWallet(){
+  if(!cloudWalletReady || !cloudUserId) return false;
+  try{
+    var result=await authorizedRequest("/rest/v1/rpc/wall_save_progress",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        p_selected_skin:selectedSkin,
+        p_unlocked_stage:Math.max(1,Math.floor(Number(unlockedStage)||1))
+      })
+    });
+    if(Array.isArray(result)) result=result[0];
+    if(!result || result.ok!==true) throw new Error("لم يؤكد الخادم حفظ التقدم.");
+    return true;
+  }catch(e){
+    console.warn("Cloud progress save:",e.message);
+    return false;
+  }
+}
 async function syncCloudWallet(){
   var auth={};
   try{auth=JSON.parse(localStorage.getItem(AUTH_KEY)||"{}");}catch(e){}
@@ -3795,7 +3821,7 @@ async function syncCloudWallet(){
     if(Array.isArray(rows)&&rows.length){
       var w=rows[0];
       coins=Number.isFinite(Number(w.coins))?Math.max(0,Number(w.coins)):coins;
-      owned=Object.assign(owned,w.owned||{});
+      owned=Object.assign({},w.owned||{});
       selectedSkin=w.selected_skin||selectedSkin;
       unlockedStage=Math.max(1,Number(w.unlocked_stage)||1);
     }else{
