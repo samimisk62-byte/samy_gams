@@ -1263,6 +1263,7 @@ html body .skiptranslate iframe{visibility:hidden!important}
   <button id="gameVolumeUp" type="button" aria-label="رفع الصوت" style="min-width:48px">➕</button>
  </div>
  <div style="font-size:12px;margin-top:6px;color:#d5e4eb">التحكم السريع في جميع الأصوات معًا. التفاصيل والأنواع داخل ⚙️ الضبط.</div>
+ <button id="gameSoundDetailsButton" type="button" style="margin-top:8px">⚙️ الضبط التفصيلي</button>
 </div>
 
 <button id="restart" type="button">
@@ -4740,7 +4741,7 @@ if($("easy")&&$("medium")&&$("hard")){
 }
 
 function open(){ $("universalSettingsShade").classList.add("open");}
-$("gameSoundSettingsButton")?.addEventListener("click",()=>{open();const panel=$("audioSettingsPanel");if(panel)panel.scrollIntoView({block:"start",behavior:"smooth"});});
+$("gameSoundDetailsButton")?.addEventListener("click",()=>{open();const panel=$("audioSettingsPanel");if(panel)panel.scrollIntoView({block:"start",behavior:"smooth"});});
 function close(){ $("universalSettingsShade").classList.remove("open");}
 $("universalSettingsButton").addEventListener("click",open);
 $("usClose").addEventListener("click",close);
