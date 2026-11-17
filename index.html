@@ -308,6 +308,17 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <div id="adminPanel" class="panel">
 <h2>🛠️ لوحة إدارة الاشتراكات</h2>
 <p class="small">هذه اللوحة مخصصة لحساب صاحب المنصة فقط. راجع رقم التحويل بنفسك قبل اعتماد أي طلب. اعتماد الطلب يفعّل الاشتراك لمدة المدة المحددة للعبة.</p>
+<div id="ownerAdminMenu" class="panel" style="background:#142b3a;border:1px solid #52758a">
+<h3>🏠 القائمة الرئيسية لإدارة المنصة</h3>
+<p class="small">اختر القسم الذي تريد فتحه. كل قسم يفتح وحده لتسهيل الاستخدام.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">
+<button class="green" type="button" data-owner-page="ownerSubscriptionsSection">🧾 الاشتراكات وطلبات الدفع والعملاء</button>
+<button class="orange" type="button" data-owner-page="privateChatAdmin">💬 مركز الرسائل الخاصة</button>
+<button class="orange" type="button" data-owner-page="broadcastAdmin">📨 الرسائل والإعلانات الجماعية</button>
+<button class="green" type="button" data-owner-page="customGamesAdmin">🎮 إضافة وإدارة الألعاب</button>
+<button class="gray" type="button" data-owner-page="dataManagementSection">🗂️ إدارة البيانات والنسخ الاحتياطية</button>
+</div></div>
+<section id="ownerSubscriptionsSection" class="ownerAdminPage" style="display:none">
 <div class="row"><button id="adminReloadBtn" class="green">🔄 تحديث الطلبات</button><button id="adminCloseBtn" class="gray">إغلاق اللوحة</button></div>
 <div id="adminSummary" class="small" style="margin-top:10px">اضغط تحديث الطلبات لعرض الطلبات والعملاء.</div>
 <h2>🧾 طلبات الاشتراك ومراجعة الدفع</h2>
@@ -324,8 +335,12 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 
 <hr>
 
-<hr><section id="customGamesAdmin">
+
+<button type="button" class="gray ownerAdminBack">↩️ العودة للقائمة الرئيسية</button>
+</section>
+<hr><section id="customGamesAdmin" class="ownerAdminPage" style="display:none">
 <h2>🎮 إضافة وإدارة الألعاب الداخلية والخارجية</h2>
+<button type="button" class="gray ownerAdminBack">↩️ العودة للقائمة الرئيسية</button>
 <p class="small">اللعبة الداخلية: رابط داخل ملفات المنصة أو GitHub. اللعبة الخارجية: رابط موقع أو لعبة من خارج المنصة. يمكنك إضافة صورة أو فيديو غلاف لكل لعبة.</p>
 <label>اسم اللعبة</label><input id="customGameName" type="text" maxlength="100" placeholder="اسم اللعبة">
 <label>نوع اللعبة</label><select id="customGameType"><option value="internal">داخلية — ضمن المنصة / GitHub</option><option value="external">خارجية — رابط موقع آخر</option></select>
@@ -338,8 +353,9 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <div id="customGamesAdminList"></div>
 </section>
 
-<section id="broadcastAdmin">
+<section id="broadcastAdmin" class="ownerAdminPage" style="display:none">
 <h2>📨 مركز الرسائل الجماعية</h2>
+<button type="button" class="gray ownerAdminBack">↩️ العودة للقائمة الرئيسية</button>
 <p class="small">اكتب الرسالة مرة واحدة لنشرها داخل حسابات جميع المستخدمين. ويمكنك تجهيز نفس النص للمشاركة عبر واتساب. اختر مجموعة أو مستلمين من واتساب واضغط إرسال هناك؛ لا يتم الإرسال تلقائيًا من المنصة.</p>
 <label>عنوان الرسالة</label><input id="broadcastTitle" type="text" maxlength="140" placeholder="مثال: إعلان لعبة جديدة">
 <label>نص الرسالة</label><textarea id="broadcastMessage" rows="4" maxlength="5000" placeholder="اكتب الإعلان أو التنبيه لجميع المستخدمين..."></textarea>
@@ -351,8 +367,9 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 </section>
 
 
-<section id="privateChatAdmin" class="panel">
+<section id="privateChatAdmin" class="panel ownerAdminPage" style="display:none">
 <h2>📩 رسائل المستخدمين — محادثات خاصة</h2>
+<button type="button" class="gray ownerAdminBack">↩️ العودة للقائمة الرئيسية</button>
 <p class="small">كل مستخدم له محادثة مستقلة. اختر المستخدم من القائمة لعرض رسائله والرد عليه نصًا أو بصورة أو فيديو.</p>
 <div class="row"><button id="privateChatAdminReload" class="green" type="button">🔄 تحديث قائمة المحادثات</button></div>
 <div id="privateChatConversations" class="privateChatList">جاري تحميل المحادثات...</div>
@@ -367,8 +384,9 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <button id="privateChatAdminSend" class="green" type="button" disabled>📨 إرسال الرد للمستخدم</button>
 </section>
 
-<section id="dataManagementSection">
+<section id="dataManagementSection" class="ownerAdminPage" style="display:none">
   <h2>🗂️ إدارة وتبديل بيانات المنصة والألعاب</h2>
+<button type="button" class="gray ownerAdminBack">↩️ العودة للقائمة الرئيسية</button>
   <p class="small">إدارة الإعدادات العامة، بيانات الألعاب، الاشتراكات، حسابات المستخدمين والنسخ الاحتياطية. كل تعديل يُسجَّل قبل وبعد التغيير.</p>
   <div class="row">
     <button id="dataManagerReload" class="green" type="button">🔄 تحديث بيانات الإدارة</button>
@@ -1170,11 +1188,19 @@ async function loadMyOrders(){
 }
 
 /* فتح لوحة الإدارة بطريقة مباشرة مع إظهار نتيجة التحميل داخل اللوحة */
+function showOwnerAdminPage(id){
+ const menu=document.getElementById("ownerAdminMenu");
+ if(menu)menu.style.display=id?"none":"block";
+ document.querySelectorAll("#adminPanel .ownerAdminPage").forEach(el=>el.style.display="none");
+ if(id){const page=document.getElementById(id);if(page){page.style.display="block";page.scrollIntoView({behavior:"smooth",block:"start"});}}
+ else if(menu){menu.style.display="block";menu.scrollIntoView({behavior:"smooth",block:"start"});}
+}
 window.openPlatformAdminPanel = function(){
   const panel=document.getElementById("adminPanel");
   if(!panel){alert("تعذر العثور على لوحة الإدارة في الصفحة.");return;}
   panel.style.display="block";
   panel.hidden=false;
+  showOwnerAdminPage(null);
   panel.scrollIntoView({behavior:"smooth",block:"start"});
   const summary=document.getElementById("adminSummary");
   if(summary)summary.textContent="⏳ تم فتح اللوحة. جارٍ التحقق من صلاحية المالك وتحميل الطلبات والعملاء...";
@@ -1185,6 +1211,11 @@ window.openPlatformAdminPanel = function(){
   try{loadPrivateChatConversations();}catch(e){}
 };
  
+document.addEventListener("click",function(event){
+ const btn=event.target.closest("[data-owner-page]");
+ if(btn){showOwnerAdminPage(btn.getAttribute("data-owner-page"));return;}
+ if(event.target.closest(".ownerAdminBack"))showOwnerAdminPage(null);
+});
 async function manageCustomer(action,userId,extra={}){
   if(!session?.access_token){showMessage("سجّل الدخول أولًا.");return;}
   try{
