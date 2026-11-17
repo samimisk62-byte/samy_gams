@@ -4239,41 +4239,54 @@ document.getElementById("resultHome")
 .addEventListener("click",showStageSelect);
 
 /* =========================================
-تحكم موحد باللمس والسحب — مناسب لهواتف Android
+تحكم مباشر باللمس والسحب — دعم Android
+نعتمد أحداث اللمس الأصلية مع احتياط للفأرة
 ========================================= */
 (function(){
   var field=document.getElementById("field");
-  if(!field) return;
-  var activePointer=null,activeSide="";
-  function setPaddle(clientX){
-    var rect=field.getBoundingClientRect();if(!rect.width)return;
+  if(!field)return;
+  var activeSide="",touchActive=false,mouseActive=false;
+  function moveTo(clientX){
+    if(!gameRunning||paused||!activeSide)return;
+    var rect=field.getBoundingClientRect();
+    if(!rect.width)return;
     var x=((clientX-rect.left)/rect.width)*100-7;
-    if(activeSide==="red"){redX=Math.max(7,Math.min(44,x));movePlayer("redPlayer",redX);}
-    else if(activeSide==="blue"&&playerCount===2&&!(onlineMode&&onlineRole==="host")){
-      blueX=Math.max(50,Math.min(85,x));movePlayer("bluePlayer",blueX);sendGuestPaddlePosition();
+    if(activeSide==="red"){
+      redX=Math.max(7,Math.min(44,x));
+      movePlayer("redPlayer",redX);
+    }else if(activeSide==="blue"&&playerCount===2&&!(onlineMode&&onlineRole==="host")){
+      blueX=Math.max(50,Math.min(85,x));
+      movePlayer("bluePlayer",blueX);
+      sendGuestPaddlePosition();
     }
   }
-  field.addEventListener("pointerdown",function(e){
-    if(!gameRunning||paused||activePointer!==null)return;
-    if(e.pointerType==="mouse"&&e.button!==0)return;
+  function chooseSide(clientX){
     var rect=field.getBoundingClientRect();
-    activeSide=(playerCount===2&&e.clientX-rect.left>rect.width/2)?"blue":"red";
-    activePointer=e.pointerId;
-    try{field.setPointerCapture(e.pointerId);}catch(err){}
-    setPaddle(e.clientX);e.preventDefault();
+    activeSide=(playerCount===2&&clientX-rect.left>rect.width/2)?"blue":"red";
+  }
+  field.addEventListener("touchstart",function(e){
+    if(!gameRunning||paused||touchActive||!e.touches||!e.touches.length)return;
+    touchActive=true;
+    chooseSide(e.touches[0].clientX);
+    moveTo(e.touches[0].clientX);
+    if(e.cancelable)e.preventDefault();
   },{passive:false});
-  field.addEventListener("pointermove",function(e){
-    if(activePointer!==e.pointerId||!gameRunning||paused)return;
-    setPaddle(e.clientX);e.preventDefault();
+  document.addEventListener("touchmove",function(e){
+    if(!touchActive||!e.touches||!e.touches.length)return;
+    moveTo(e.touches[0].clientX);
+    if(e.cancelable)e.preventDefault();
   },{passive:false});
-  function endPointer(e){if(activePointer!==null&&(!e||e.pointerId===activePointer)){activePointer=null;activeSide="";dragging=false;blueDragging=false;}}
-  field.addEventListener("pointerup",endPointer);
-  field.addEventListener("pointercancel",endPointer);
-  field.addEventListener("lostpointercapture",endPointer);
-  field.addEventListener("touchstart",function(e){if(e.cancelable)e.preventDefault();},{passive:false});
-  field.addEventListener("touchmove",function(e){if(e.cancelable)e.preventDefault();},{passive:false});
+  function endTouch(){touchActive=false;activeSide="";dragging=false;blueDragging=false;}
+  document.addEventListener("touchend",endTouch,{passive:true});
+  document.addEventListener("touchcancel",endTouch,{passive:true});
+  field.addEventListener("mousedown",function(e){
+    if(!gameRunning||paused||e.button!==0)return;
+    mouseActive=true;chooseSide(e.clientX);moveTo(e.clientX);e.preventDefault();
+  });
+  document.addEventListener("mousemove",function(e){if(mouseActive)moveTo(e.clientX);});
+  document.addEventListener("mouseup",function(){mouseActive=false;activeSide="";});
 })();
-
+ 
 /* =========================================
 التهيئة
 ========================================= */
