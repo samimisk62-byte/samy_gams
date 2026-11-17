@@ -373,7 +373,8 @@ user-select:none;
 }
 #redPlayer{left:25%;}
 #bluePlayer{left:58%;}
-.head,.body{display:none;}
+.head{display:block;position:absolute;width:15px;height:15px;left:21px;top:37px;border-radius:50%;background:#f0c7a5;z-index:1;box-shadow:0 1px 2px #0006;}
+.body{display:block;position:absolute;width:29px;height:20px;left:14px;top:51px;border-radius:8px 8px 4px 4px;background:#e53935;z-index:2;border:1px solid #ffffff88;}
 .paddle{
 position:absolute;
 width:43px;
@@ -1483,7 +1484,7 @@ function paintPaddle(player,style){
   if(!p)return;
   p.style.background=paddleColor(style);
   p.classList.toggle("upgraded",!!(player==="redPlayer"?(owned.redPaddle||owned.goldPaddle):(owned.bluePaddle||owned.goldPaddle)));
-  p.classList.toggle("gold-upgrade",!!owned.goldPaddle);
+  p.classList.toggle("gold-upgrade",style==="gold");
 }
 function applyPaddleUpgrades(){
   paintPaddle("redPlayer",selectedRedPaddle);
@@ -1501,6 +1502,7 @@ function setPaddleChoice(player,style){
   if(player==="red")selectedRedPaddle=style;
   else selectedBluePaddle=style;
   applyPaddleUpgrades();
+  saveData();
 }
 function savePaddleChoices(){
   var redSelect=document.getElementById("redPaddleStyle");
