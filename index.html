@@ -1207,12 +1207,23 @@ async function loadMyOrders(){
 
 /* فتح لوحة الإدارة بطريقة مباشرة مع إظهار نتيجة التحميل داخل اللوحة */
 function showPlatformGame(code){
- const cards=document.querySelectorAll("#gamesSection .games > .game");let found=false;
- cards.forEach(card=>{const launch=card.querySelector("[data-game]");const match=launch&&launch.getAttribute("data-game")===code;card.style.display=match?"flex":"none";if(match)found=true;});
- const section=document.getElementById("gamesSection");if(section)section.scrollIntoView({behavior:"smooth",block:"start"});
- if(!found)showMessage("اللعبة المطلوبة غير موجودة في القائمة.");
+ const cards=document.querySelectorAll("#gamesSection .games > .game");let found=null;
+ const aliases={mat3amy:"matamy",matamy:"matamy"};
+ const wanted=aliases[code]||code;
+ cards.forEach(card=>{
+  const launch=card.querySelector("[data-game]");
+  const gameCode=launch?launch.getAttribute("data-game"):"";
+  const title=(card.querySelector("h3")?.textContent||"").trim();
+  const match=(aliases[gameCode]||gameCode)===wanted || (wanted==="matamy"&&title.includes("مطعمي"));
+  card.style.display=match?"":"none";
+  if(match)found=card;
+ });
+ const section=document.getElementById("gamesSection");
+ if(section)section.scrollIntoView({behavior:"smooth",block:"start"});
+ if(found){found.scrollIntoView({behavior:"smooth",block:"center"});}
+ else showMessage("لم أجد بطاقة اللعبة المطلوبة. راجع اسم اللعبة في قائمة المنصة.");
 }
-function showAllPlatformGames(){document.querySelectorAll("#gamesSection .games > .game").forEach(card=>card.style.display="flex");}
+function showAllPlatformGames(){document.querySelectorAll("#gamesSection .games > .game").forEach(card=>card.style.display="");}
 function showOwnerAdminPage(id){
  const menu=document.getElementById("ownerAdminMenu");
  if(menu)menu.style.display=id?"none":"block";
