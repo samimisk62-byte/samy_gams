@@ -317,7 +317,19 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <button class="orange" type="button" data-owner-page="broadcastAdmin">📨 الرسائل والإعلانات الجماعية</button>
 <button class="green" type="button" data-owner-page="customGamesAdmin">🎮 إضافة وإدارة الألعاب</button>
 <button class="gray" type="button" data-owner-page="dataManagementSection">🗂️ إدارة البيانات والنسخ الاحتياطية</button>
+<button class="orange" type="button" data-owner-page="dataManagementSection" data-owner-scroll="dataUsersList">👥 حسابات المستخدمين</button>
+<button class="green" type="button" id="ownerGamesShortcut">🎮 ألعاب المنصة</button>
+<button class="gray" type="button" id="ownerOpenSettings">⚙️ ضبط المنصة</button>
 </div></div>
+<section id="ownerPlatformGames" class="ownerAdminPage" style="display:none">
+<h3>🎮 ألعاب المنصة</h3><p class="small">اختر اللعبة لعرض بطاقتها وتشغيلها إذا كان الحساب يملك صلاحية الدخول.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px">
+<button class="green" type="button" data-owner-game="al7aet">🎾 الحائط الصعب</button>
+<button class="green" type="button" data-owner-game="alashra">🃏 لعبة الـ٦ ورقات</button>
+<button class="green" type="button" data-owner-game="alashra_ten">🂡 لعبة العشرة</button>
+<button class="green" type="button" data-owner-game="saed_al_samak">🐟 صائد السمك</button>
+<button class="green" type="button" data-owner-game="matamy">🍔 مطعمي</button>
+</div><button type="button" class="gray ownerAdminBack">↩️ العودة للقائمة الرئيسية</button></section>
 <section id="ownerSubscriptionsSection" class="ownerAdminPage" style="display:none">
 <div class="row"><button id="adminReloadBtn" class="green">🔄 تحديث الطلبات</button><button id="adminCloseBtn" class="gray">إغلاق اللوحة</button></div>
 <div id="adminSummary" class="small" style="margin-top:10px">اضغط تحديث الطلبات لعرض الطلبات والعملاء.</div>
@@ -438,7 +450,13 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <h2>🎮 ألعاب المنصة</h2>
 <p class="small">اختر اللعبة التي تريد تشغيلها.</p>
 
-<div class="games">
+<div id="platformGameMenu" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:12px 0">
+<button type="button" class="green" data-show-game="al7aet">🎾 الحائط الصعب</button>
+<button type="button" class="green" data-show-game="alashra">🃏 لعبة الـ٦ ورقات</button>
+<button type="button" class="green" data-show-game="alashra_ten">🂡 لعبة العشرة</button>
+<button type="button" class="green" data-show-game="saed_al_samak">🐟 صائد السمك</button>
+<button type="button" class="green" data-show-game="matamy">🍔 مطعمي</button>
+<button type="button" class="gray" id="showAllPlatformGames">📋 عرض كل الألعاب</button></div><div class="games">
 
 <div class="game">
 <div class="gameIcon">🎾</div>
@@ -1188,6 +1206,13 @@ async function loadMyOrders(){
 }
 
 /* فتح لوحة الإدارة بطريقة مباشرة مع إظهار نتيجة التحميل داخل اللوحة */
+function showPlatformGame(code){
+ const cards=document.querySelectorAll("#gamesSection .games > .game");let found=false;
+ cards.forEach(card=>{const launch=card.querySelector("[data-game]");const match=launch&&launch.getAttribute("data-game")===code;card.style.display=match?"flex":"none";if(match)found=true;});
+ const section=document.getElementById("gamesSection");if(section)section.scrollIntoView({behavior:"smooth",block:"start"});
+ if(!found)showMessage("اللعبة المطلوبة غير موجودة في القائمة.");
+}
+function showAllPlatformGames(){document.querySelectorAll("#gamesSection .games > .game").forEach(card=>card.style.display="flex");}
 function showOwnerAdminPage(id){
  const menu=document.getElementById("ownerAdminMenu");
  if(menu)menu.style.display=id?"none":"block";
@@ -1212,6 +1237,16 @@ window.openPlatformAdminPanel = function(){
 };
  
 document.addEventListener("click",function(event){
+ const openSettings=event.target.closest("#ownerOpenSettings");
+ if(openSettings){const s=document.getElementById("universalSettingsButton");if(s)s.click();return;}
+ if(event.target.closest("#ownerGamesShortcut")){showOwnerAdminPage("ownerPlatformGames");return;}
+ const ownerGame=event.target.closest("[data-owner-game]");
+ if(ownerGame){const code=ownerGame.getAttribute("data-owner-game");showOwnerAdminPage(null);showPlatformGame(code);return;}
+ const gameButton=event.target.closest("[data-show-game]");
+ if(gameButton){showPlatformGame(gameButton.getAttribute("data-show-game"));return;}
+ if(event.target.closest("#showAllPlatformGames")){showAllPlatformGames();return;}
+ const scrollTarget=event.target.closest("[data-owner-scroll]");
+ if(scrollTarget){const id=scrollTarget.getAttribute("data-owner-scroll");setTimeout(()=>{const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});},120);}
  const btn=event.target.closest("[data-owner-page]");
  if(btn){showOwnerAdminPage(btn.getAttribute("data-owner-page"));return;}
  if(event.target.closest(".ownerAdminBack"))showOwnerAdminPage(null);
