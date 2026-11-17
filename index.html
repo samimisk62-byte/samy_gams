@@ -269,13 +269,13 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <section id="broadcastInbox" class="panel">
 <h2>📨 رسائل وإعلانات المنصة</h2>
 <p class="small">رسائل الإدارة المرسلة لجميع المستخدمين.</p>
-<div id="broadcastFeed">جاري تحميل الرسائل...</div>
+<div class="row"><button id="broadcastCustomerTrash" class="gray" type="button">🗑️ سلة مهملات الإعلانات</button></div><div id="broadcastFeed">جاري تحميل الرسائل...</div>
 </section>
 
 <section id="privateChatCustomer" class="panel" style="display:none">
 <h2>💬 مراسلة الإدارة — محادثتك الخاصة</h2>
 <p class="small">هذه المحادثة خاصة بك وبإدارة المنصة فقط. لا يستطيع أي مستخدم آخر رؤية رسائلك.</p>
-<div id="privateChatCustomerThread" class="privateChatThread">جاري تحميل المحادثة...</div>
+<div class="row"><button id="privateChatCustomerTrash" class="gray" type="button">🗑️ سلة المهملات</button></div><div id="privateChatCustomerThread" class="privateChatThread">جاري تحميل المحادثة...</div>
 <label>اكتب رسالتك</label><textarea id="privateChatCustomerText" rows="3" maxlength="5000" placeholder="اكتب رسالتك للإدارة..."></textarea>
 <label>إرفاق صورة أو فيديو (حتى 25 ميجابايت)</label><input id="privateChatCustomerFile" type="file" accept="image/*,video/*">
 <div id="privateChatCustomerFileStatus" class="small">لم يتم اختيار ملف.</div>
@@ -358,7 +358,7 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <div id="privateChatConversations" class="privateChatList">جاري تحميل المحادثات...</div>
 <hr>
 <h3 id="privateChatAdminTitle">اختر محادثة من القائمة</h3>
-<div id="privateChatAdminThread" class="privateChatThread">لم يتم اختيار مستخدم بعد.</div>
+<div class="row"><button id="privateChatAdminTrash" class="gray" type="button">🗑️ سلة مهملات هذه المحادثة</button></div><div id="privateChatAdminThread" class="privateChatThread">لم يتم اختيار مستخدم بعد.</div>
 <label>رد الإدارة</label><textarea id="privateChatAdminText" rows="3" maxlength="5000" placeholder="اكتب ردك للمستخدم..."></textarea>
 <label>إرفاق صورة أو فيديو (حتى 25 ميجابايت)</label><input id="privateChatAdminFile" type="file" accept="image/*,video/*">
 <div id="privateChatAdminFileStatus" class="small">لم يتم اختيار ملف.</div>
@@ -1629,7 +1629,16 @@ async function uploadPrivateChatMedia(file,customerId=null){
  if(!response.ok||result.data?.error)throw new Error(getServerError(result,response));
  return result.data;
 }
-function renderPrivateChatMessages(box,messages){
+let privateCustomerTrashMode=false, privateAdminTrashMode=false;
+async function runPrivateMessageAction(action,id,side){
+ const payload={id};
+ if(side==="Admin")payload.customer_id=privateChatSelectedCustomer;
+ await callPrivateChat(action,payload);
+ if(side==="Customer")await loadPrivateChatCustomer();
+ else await openPrivateChatThread(privateChatSelectedCustomer,$("privateChatAdminTitle").textContent.replace("💬 محادثة: ",""));
+}
+function renderPrivateChatMessages(box,messages,side="Customer",inTrash=false){
+
  box.textContent="";
  if(!messages.length){box.textContent="لا توجد رسائل في هذه المحادثة حتى الآن. ابدأ بإرسال رسالة.";return;}
  messages.forEach(m=>{
@@ -1641,16 +1650,41 @@ function renderPrivateChatMessages(box,messages){
    else{const img=document.createElement("img");img.src=m.media_url;img.alt="مرفق المحادثة";img.loading="lazy";bubble.appendChild(img);}
   }
   const meta=document.createElement("div");meta.className="privateChatMeta";meta.textContent=m.created_at?new Date(m.created_at).toLocaleString("ar-EG"):"";bubble.appendChild(meta);
-  box.appendChild(bubble);
+  const actions=document.createElement("div");actions.className="row";
+  if(inTrash){
+   const restore=document.createElement("button");restore.type="button";restore.className="green";restore.textContent="↩️ استعادة";
+   restore.onclick=async()=>{try{await runPrivateMessageAction("restore",m.id,side);showMessage("تمت استعادة الرسالة.",true);}catch(e){showMessage("تعذرت الاستعادة: "+e.message);}};
+   const del=document.createElement("button");del.type="button";del.className="red";del.textContent="❌ حذف نهائي";
+   del.onclick=async()=>{if(!confirm("حذف هذه الرسالة نهائيًا من عندك فقط؟ لن تُحذف من الطرف الآخر."))return;try{await runPrivateMessageAction("permanent",m.id,side);showMessage("تم الحذف النهائي من سلتك.",true);}catch(e){showMessage("تعذر الحذف: "+e.message);}};
+   actions.append(restore,del);
+  }else{
+   const hide=document.createElement("button");hide.type="button";hide.className="gray";hide.textContent="🗑️ حذف عندي";
+   hide.onclick=async()=>{try{await runPrivateMessageAction("hide",m.id,side);showMessage("نُقلت الرسالة إلى سلة مهملاتك.",true);}catch(e){showMessage("تعذر نقل الرسالة: "+e.message);}};
+   actions.append(hide);
+  }
+  bubble.appendChild(actions);box.appendChild(bubble);
  });
  box.scrollTop=box.scrollHeight;
+}
+async function loadPrivateChatCustomerTrash(){
+ privateCustomerTrashMode=true;
+ const box=$("privateChatCustomerThread");box.textContent="⏳ جاري تحميل سلة المهملات...";
+ try{const d=await callPrivateChat("trash_list");renderPrivateChatMessages(box,d.messages||[],"Customer",true);}
+ catch(e){box.textContent="تعذر تحميل السلة: "+e.message;}
+}
+async function loadPrivateChatAdminTrash(){
+ if(!privateChatSelectedCustomer){showMessage("اختر محادثة أولًا.");return;}
+ privateAdminTrashMode=true;
+ const box=$("privateChatAdminThread");box.textContent="⏳ جاري تحميل سلة المهملات...";
+ try{const d=await callPrivateChat("trash_list",{customer_id:privateChatSelectedCustomer});renderPrivateChatMessages(box,d.messages||[],"Admin",true);}
+ catch(e){box.textContent="تعذر تحميل السلة: "+e.message;}
 }
 async function loadPrivateChatCustomer(){
  const section=$("privateChatCustomer"),box=$("privateChatCustomerThread");
  if(!section||!box||!session?.access_token)return;
  if(platformIsOwner){section.style.display="none";return;}
  section.style.display="block";box.textContent="⏳ جاري تحميل المحادثة...";
- try{const d=await callPrivateChat("feed");renderPrivateChatMessages(box,d.messages||[]);}
+ try{const d=await callPrivateChat("feed");renderPrivateChatMessages(box,d.messages||[],"Customer",false);}
  catch(e){box.textContent="تعذر تحميل المحادثة: "+e.message;}
 }
 async function loadPrivateChatConversations(){
@@ -1671,7 +1705,7 @@ async function openPrivateChatThread(customerId,email){
  $("privateChatAdminTitle").textContent="💬 محادثة: "+(email||"المستخدم");
  $("privateChatAdminThread").textContent="⏳ جاري تحميل الرسائل...";
  $("privateChatAdminSend").disabled=false;
- try{const d=await callPrivateChat("thread",{customer_id:customerId});renderPrivateChatMessages($("privateChatAdminThread"),d.messages||[]);await loadPrivateChatConversations();}
+ try{const d=await callPrivateChat("thread",{customer_id:customerId});renderPrivateChatMessages($("privateChatAdminThread"),d.messages||[],"Admin",false);await loadPrivateChatConversations();}
  catch(e){$("privateChatAdminThread").textContent="تعذر تحميل المحادثة: "+e.message;}
 }
 async function sendPrivateChatCustomer(){
@@ -1701,6 +1735,8 @@ $("privateChatCustomerSend").addEventListener("click",sendPrivateChatCustomer);
 $("privateChatCustomerReload").addEventListener("click",loadPrivateChatCustomer);
 $("privateChatAdminReload").addEventListener("click",loadPrivateChatConversations);
 $("privateChatAdminSend").addEventListener("click",sendPrivateChatAdmin);
+$("privateChatCustomerTrash").addEventListener("click",loadPrivateChatCustomerTrash);
+$("privateChatAdminTrash").addEventListener("click",loadPrivateChatAdminTrash);
 bindPrivateChatFileControls("Customer");
 bindPrivateChatFileControls("Admin");
 
