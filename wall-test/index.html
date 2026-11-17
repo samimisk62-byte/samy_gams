@@ -785,6 +785,10 @@ html body .skiptranslate iframe{visibility:hidden!important}
 </head>
 
 <body>
+<div id="wallTestBanner" style="position:sticky;top:0;z-index:99999;background:#fff3cd;color:#593d00;border:2px solid #e0ad24;padding:10px;text-align:center;font-weight:bold;border-radius:10px">
+🧪 نسخة اختبار معزولة — الرصيد والمشتريات محفوظة على هذا المتصفح فقط. لا يتم تعديل بيانات اللاعبين أو المحفظة السحابية.
+</div>
+
 
 <!-- ================= خريطة المراحل ================= -->
 <div id="stages" class="screen">
@@ -1398,8 +1402,8 @@ var selectedSkin = "red";
 var selectedRedPaddle = "red";
 var selectedBluePaddle = "blue";
 
-var DATA_KEY = "al7aet_game_data";
-var AUTH_KEY = "al7aet_auth";
+var DATA_KEY = "al7aet_game_data_wall_test";
+var AUTH_KEY = "al7aet_auth_wall_test";
 
 /* =========================================
 التخزين
@@ -1639,6 +1643,8 @@ stopOnlinePolling(); onlineMode=false; onlineRole=""; onlineRoomId=""; onlineRoo
 playerCount=1;
 document.getElementById("one").className="sel";
 document.getElementById("two").className="";
+document.getElementById("online").disabled = true;
+document.getElementById("online").title = "المباريات عبر الإنترنت غير مفعلة في نسخة الاختبار المحلية";
 document.getElementById("online").className="";
 document.getElementById("onlineRoomBox").style.display="none";
 }
@@ -3762,57 +3768,16 @@ function scheduleCloudWalletSave(){
   cloudWalletSaveTimer=setTimeout(saveCloudWallet,700);
 }
 async function saveCloudWallet(){
-  if(!cloudWalletReady || !cloudUserId) return;
-  if(cloudWalletSaving){cloudWalletSaveAgain=true;return;}
-  cloudWalletSaving=true;
-  try{
-    var payload={
-      coins:Math.max(0,Math.floor(Number(coins)||0)),
-      owned:owned,
-      selected_skin:selectedSkin,
-      unlocked_stage:Math.max(1,Math.floor(Number(unlockedStage)||1)),
-      updated_at:new Date().toISOString()
-    };
-    await authorizedRequest("/rest/v1/wall_player_wallets?user_id=eq."+encodeURIComponent(cloudUserId),{
-      method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify(payload)
-    });
-  }catch(e){console.warn("Cloud wallet save:",e.message);}
-  finally{
-    cloudWalletSaving=false;
-    if(cloudWalletSaveAgain){cloudWalletSaveAgain=false;saveCloudWallet();}
-  }
+  /* نسخة الاختبار لا تكتب مطلقًا إلى محفظة الإنتاج. */
+  return false;
 }
 async function syncCloudWallet(){
-  var auth={};
-  try{auth=JSON.parse(localStorage.getItem(AUTH_KEY)||"{}");}catch(e){}
-  if(!auth.access_token || !userEmail) return false;
-  cloudWalletReady=false;cloudUserId="";
-  try{
-    var user=await authorizedRequest("/auth/v1/user",{method:"GET"});
-    if(!user||!user.id)throw new Error("تعذر تحديد الحساب الحالي.");
-    cloudUserId=user.id;
-    var rows=await authorizedRequest("/rest/v1/wall_player_wallets?user_id=eq."+encodeURIComponent(cloudUserId)+"&select=*",{method:"GET"});
-    if(Array.isArray(rows)&&rows.length){
-      var w=rows[0];
-      coins=Number.isFinite(Number(w.coins))?Math.max(0,Number(w.coins)):coins;
-      owned=Object.assign(owned,w.owned||{});
-      selectedSkin=w.selected_skin||selectedSkin;
-      unlockedStage=Math.max(1,Number(w.unlocked_stage)||1);
-    }else{
-      await authorizedRequest("/rest/v1/wall_player_wallets",{
-        method:"POST",headers:{"Prefer":"return=minimal"},
-        body:JSON.stringify({user_id:cloudUserId,coins:Math.max(0,Math.floor(Number(coins)||0)),owned:owned,selected_skin:selectedSkin,unlocked_stage:Math.max(1,Math.floor(Number(unlockedStage)||1))})
-      });
-    }
-    cloudWalletReady=true;
-    updateCoins();applySkin();applyPaddleUpgrades();renderStore();renderTrophies();saveData();
-    return true;
-  }catch(e){
-    cloudWalletReady=false;cloudUserId="";
-    console.warn("Cloud wallet load:",e.message);
-    return false;
-  }
+  /* نسخة الاختبار محلية فقط حتى تجهيز بيئة سحابية مستقلة. */
+  cloudWalletReady=false;
+  cloudUserId="";
+  return false;
 }
+
 
 /* =========================================
 تسجيل الدخول
@@ -4032,129 +3997,11 @@ msg.innerHTML =
 ========================================= */
 
 async function checkAccess(){
-
-var accessText =
-document.getElementById("accessText");
-
-if(!userEmail){
-
-accessText.innerHTML =
-"🔒 سجّل الدخول أولًا.";
-
-return false;
-
+  var accessText=document.getElementById("accessText");
+  if(accessText) accessText.innerHTML="🧪 نسخة اختبار محلية — لا يوجد اتصال بمحفظة الإنتاج.";
+  return true;
 }
 
-accessText.innerHTML =
-"⏳ جاري فحص الاشتراك...";
-
-try{
-
-var auth =
-JSON.parse(
-localStorage.getItem(AUTH_KEY) || "{}"
-);
-
-var token =
-auth.access_token || "";
-
-if(!token){
-
-accessText.innerHTML =
-"🧪 وضع التجربة فعال.";
-
-return false;
-
-}
-
-var data =
-await authorizedRequest(
-"/functions/v1/account-game-access",
-{
-method:"POST",
-body:"{}"
-}
-);
-
-var list =
-data && Array.isArray(data.access)
-? data.access
-: [];
-
-var found = null;
-
-for(var i=0;i<list.length;i++){
-
-if(
-list[i].game_code === GAME_CODE ||
-list[i].code === GAME_CODE
-){
-
-found = list[i];
-break;
-
-}
-
-}
-
-if(found){
-
-var until =
-found.expires_at ||
-found.access_until ||
-found.expiry;
-
-var stamp =
-until
-? new Date(until).getTime()
-: 0;
-
-if(found.owner === true){
-
-ownerAccess = true;
-accessUntil = 0;
-saveAuth();
-accessText.innerHTML = "👑 حساب المالك مفعل: يمكنك اللعب دون اشتراك.";
-document.getElementById("accountMessage").innerHTML = "حساب المالك لا يحتاج إلى شراء اشتراك.";
-return true;
-
-}
-
-ownerAccess = false;
-
-if(stamp > Date.now()){
-
-accessUntil = stamp;
-saveAuth();
-
-accessText.innerHTML =
-"✅ الاشتراك فعال حتى " +
-new Date(stamp).toLocaleDateString("ar-EG");
-
-return true;
-
-}
-
-}
-
-ownerAccess = false;
-saveAuth();
-accessText.innerHTML =
-"🔒 لا يوجد اشتراك فعال لهذه اللعبة. اشترك ثم انتظر اعتماد الدفع.";
-
-return false;
-
-}catch(e){
-
-accessText.innerHTML =
-"⚠️ تعذر التحقق من الاشتراك: " +
-String(e && e.message ? e.message : "تأكد من الإنترنت ثم أعد المحاولة.");
-
-return false;
-
-}
-
-}
 
 /* =========================================
 الشراء
