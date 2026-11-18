@@ -399,10 +399,30 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <div class="row">
 <button id="refreshBtn" class="green">🔄 تحديث الاشتراكات</button>
 <button id="openPlatformSocialBtn" class="orange" type="button">💬 التواصل والمكالمات</button>
+<button id="openPlatformCommunityBtn" class="green" type="button">🌐 مجتمع المنصة</button>
 <button id="adminOpenBtn" class="orange" type="button" onclick="window.openPlatformAdminPanel && window.openPlatformAdminPanel()">🔐 لوحة الإدارة</button>
 <button id="logoutBtn" class="gray">🚪 خروج</button>
 </div>
 </div>
+
+<section id="platformCommunityPanel" class="panel" style="display:none;margin-top:12px;background:#102b3b;border:2px solid #3d819c">
+ <div class="row" style="align-items:center;justify-content:space-between">
+  <h2 style="margin:4px 0">🌐 مجتمع منصة ألعابي</h2>
+  <button id="communityCloseBtn" class="gray" type="button">✖ إغلاق</button>
+ </div>
+ <p class="small">منشورات وصور وفيديوهات يراها أعضاء المنصة المسجلون. الرسائل الخاصة والمكالمات من زر التواصل والمكالمات.</p>
+ <div class="panel" style="background:#17394b">
+  <textarea id="communityPostText" rows="3" placeholder="بماذا تفكر؟ شارك منشورًا مع أعضاء المنصة..." style="width:100%;box-sizing:border-box"></textarea>
+  <label style="display:block;background:#315b78;padding:10px;border-radius:10px;margin:8px 0;color:white">🖼️ إضافة صورة أو فيديو أو ملف
+   <input id="communityPostFile" type="file" accept="image/*,video/*,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip" style="display:block;width:100%;margin-top:8px">
+  </label>
+  <div id="communityFileStatus" class="small">لم يتم اختيار مرفق.</div>
+  <button id="communityPublishBtn" class="green" type="button">📢 نشر المنشور</button>
+  <button id="communityRefreshBtn" class="gray" type="button">🔄 تحديث المنشورات</button>
+  <div id="communityStatus" class="small" style="margin-top:8px"></div>
+ </div>
+ <div id="communityFeedList"><p class="small">اضغط تحديث المنشورات لعرض المشاركات.</p></div>
+</section>
 
 <div class="row" style="margin-top:10px">
 <button id="ownerRecipeOpenBtn" class="orange" type="button" style="display:none">📸 استديو الوصفات الخاص بالمالك</button>
@@ -3223,6 +3243,66 @@ bind();
 if(token())pollInvites();
 inviteTimer=setInterval(()=>{if(token())pollInvites();},6000);
 window.addEventListener("beforeunload",()=>{if(localStream)localStream.getTracks().forEach(t=>t.stop());});
+})();
+</script>
+
+<script>
+(function(){
+"use strict";
+const communityApi="https://auptwgjiivhglxtdjlnd.supabase.co/functions/v1/platform-community";
+const communityKey="sb_publishable_6dszOZKIdlA57hHf2E3V5Q_VO-ewwtM";
+const el=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+const authHeaders=()=>({apikey:communityKey,Authorization:"Bearer "+(window.session?.access_token||"" )});
+async function callCommunity(action,payload={}){
+ const res=await fetch(communityApi,{method:"POST",headers:{...authHeaders(),"Content-Type":"application/json"},body:JSON.stringify({action,...payload})});
+ const data=await res.json().catch(()=>({}));
+ if(!res.ok||data.error)throw new Error(data.error||"تعذر الاتصال بالمجتمع.");
+ return data;
+}
+function status(msg){const n=el("communityStatus");if(n)n.textContent=msg||"";}
+function renderPost(p){
+ const media=p.media_url?(p.media_type==="image"?'<img src="'+esc(p.media_url)+'" alt="مرفق المنشور" style="width:100%;max-height:420px;object-fit:contain;border-radius:10px;margin-top:8px">':p.media_type==="video"?'<video controls playsinline src="'+esc(p.media_url)+'" style="width:100%;max-height:420px;border-radius:10px;margin-top:8px"></video>':'<a href="'+esc(p.media_url)+'" target="_blank" rel="noopener">📎 تنزيل '+esc(p.media_name||"الملف")+'</a>'):"";
+ const comments=(p.comments||[]).map(x=>'<div style="padding:7px;margin-top:6px;background:#183748;border-radius:8px"><b>'+esc(x.author_name)+'</b><div>'+esc(x.body)+'</div></div>').join("");
+ return '<article class="panel" style="background:#153447;border:1px solid #41677d;margin:12px 0" data-post="'+esc(p.id)+'"><div class="row" style="justify-content:space-between"><b>👤 '+esc(p.author_name)+'</b><small>'+esc(new Date(p.created_at).toLocaleString("ar-EG"))+'</small></div><div style="white-space:pre-wrap;margin-top:8px">'+esc(p.body)+'</div>'+media+'<div class="row" style="margin-top:10px"><button class="green communityLike" type="button" data-id="'+esc(p.id)+'">'+(p.liked?"❤️ أعجبني":"🤍 إعجاب")+' ('+Number(p.likes_count||0)+')</button>'+(p.author_id===(window.session?.user?.id) || window.platformIsOwner?'<button class="gray communityDelete" type="button" data-id="'+esc(p.id)+'">🗑️ حذف</button>':"")+'</div><div class="small" style="margin-top:8px">💬 التعليقات</div>'+comments+'<div class="row" style="margin-top:8px"><input class="communityCommentText" data-id="'+esc(p.id)+'" placeholder="اكتب تعليقًا..." style="flex:1;min-width:0"><button class="green communityComment" data-id="'+esc(p.id)+'" type="button">إرسال</button></div></article>';
+}
+async function loadFeed(){
+ if(!window.session?.access_token){status("سجّل الدخول أولًا.");return;}
+ status("جارٍ تحميل المنشورات...");
+ try{const d=await callCommunity("feed");el("communityFeedList").innerHTML=(d.posts||[]).map(renderPost).join("")||'<p class="small">لا توجد منشورات بعد. كن أول من يشارك!</p>';status("تم تحديث المنشورات.");}
+ catch(e){status("تعذر تحميل المجتمع: "+e.message);}
+}
+async function publish(){
+ const text=el("communityPostText").value.trim(),file=el("communityPostFile").files[0];
+ if(!text&&!file){status("اكتب منشورًا أو اختر مرفقًا.");return;}
+ const btn=el("communityPublishBtn");btn.disabled=true;status("جارٍ نشر المنشور...");
+ try{
+  let media={};
+  if(file){
+   const fd=new FormData();fd.append("action","upload");fd.append("file",file);
+   const up=await fetch(communityApi,{method:"POST",headers:authHeaders(),body:fd});
+   const ud=await up.json().catch(()=>({}));if(!up.ok||ud.error)throw new Error(ud.error||"فشل رفع المرفق.");
+   media={media_path:ud.media_path,media_type:ud.media_type,media_name:ud.media_name};
+  }
+  await callCommunity("create_post",{body:text,...media});
+  el("communityPostText").value="";el("communityPostFile").value="";el("communityFileStatus").textContent="لم يتم اختيار مرفق.";
+  await loadFeed();status("تم نشر منشورك بنجاح.");
+ }catch(e){status("لم يتم النشر: "+e.message);}
+ finally{btn.disabled=false;}
+}
+el("openPlatformCommunityBtn")?.addEventListener("click",()=>{if(!window.session?.access_token){if(typeof showMessage==="function")showMessage("سجّل الدخول أولًا.");return;}el("platformCommunityPanel").style.display="block";loadFeed();el("platformCommunityPanel").scrollIntoView({behavior:"smooth",block:"start"});});
+el("communityCloseBtn")?.addEventListener("click",()=>el("platformCommunityPanel").style.display="none");
+el("communityRefreshBtn")?.addEventListener("click",loadFeed);
+el("communityPublishBtn")?.addEventListener("click",publish);
+el("communityPostFile")?.addEventListener("change",()=>{const f=el("communityPostFile").files[0];el("communityFileStatus").textContent=f?f.name+" ("+Math.ceil(f.size/1024)+" ك.ب)":"لم يتم اختيار مرفق.";});
+el("communityFeedList")?.addEventListener("click",async ev=>{
+ const b=ev.target.closest("button");if(!b)return;const id=b.dataset.id;if(!id)return;
+ try{
+  if(b.classList.contains("communityLike")){await callCommunity("like",{post_id:id});await loadFeed();}
+  else if(b.classList.contains("communityDelete")){if(!confirm("هل تريد حذف هذا المنشور؟"))return;await callCommunity("delete_post",{post_id:id});await loadFeed();}
+  else if(b.classList.contains("communityComment")){const input=el("communityFeedList").querySelector('.communityCommentText[data-id="'+CSS.escape(id)+'"]');const body=input?.value.trim();if(!body)return;await callCommunity("comment",{post_id:id,body});await loadFeed();}
+ }catch(e){status("تعذر تنفيذ الطلب: "+e.message);}
+});
 })();
 </script>
 
