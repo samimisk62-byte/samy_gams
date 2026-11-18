@@ -424,7 +424,18 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
  </div>
  <div id="communityFeedList"><p class="small">اضغط تحديث المنشورات لعرض المشاركات.</p></div>
 </section>
-
+<button id="platformMediaOpenBtn" type="button" style="display:block;width:100%;margin:12px 0;padding:16px 12px;background:linear-gradient(135deg,#174ea6,#6a35b5);color:#fff;border:2px solid #b8a1ff;border-radius:14px;font-size:19px;font-weight:800">🎵 الموسيقى والوسائط والتحميل</button>
+<section id="platformMediaPanel" class="panel" style="display:none;margin-top:12px;background:#122b45;border:2px solid #6989c5">
+ <div class="row" style="align-items:center;justify-content:space-between"><h2 style="margin:4px 0">🎵 مكتبة الموسيقى والوسائط</h2><button id="platformMediaCloseBtn" class="gray" type="button">✖ إغلاق</button></div>
+ <p class="small">ارفع ملفات من هاتفك إلى مكتبتك الخاصة، وشغّلها أو نزّلها لاحقًا. الحد الأقصى للملف الواحد 50 ميجابايت.</p>
+ <div class="panel" style="background:#1a3a5c">
+  <label style="display:block;background:#315b8b;padding:12px;border-radius:10px;color:white">📂 اختيار موسيقى أو صوت أو فيديو أو صورة أو مستند من الهاتف<input id="platformMediaFiles" type="file" multiple accept="audio/*,video/*,image/*,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip" style="display:block;width:100%;margin-top:8px"></label>
+  <div id="platformMediaSelected" class="small" style="margin:8px 0">لم يتم اختيار ملفات.</div>
+  <button id="platformMediaUploadBtn" class="green" type="button">⬆️ رفع الملفات إلى مكتبتي</button><button id="platformMediaRefreshBtn" class="gray" type="button">🔄 تحديث مكتبتي</button><div id="platformMediaStatus" class="small" style="margin-top:10px"></div>
+ </div>
+ <div class="panel" style="background:#1a3a5c"><h3 style="margin:4px 0">🌐 تنزيل أو فتح ملف من الإنترنت</h3><input id="platformExternalUrl" type="url" inputmode="url" placeholder="ضع رابط الملف أو الصوت أو الفيديو أو الموقع هنا" style="width:100%;box-sizing:border-box;margin:8px 0"><div class="row"><button id="platformExternalDownloadBtn" class="green" type="button">⬇️ محاولة تنزيل إلى الهاتف</button><button id="platformExternalOpenBtn" class="orange" type="button">🌍 فتح الرابط في المتصفح</button></div><p class="small">بعض المواقع تمنع التنزيل المباشر؛ عندها افتح الرابط في المتصفح واستخدم زر التنزيل الموجود في الموقع نفسه.</p></div>
+ <div id="platformMediaList"><p class="small">اضغط «تحديث مكتبتي» لعرض ملفاتك.</p></div>
+</section>
 <div class="row" style="margin-top:10px">
 <button id="ownerRecipeOpenBtn" class="orange" type="button" style="display:none">📸 استديو الوصفات الخاص بالمالك</button>
 </div>
@@ -3306,6 +3317,29 @@ el("communityFeedList")?.addEventListener("click",async ev=>{
   else if(b.classList.contains("communityComment")){const input=el("communityFeedList").querySelector('.communityCommentText[data-id="'+CSS.escape(id)+'"]');const body=input?.value.trim();if(!body)return;await callCommunity("comment",{post_id:id,body});await loadFeed();}
  }catch(e){status("تعذر تنفيذ الطلب: "+e.message);}
 });
+})();
+</script>
+
+<script>
+(function(){
+"use strict";
+const api="https://auptwgjiivhglxtdjlnd.supabase.co/functions/v1/platform-community",key="sb_publishable_6dszOZKIdlA57hHf2E3V5Q_VO-ewwtM";
+const $=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function currentSession(){try{if(typeof session!=="undefined"&&session?.access_token)return session;}catch(e){}return window.session||null;}
+const token=()=>currentSession()?.access_token||"",headers=()=>({apikey:key,Authorization:"Bearer "+token()});
+const say=t=>{$("platformMediaStatus").textContent=t||"";};
+async function request(action,payload={}){const r=await fetch(api,{method:"POST",headers:{...headers(),"Content-Type":"application/json"},body:JSON.stringify({action,...payload})}),d=await r.json().catch(()=>({}));if(!r.ok||d.error)throw new Error(d.error||"تعذر تنفيذ الطلب.");return d;}
+function renderItem(x){const mime=x.metadata?.mimetype||"";let preview="";if(mime.startsWith("audio/"))preview='<audio controls preload="none" src="'+esc(x.url)+'" style="width:100%;margin-top:8px"></audio>';else if(mime.startsWith("video/"))preview='<video controls playsinline preload="metadata" src="'+esc(x.url)+'" style="width:100%;max-height:300px;margin-top:8px;border-radius:9px"></video>';else if(mime.startsWith("image/"))preview='<img loading="lazy" src="'+esc(x.url)+'" alt="'+esc(x.name)+'" style="width:100%;max-height:260px;object-fit:contain;margin-top:8px;border-radius:9px">';return '<article class="panel" style="background:#193b5b;border:1px solid #547aa5;margin:10px 0"><b>📁 '+esc(x.name)+'</b>'+preview+'<div class="row" style="margin-top:9px"><a href="'+esc(x.url)+'" target="_blank" rel="noopener" download="'+esc(x.name)+'" style="color:#b9dcff">⬇️ تنزيل إلى الهاتف</a><button type="button" class="gray mediaDeleteBtn" data-path="'+esc(x.path)+'">🗑️ حذف من مكتبتي</button></div></article>';}
+async function refresh(){if(!token()){say("سجّل الدخول أولًا.");return;}say("جارٍ تحميل مكتبتك...");try{const d=await request("my_media");$("platformMediaList").innerHTML=(d.items||[]).map(renderItem).join("")||'<p class="small">مكتبتك فارغة. اختر ملفات من هاتفك وارفعها.</p>';say("تم تحديث المكتبة.");}catch(e){say("تعذر تحميل المكتبة: "+e.message);}}
+async function upload(){const files=Array.from($("platformMediaFiles").files||[]);if(!files.length){say("اختر ملفًا واحدًا على الأقل من هاتفك.");return;}if(files.some(f=>f.size>50*1024*1024)){say("يوجد ملف أكبر من 50 ميجابايت. اختر ملفات أصغر.");return;}const b=$("platformMediaUploadBtn");b.disabled=true;try{for(let i=0;i<files.length;i++){say("جارٍ رفع الملف "+(i+1)+" من "+files.length+": "+files[i].name);const fd=new FormData();fd.append("action","upload");fd.append("file",files[i]);const r=await fetch(api,{method:"POST",headers:headers(),body:fd}),d=await r.json().catch(()=>({}));if(!r.ok||d.error)throw new Error(d.error||("فشل رفع "+files[i].name));}$("platformMediaFiles").value="";$("platformMediaSelected").textContent="لم يتم اختيار ملفات.";say("تم رفع الملفات إلى مكتبتك بنجاح.");await refresh();}catch(e){say("تعذر إكمال الرفع: "+e.message);}finally{b.disabled=false;}}
+function validUrl(){const raw=$("platformExternalUrl").value.trim();if(!raw){say("اكتب رابطًا أولًا.");return null;}try{const u=new URL(raw);if(!["http:","https:"].includes(u.protocol))throw 0;return u.href;}catch(e){say("الرابط غير صحيح. استخدم رابطًا يبدأ بـ https:// أو http://");return null;}}
+$("platformMediaOpenBtn")?.addEventListener("click",()=>{if(!token()){say("سجّل الدخول أولًا.");return;}$("platformMediaPanel").style.display="block";refresh();$("platformMediaPanel").scrollIntoView({behavior:"smooth",block:"start"});});
+$("platformMediaCloseBtn")?.addEventListener("click",()=>$("platformMediaPanel").style.display="none");
+$("platformMediaRefreshBtn")?.addEventListener("click",refresh);$("platformMediaUploadBtn")?.addEventListener("click",upload);
+$("platformMediaFiles")?.addEventListener("change",()=>{$("platformMediaSelected").textContent=Array.from($("platformMediaFiles").files||[]).map(f=>f.name+" ("+Math.ceil(f.size/1024)+" ك.ب)").join("، ")||"لم يتم اختيار ملفات.";});
+$("platformExternalOpenBtn")?.addEventListener("click",()=>{const u=validUrl();if(u)window.open(u,"_blank","noopener");});
+$("platformExternalDownloadBtn")?.addEventListener("click",async()=>{const u=validUrl();if(!u)return;const tab=window.open("about:blank","_blank");say("جارٍ محاولة تنزيل الملف من الرابط...");try{const r=await fetch(u);if(!r.ok)throw new Error("تعذر جلب الملف");const blob=await r.blob();if(!blob.size)throw new Error("الملف فارغ");const objectUrl=URL.createObjectURL(blob),a=document.createElement("a");a.href=objectUrl;a.download=decodeURIComponent(new URL(u).pathname.split("/").pop()||"download");document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);if(tab)tab.close();say("بدأ تنزيل الملف. راجع مجلد التنزيلات في هاتفك.");}catch(e){if(tab)tab.location.href=u;else window.open(u,"_blank","noopener");say("الموقع لا يسمح بالتنزيل المباشر من داخل المنصة؛ فتحنا الرابط في المتصفح لتستخدم زر التنزيل هناك.");}});
+$("platformMediaList")?.addEventListener("click",async ev=>{const b=ev.target.closest(".mediaDeleteBtn");if(!b)return;if(!confirm("هل تريد حذف هذا الملف من مكتبتك؟"))return;try{await request("delete_media",{path:b.dataset.path});say("تم حذف الملف.");await refresh();}catch(e){say("تعذر حذف الملف: "+e.message);}});
 })();
 </script>
 
