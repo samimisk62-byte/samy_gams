@@ -403,6 +403,7 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <button id="adminOpenBtn" class="orange" type="button" onclick="window.openPlatformAdminPanel && window.openPlatformAdminPanel()">🔐 لوحة الإدارة</button>
 <button id="logoutBtn" class="gray">🚪 خروج</button>
 </div>
+<button id="communityQuickOpenBtn" type="button" style="display:block;width:100%;margin:14px 0 4px;padding:16px 12px;background:linear-gradient(135deg,#087f5b,#16a36a);color:#fff;border:2px solid #7ee6b2;border-radius:14px;font-size:19px;font-weight:800;box-shadow:0 4px 12px #0005">🌐 افتح مجتمع المنصة — منشورات وصور وفيديوهات الأعضاء</button>
 </div>
 
 <section id="platformCommunityPanel" class="panel" style="display:none;margin-top:12px;background:#102b3b;border:2px solid #3d819c">
@@ -3290,7 +3291,9 @@ async function publish(){
  }catch(e){status("لم يتم النشر: "+e.message);}
  finally{btn.disabled=false;}
 }
-el("openPlatformCommunityBtn")?.addEventListener("click",()=>{if(!window.session?.access_token){if(typeof showMessage==="function")showMessage("سجّل الدخول أولًا.");return;}el("platformCommunityPanel").style.display="block";loadFeed();el("platformCommunityPanel").scrollIntoView({behavior:"smooth",block:"start"});});
+const openCommunity=()=>{let current=null;try{current=typeof session!=="undefined"?session:null;}catch(e){}if(!(current?.access_token||window.session?.access_token)){if(typeof showMessage==="function")showMessage("سجّل الدخول أولًا.");return;}el("platformCommunityPanel").style.display="block";loadFeed();el("platformCommunityPanel").scrollIntoView({behavior:"smooth",block:"start"});};
+el("openPlatformCommunityBtn")?.addEventListener("click",openCommunity);
+el("communityQuickOpenBtn")?.addEventListener("click",openCommunity);
 el("communityCloseBtn")?.addEventListener("click",()=>el("platformCommunityPanel").style.display="none");
 el("communityRefreshBtn")?.addEventListener("click",loadFeed);
 el("communityPublishBtn")?.addEventListener("click",publish);
