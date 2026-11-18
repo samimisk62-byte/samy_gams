@@ -404,6 +404,36 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 </div>
 </div>
 
+<div class="row" style="margin-top:10px">
+<button id="ownerRecipeOpenBtn" class="orange" type="button" style="display:none">📸 استديو الوصفات الخاص بالمالك</button>
+</div>
+<section id="platformOwnerRecipeStudio" class="panel" style="display:none">
+ <h2>📸 استديو الوصفات الخاص بالمالك</h2>
+ <p class="small">هذه المكتبة خاصة بحساب مالك المنصة فقط، ومستقلة عن رصيد الألعاب واشتراكات المشتركين.</p>
+ <div class="row">
+  <label class="orange" style="display:block;padding:12px;border-radius:10px;color:white">🖼️ اختيار الصور والملفات من الهاتف<input id="platformRecipeFiles" type="file" multiple accept="image/*,.pdf,.txt,.json,.csv,.doc,.docx,.xls,.xlsx" style="display:block;width:100%;margin-top:8px"></label>
+  <label style="display:block;background:#6a1b9a;padding:12px;border-radius:10px;color:white">🎥 اختيار فيديوهات من الهاتف<input id="platformRecipeVideos" type="file" multiple accept="video/*" style="display:block;width:100%;margin-top:8px"></label>
+  <label style="display:block;background:#ad1457;padding:12px;border-radius:10px;color:white">🎬 تصوير فيديو بالكاميرا<input id="platformRecipeVideoCapture" type="file" accept="video/*" capture="environment" style="display:block;width:100%;margin-top:8px"></label>
+  <label style="display:block;background:#2e7d32;padding:12px;border-radius:10px;color:white">📷 التقاط صورة بالكاميرا<input id="platformRecipeCamera" type="file" accept="image/*" capture="environment" style="display:block;width:100%;margin-top:8px"></label>
+ </div>
+ <input id="platformRecipeName" placeholder="اسم الوصفة" style="width:100%;padding:11px;border-radius:9px;margin:7px 0">
+ <textarea id="platformRecipeNotes" placeholder="المكونات وطريقة التحضير أو ملاحظاتك" style="width:100%;min-height:85px;padding:10px;border-radius:9px"></textarea>
+ <input id="platformRecipeUrl" type="url" placeholder="رابط منشور عام من فيسبوك أو إنستجرام أو تيك توك أو يوتيوب" style="width:100%;padding:11px;border-radius:9px;margin:7px 0">
+ <div id="platformRecipeDraftList" class="card">لم تختر مرفقات بعد.</div>
+ <div class="row">
+  <button type="button" onclick="platformRecipePreviewDraft()">👁️ معاينة المرفقات</button>
+  <button type="button" class="gray" onclick="platformRecipeClearDraft()">إلغاء الصور والملفات المختارة</button>
+  <button type="button" class="green" onclick="platformRecipeSave()">💾 حفظ الوصفة</button>
+ </div>
+ <hr>
+ <h3>🗂️ الأرشيف والاستديو (<span id="platformRecipeCount">0</span>)</h3>
+ <div class="row">
+  <button type="button" onclick="platformRecipeExportIndex()">📤 تصدير فهرس الأرشيف</button>
+  <button type="button" onclick="platformRecipeShowArchive()">فتح الأرشيف</button>
+  <button type="button" class="gray" onclick="platformRecipeClose()">رجوع وإغلاق</button>
+ </div>
+ <div id="platformRecipeArchive" class="card" style="display:none"></div>
+</section>
 
 <section id="broadcastInbox" class="panel">
 <h2>📨 رسائل وإعلانات المنصة</h2>
@@ -2199,12 +2229,139 @@ $("broadcastReload").addEventListener("click",loadBroadcastAdmin);
 $("broadcastCustomerTrash").addEventListener("click",loadBroadcastCustomerTrash);
 $("broadcastAdminTrash").addEventListener("click",loadBroadcastAdminTrash);
 
+
+/* مكتبة استديو الوصفات الخاصة بمالك المنصة فقط */
+const PLATFORM_RECIPE_DB="platform_owner_recipe_media_v1";
+let platformRecipeDraft=[];
+let platformRecipeItems=[];
+function platformRecipeAllowed(){
+ return !!(session&&session.access_token&&platformIsOwner);
+}
+function platformRecipeGuard(){
+ if(platformRecipeAllowed())return true;
+ const panel=document.getElementById("platformOwnerRecipeStudio");if(panel)panel.style.display="none";
+ showMessage("هذه الأدوات متاحة لحساب مالك المنصة فقط.");
+ return false;
+}
+function platformRecipeKey(){return "platform_owner_recipes_v1_"+String(session?.user?.id||"owner");}
+function platformRecipeLoad(){
+ try{const x=JSON.parse(localStorage.getItem(platformRecipeKey())||"[]");platformRecipeItems=Array.isArray(x)?x:[];}catch(e){platformRecipeItems=[];}
+ const n=document.getElementById("platformRecipeCount");if(n)n.textContent=platformRecipeItems.length;
+}
+function platformRecipeStore(){localStorage.setItem(platformRecipeKey(),JSON.stringify(platformRecipeItems));const n=document.getElementById("platformRecipeCount");if(n)n.textContent=platformRecipeItems.length;}
+function platformRecipeDb(){
+ return new Promise((resolve,reject)=>{
+  if(!indexedDB){reject(new Error("التخزين المحلي غير متاح في هذا المتصفح"));return;}
+  const q=indexedDB.open(PLATFORM_RECIPE_DB,1);
+  q.onupgradeneeded=()=>{if(!q.result.objectStoreNames.contains("media"))q.result.createObjectStore("media",{keyPath:"id"});};
+  q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error);
+ });
+}
+async function platformRecipePut(item){
+ const db=await platformRecipeDb();return new Promise((resolve,reject)=>{const tx=db.transaction("media","readwrite");tx.objectStore("media").put(item);tx.oncomplete=()=>{db.close();resolve(true);};tx.onerror=()=>{db.close();reject(tx.error);};});
+}
+async function platformRecipeGet(id){
+ const db=await platformRecipeDb();return new Promise((resolve,reject)=>{const q=db.transaction("media","readonly").objectStore("media").get(id);q.onsuccess=()=>{db.close();resolve(q.result||null);};q.onerror=()=>{db.close();reject(q.error);};});
+}
+async function platformRecipeDeleteBlob(id){
+ const db=await platformRecipeDb();return new Promise((resolve,reject)=>{const tx=db.transaction("media","readwrite");tx.objectStore("media").delete(id);tx.oncomplete=()=>{db.close();resolve(true);};tx.onerror=()=>{db.close();reject(tx.error);};});
+}
+function platformRecipeId(){return "pr_"+Date.now()+"_"+Math.random().toString(36).slice(2,9);}
+function platformRecipeEsc(v){return String(v||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function platformRecipeFiles(){
+ const ids=["platformRecipeFiles","platformRecipeVideos","platformRecipeVideoCapture","platformRecipeCamera"];
+ return ids.flatMap(id=>Array.from(document.getElementById(id)?.files||[]));
+}
+function platformRecipeClearDraft(){
+ if(!platformRecipeGuard())return;platformRecipeDraft=[];
+ ["platformRecipeFiles","platformRecipeVideos","platformRecipeVideoCapture","platformRecipeCamera"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+ const b=document.getElementById("platformRecipeDraftList");if(b)b.textContent="تم إلغاء الصور والفيديوهات والملفات المختارة.";
+}
+function platformRecipeRemoveDraft(i){
+ if(!platformRecipeGuard())return;platformRecipeDraft.splice(i,1);platformRecipePreviewDraft();
+}
+function platformRecipePreviewDraft(){
+ if(!platformRecipeGuard())return;
+ platformRecipeDraft=platformRecipeFiles();
+ const b=document.getElementById("platformRecipeDraftList");
+ if(!platformRecipeDraft.length){if(b)b.textContent="لم تختر مرفقات بعد.";return;}
+ if(b)b.innerHTML=platformRecipeDraft.map((f,i)=>'<div style="padding:6px;border-bottom:1px solid #888">📎 '+platformRecipeEsc(f.name)+' · '+Math.ceil(f.size/1024)+' KB <button type="button" onclick="platformRecipeRemoveDraft('+i+')">حذف</button></div>').join("");
+}
+async function platformRecipeSave(){
+ if(!platformRecipeGuard())return;
+ const name=document.getElementById("platformRecipeName")?.value.trim()||"";
+ if(!name){showMessage("اكتب اسم الوصفة أولًا.");return;}
+ const files=platformRecipeDraft.length?platformRecipeDraft:platformRecipeFiles();
+ const recipe={id:platformRecipeId(),name,notes:document.getElementById("platformRecipeNotes")?.value.trim()||"",url:(document.getElementById("platformRecipeUrl")?.value.trim()||""),createdAt:new Date().toISOString(),attachments:[]};
+ if(recipe.url&&!/^https?:\/\//i.test(recipe.url))recipe.url="";
+ try{
+  for(const file of files){
+   if(file.size>80*1024*1024)throw new Error("الملف "+file.name+" أكبر من 80 ميجابايت.");
+   const id=platformRecipeId(),type=file.type||"application/octet-stream";
+   await platformRecipePut({id,recipeId:recipe.id,name:file.name,type,size:file.size,blob:file});
+   recipe.attachments.push({id,name:file.name,type,size:file.size});
+  }
+  platformRecipeItems.unshift(recipe);platformRecipeItems=platformRecipeItems.slice(0,100);platformRecipeStore();
+  document.getElementById("platformRecipeName").value="";document.getElementById("platformRecipeNotes").value="";document.getElementById("platformRecipeUrl").value="";
+  platformRecipeClearDraft();showMessage("تم حفظ الوصفة ومرفقاتها في أرشيف المالك.",true);platformRecipeShowArchive();
+ }catch(e){showMessage("تعذر الحفظ: "+(e.message||"مساحة التخزين غير كافية"));}
+}
+function platformRecipeDownload(blob,name){
+ const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1800);
+}
+async function platformRecipeExportIndex(){
+ if(!platformRecipeGuard())return;platformRecipeLoad();
+ const data={format:"platform-owner-recipe-archive",version:1,recipes:platformRecipeItems.map(r=>({id:r.id,name:r.name,notes:r.notes,url:r.url,createdAt:r.createdAt,attachments:r.attachments||[]}))};
+ platformRecipeDownload(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),"platform-owner-recipe-index.json");
+}
+async function platformRecipeExportOne(id){
+ if(!platformRecipeGuard())return;const r=platformRecipeItems.find(x=>x.id===id);if(!r)return;
+ const attachments=[];for(const m of r.attachments||[]){const item=await platformRecipeGet(m.id);if(!item)continue;const data=await new Promise((ok,no)=>{const fr=new FileReader();fr.onload=()=>ok(fr.result);fr.onerror=no;fr.readAsDataURL(item.blob);});attachments.push({name:item.name,type:item.type,data});}
+ platformRecipeDownload(new Blob([JSON.stringify({format:"platform-owner-recipe",version:1,recipe:r,attachments})],{type:"application/json"}),"recipe-"+r.name.replace(/[^\w\u0600-\u06FF-]/g,"_")+".json");
+}
+async function platformRecipePreview(id){
+ if(!platformRecipeGuard())return;const item=await platformRecipeGet(id);if(!item){showMessage("المرفق غير موجود.");return;}
+ if(item.type.startsWith("image/")||item.type.startsWith("video/")){
+  const url=URL.createObjectURL(item.blob),b=document.getElementById("platformRecipeArchive");
+  b.style.display="block";b.innerHTML='<h3>'+platformRecipeEsc(item.name)+'</h3>'+(item.type.startsWith("image/")?'<img src="'+url+'" style="max-width:100%;max-height:55vh;object-fit:contain">':'<video src="'+url+'" controls playsinline style="width:100%;max-height:55vh"></video>')+'<button type="button" onclick="platformRecipeShowArchive()">رجوع للأرشيف</button>';
+ }else platformRecipeDownload(item.blob,item.name);
+}
+async function platformRecipeDeleteAttachment(rid,mid){
+ if(!platformRecipeGuard())return;const r=platformRecipeItems.find(x=>x.id===rid);if(!r)return;
+ await platformRecipeDeleteBlob(mid);r.attachments=(r.attachments||[]).filter(x=>x.id!==mid);platformRecipeStore();platformRecipeShowArchive();
+}
+async function platformRecipeDeleteOne(id){
+ if(!platformRecipeGuard()||!confirm("هل تريد حذف الوصفة وكل مرفقاتها؟"))return;
+ const r=platformRecipeItems.find(x=>x.id===id);if(!r)return;for(const a of r.attachments||[])await platformRecipeDeleteBlob(a.id);
+ platformRecipeItems=platformRecipeItems.filter(x=>x.id!==id);platformRecipeStore();platformRecipeShowArchive();
+}
+async function platformRecipeConvert(rid,mid,format){
+ if(!platformRecipeGuard())return;const item=await platformRecipeGet(mid);if(!item||!item.type.startsWith("image/"))return;
+ const url=URL.createObjectURL(item.blob),img=new Image();img.onload=async()=>{
+  const c=document.createElement("canvas");c.width=img.naturalWidth;c.height=img.naturalHeight;const x=c.getContext("2d");if(format==="image/jpeg"){x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);}x.drawImage(img,0,0);
+  c.toBlob(async blob=>{if(!blob)return;const id=platformRecipeId(),name=item.name.replace(/\.[^.]+$/,"")+(format==="image/png"?".png":".jpg");await platformRecipePut({id,recipeId:rid,name,type:format,size:blob.size,blob});const r=platformRecipeItems.find(z=>z.id===rid);r.attachments.push({id,name,type:format,size:blob.size});platformRecipeStore();platformRecipeShowArchive();},format,.9);URL.revokeObjectURL(url);
+ };img.onerror=()=>URL.revokeObjectURL(url);img.src=url;
+}
+function platformRecipeShowArchive(){
+ if(!platformRecipeGuard())return;platformRecipeLoad();const box=document.getElementById("platformRecipeArchive");box.style.display="block";
+ if(!platformRecipeItems.length){box.textContent="الأرشيف فارغ حتى الآن.";return;}
+ box.innerHTML=platformRecipeItems.map(r=>'<article style="border-bottom:1px solid #789;padding:10px 0"><b>'+platformRecipeEsc(r.name)+'</b><p>'+platformRecipeEsc(r.notes)+'</p>'+(r.url?'<a href="'+encodeURI(r.url)+'" target="_blank" rel="noopener">فتح رابط المصدر</a>':"")+(r.attachments||[]).map(a=>'<div style="padding:5px">📎 '+platformRecipeEsc(a.name)+' · '+Math.ceil(a.size/1024)+' KB <button type="button" onclick="platformRecipePreview(\''+a.id+'\')">فتح/تنزيل</button> <button type="button" onclick="platformRecipeDeleteAttachment(\''+r.id+'\',\''+a.id+'\')">حذف</button>'+(a.type||"").startsWith("image/")?' <button type="button" onclick="platformRecipeConvert(\''+r.id+'\',\''+a.id+'\',\'image/jpeg\')">JPG</button> <button type="button" onclick="platformRecipeConvert(\''+r.id+'\',\''+a.id+'\',\'image/png\')">PNG</button>':"")+'</div>').join("")+'<button type="button" onclick="platformRecipeExportOne(\''+r.id+'\')">📤 تصدير الوصفة ومرفقاتها</button> <button type="button" onclick="platformRecipeDeleteOne(\''+r.id+'\')">🗑️ حذف الوصفة كاملة</button></article>').join("");
+}
+function platformRecipeOpen(){
+ if(!platformRecipeGuard())return;platformRecipeLoad();const p=document.getElementById("platformOwnerRecipeStudio");p.style.display="block";p.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function platformRecipeClose(){const p=document.getElementById("platformOwnerRecipeStudio");if(p)p.style.display="none";}
+document.addEventListener("DOMContentLoaded",()=>{
+ const b=document.getElementById("ownerRecipeOpenBtn");if(b)b.addEventListener("click",platformRecipeOpen);
+});
+
 async function refreshAccess(){
   if(!session?.access_token)return;
   platformIsOwner=false;
   const codes=Object.keys(GAME_NAMES);let activeCount=0;
   for(const code of codes){const allowed=await checkGameAccess(code);if(allowed)activeCount++;const status=document.querySelector('[data-status-for="' + code + '"]');if(status)status.textContent=allowed?(platformIsOwner?"🟢 متاحة مجانًا لمالك المنصة":"🟢 الاشتراك فعال"):"🟡 لا يوجد اشتراك فعال";}
   document.querySelectorAll("[data-subscribe-game]").forEach(function(button){button.style.display=platformIsOwner?"none":"";});
+  const recipeButton=$("ownerRecipeOpenBtn");if(recipeButton)recipeButton.style.display=platformIsOwner?"inline-block":"none";if(!platformIsOwner)platformRecipeClose();
   $("accountStatus").textContent=platformIsOwner?"🟢 حساب مالك المنصة: كل ألعاب المنصة متاحة مجانًا":(activeCount?"🟢 لديك اشتراك فعال في "+activeCount+" لعبة":"🟡 لا توجد اشتراكات نشطة حاليًا");
   await loadMyOrders();
   await loadBroadcastFeed();
