@@ -280,14 +280,6 @@ html body .skiptranslate iframe{visibility:hidden!important}
 .socialDownload{display:inline-block;margin-top:9px;background:#087fbb;color:white;padding:8px 12px;border-radius:8px;text-decoration:none;font-weight:bold}
 .socialRemoteTile{background:#142b3a;border-radius:12px;padding:6px;text-align:center;min-width:0}
 .socialRemoteTile video{width:100%;max-height:38vh;object-fit:cover;border-radius:9px;background:#000}
-#platformCommunitySection input,#platformCommunitySection textarea{width:100%;padding:12px;border-radius:10px;margin:6px 0;background:#f7fbff;color:#10212c;font-size:16px}
-.communityPost{background:#203b4d;border:1px solid #3d6175;border-radius:16px;padding:13px;margin:12px 0;overflow-wrap:anywhere}
-.communityPost img,.communityPost video{display:block;width:100%;max-height:480px;object-fit:contain;background:#09151d;border-radius:12px;margin-top:10px}
-.communityPost .communityMeta{color:#c6d7e1;font-size:12px;margin:5px 0}
-.communityComment{background:#142b3a;border-radius:10px;padding:8px;margin:6px 0}
-.communityPostActions{display:flex;gap:7px;flex-wrap:wrap}
-.communityPostActions button{flex:1;min-width:105px}
-
 @media(max-width:520px){#socialCallOverlay{padding:7px!important}#socialCallOverlay h2{font-size:19px}#socialCallOverlay button{min-width:105px;padding:10px 7px}}
 
 </style>
@@ -406,7 +398,6 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 
 <div class="row">
 <button id="refreshBtn" class="green">🔄 تحديث الاشتراكات</button>
-<button id="openPlatformCommunityBtn" class="green" type="button">🌐 مجتمع المنصة</button>
 <button id="openPlatformSocialBtn" class="orange" type="button">💬 التواصل والمكالمات</button>
 <button id="adminOpenBtn" class="orange" type="button" onclick="window.openPlatformAdminPanel && window.openPlatformAdminPanel()">🔐 لوحة الإدارة</button>
 <button id="logoutBtn" class="gray">🚪 خروج</button>
@@ -450,23 +441,6 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <div class="row"><button id="broadcastCustomerTrash" class="gray" type="button">🗑️ سلة مهملات الإعلانات</button><button id="broadcastCustomerBack" class="green" type="button" style="display:none">↩️ العودة إلى الإعلانات</button></div><div id="broadcastFeed">جاري تحميل الرسائل...</div>
 </section>
 
-
-<section id="platformCommunitySection" class="panel" style="display:none">
- <h2>🌐 مجتمع منصة ألعابي</h2>
- <p class="small">منشورات عامة يراها أعضاء المنصة المسجلون، مع الصور والفيديوهات والإعجابات والتعليقات. الرسائل الخاصة تظل في مركز التواصل ولا يراها إلا أطراف المحادثة.</p>
- <div class="row"><button id="communityRefresh" class="gray" type="button">🔄 تحديث المنشورات</button><button id="communityClose" class="red" type="button">✖ إغلاق المجتمع</button></div>
- <div class="panel" style="background:#102b3b;border:1px solid #41677d">
-  <h3>✍️ اكتب منشورًا جديدًا</h3>
-  <textarea id="communityPostText" rows="4" maxlength="5000" placeholder="شارك أخبارك أو أفكارك مع أعضاء المنصة..."></textarea>
-  <label style="display:block;background:#1769aa;padding:11px;border-radius:10px;margin:7px 0;text-align:center">🖼️ اختيار صورة أو فيديو<input id="communityMedia" type="file" accept="image/*,video/*,.pdf,.txt,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.zip" style="display:block;width:100%;margin-top:7px"></label>
-  <label style="display:block;background:#6a1b9a;padding:11px;border-radius:10px;margin:7px 0;text-align:center">🎬 تصوير فيديو جديد<input id="communityVideoCapture" type="file" accept="video/*" capture="environment" style="display:block;width:100%;margin-top:7px"></label>
-  <label style="display:block;background:#2e7d32;padding:11px;border-radius:10px;margin:7px 0;text-align:center">📷 التقاط صورة بالكاميرا<input id="communityPhotoCapture" type="file" accept="image/*" capture="environment" style="display:block;width:100%;margin-top:7px"></label>
-  <div id="communityMediaStatus" class="small">لم يتم اختيار مرفق.</div>
-  <button id="communityPublish" class="green" type="button">🚀 نشر للجميع</button>
- </div>
- <h3>📰 آخر منشورات الأعضاء</h3>
- <div id="communityFeed">افتح المجتمع لتحديث المنشورات.</div>
-</section>
 
 <section id="platformSocialSection" class="panel" style="display:none">
  <h2>💬 مركز التواصل بين أعضاء المنصة</h2>
@@ -2120,96 +2094,6 @@ $("privateChatCustomerChooseFile").addEventListener("click",()=>$("privateChatCu
 $("privateChatAdminChooseFile").addEventListener("click",()=>$("privateChatAdminFile").click());
 $("privateChatCustomerPasteText").addEventListener("click",()=>pasteTextFromOtherApp("privateChatCustomerText"));
 $("privateChatAdminPasteText").addEventListener("click",()=>pasteTextFromOtherApp("privateChatAdminText"));
-
-/* المجتمع العام لأعضاء المنصة */
-let communityUploaded=null;
-async function communityRequest(action,payload={}){
- if(!session?.access_token)throw new Error("سجّل الدخول أولًا.");
- const response=await fetch(SUPABASE_URL+"/functions/v1/platform-community",{method:"POST",headers:authHeaders(),body:JSON.stringify({action,...payload})});
- const data=await response.json().catch(()=>({}));
- if(!response.ok||data.error)throw new Error(data.error||"تعذر تنفيذ الطلب.");
- return data;
-}
-async function communityUpload(file){
- if(file.size>50*1024*1024)throw new Error("الحد الأقصى لحجم الصورة أو الفيديو 50 ميجابايت.");
- const form=new FormData();form.append("action","upload");form.append("file",file);
- const response=await fetch(SUPABASE_URL+"/functions/v1/platform-community",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+session.access_token},body:form});
- const data=await response.json().catch(()=>({}));
- if(!response.ok||data.error)throw new Error(data.error||"تعذر رفع المرفق.");
- return data;
-}
-function communitySelectedFile(){
- return $("communityVideoCapture").files[0]||$("communityPhotoCapture").files[0]||$("communityMedia").files[0]||null;
-}
-function communityClearDraft(){
- ["communityMedia","communityVideoCapture","communityPhotoCapture"].forEach(id=>$(id).value="");
- communityUploaded=null;$("communityMediaStatus").textContent="لم يتم اختيار مرفق.";
-}
-function communityOpen(){
- if(!session?.access_token){showMessage("سجّل الدخول أولًا.");return;}
- $("platformCommunitySection").style.display="block";
- $("platformCommunitySection").scrollIntoView({behavior:"smooth",block:"start"});
- loadCommunityFeed();
-}
-function communityClose(){$("platformCommunitySection").style.display="none";}
-function communityRenderPost(post){
- const card=document.createElement("article");card.className="communityPost";
- const head=document.createElement("strong");head.textContent="👤 "+(post.author_name||"عضو المنصة");card.appendChild(head);
- const date=document.createElement("div");date.className="communityMeta";date.textContent=new Date(post.created_at).toLocaleString("ar-EG");card.appendChild(date);
- if(post.body){const body=document.createElement("p");body.style.whiteSpace="pre-wrap";body.textContent=post.body;card.appendChild(body);}
- if(post.media_url){
-  if(post.media_type==="video"){const video=document.createElement("video");video.src=post.media_url;video.controls=true;video.playsInline=true;video.preload="metadata";card.appendChild(video);}
-  else if(post.media_type==="image"){const img=document.createElement("img");img.src=post.media_url;img.alt="صورة من منشور";img.loading="lazy";card.appendChild(img);}
-  else{const file=document.createElement("div");file.className="communityComment";file.textContent="📎 "+(post.media_name||"ملف مرفق");card.appendChild(file);}
-  const download=document.createElement("button");download.type="button";download.className="gray";download.textContent="⬇️ تنزيل "+(post.media_name||"المرفق");download.onclick=()=>downloadFile(post.media_url,post.media_name||"مرفق-من-المنصة");card.appendChild(download);
- }
- const actions=document.createElement("div");actions.className="communityPostActions";
- const like=document.createElement("button");like.type="button";like.className=post.liked?"green":"gray";like.textContent=(post.liked?"❤️ أعجبني":"🤍 إعجاب")+" · "+(post.likes_count||0);
- like.onclick=async()=>{like.disabled=true;try{await communityRequest("like",{post_id:post.id});await loadCommunityFeed();}catch(e){showMessage(e.message);}finally{like.disabled=false;}};
- actions.appendChild(like);
- if(post.author_id===session.user.id||platformIsOwner){
-  const del=document.createElement("button");del.type="button";del.className="red";del.textContent="🗑️ حذف المنشور";
-  del.onclick=async()=>{if(!confirm("هل تريد حذف هذا المنشور؟"))return;try{await communityRequest("delete_post",{post_id:post.id});await loadCommunityFeed();showMessage("تم حذف المنشور.",true);}catch(e){showMessage(e.message);}};
-  actions.appendChild(del);
- }
- card.appendChild(actions);
- const comments=document.createElement("div");comments.style.marginTop="10px";
- const title=document.createElement("strong");title.textContent="💬 التعليقات";comments.appendChild(title);
- (post.comments||[]).forEach(c=>{const row=document.createElement("div");row.className="communityComment";const who=document.createElement("b");who.textContent=(c.author_name||"عضو")+" : ";row.appendChild(who);const txt=document.createElement("span");txt.textContent=c.body;row.appendChild(txt);const when=document.createElement("div");when.className="communityMeta";when.textContent=new Date(c.created_at).toLocaleString("ar-EG");row.appendChild(when);comments.appendChild(row);});
- const entry=document.createElement("input");entry.type="text";entry.maxLength=2000;entry.placeholder="اكتب تعليقًا...";
- const send=document.createElement("button");send.type="button";send.className="orange";send.textContent="إرسال التعليق";
- send.onclick=async()=>{const value=entry.value.trim();if(!value)return;send.disabled=true;try{await communityRequest("comment",{post_id:post.id,body:value});await loadCommunityFeed();}catch(e){showMessage(e.message);}finally{send.disabled=false;}};
- comments.appendChild(entry);comments.appendChild(send);card.appendChild(comments);
- return card;
-}
-async function loadCommunityFeed(){
- const box=$("communityFeed");if(!box||!session?.access_token)return;
- box.textContent="⏳ جاري تحميل منشورات أعضاء المنصة...";
- try{const data=await communityRequest("feed");box.textContent="";const posts=data.posts||[];
-  if(!posts.length){box.textContent="لا توجد منشورات بعد. كن أول من يشارك منشورًا في مجتمع المنصة!";return;}
-  posts.forEach(post=>box.appendChild(communityRenderPost(post)));
- }catch(e){box.textContent="تعذر تحميل المنشورات: "+e.message;}
-}
-async function publishCommunityPost(){
- const text=$("communityPostText").value.trim(),file=communitySelectedFile(),button=$("communityPublish");
- if(!text&&!file){showMessage("اكتب منشورًا أو اختر صورة أو فيديو.");return;}
- button.disabled=true;
- try{
-  if(file&&!communityUploaded){$("communityMediaStatus").textContent="⏳ جاري رفع المرفق...";communityUploaded=await communityUpload(file);}
-  await communityRequest("create_post",{body:text,media_path:communityUploaded?.media_path||null,media_type:communityUploaded?.media_type||null,media_name:communityUploaded?.media_name||null});
-  $("communityPostText").value="";communityClearDraft();await loadCommunityFeed();showMessage("✅ تم نشر منشورك لجميع أعضاء المنصة.",true);
- }catch(e){showMessage("❌ تعذر النشر: "+e.message);}
- finally{button.disabled=false;}
-}
-$("openPlatformCommunityBtn")?.addEventListener("click",communityOpen);
-$("communityClose")?.addEventListener("click",communityClose);
-$("communityRefresh")?.addEventListener("click",loadCommunityFeed);
-$("communityPublish")?.addEventListener("click",publishCommunityPost);
-["communityMedia","communityVideoCapture","communityPhotoCapture"].forEach(id=>$(id)?.addEventListener("change",()=>{
- communityUploaded=null;const file=communitySelectedFile();$("communityMediaStatus").textContent=file?file.name+" · "+Math.ceil(file.size/1024)+" كيلوبايت":"لم يتم اختيار مرفق.";
-}));
-$("logoutBtn")?.addEventListener("click",communityClose);
-setInterval(()=>{if(session?.access_token&&$("platformCommunitySection")?.style.display==="block")loadCommunityFeed();},25000);
 
 /* مركز الرسائل الجماعية */
 async function callBroadcast(action,payload={}){
