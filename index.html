@@ -268,6 +268,20 @@ html body .skiptranslate iframe{visibility:hidden!important}
 .platformClock.clock-dark{background:linear-gradient(120deg,#111820,#26323d 55%,#182536)}
 .platformClock.clock-small .clockTime{font-size:22px}
 .platformClock.clock-large .clockTime{font-size:clamp(30px,7vw,40px)}
+
+#platformSocialSection .privateChatThread{background:#0c2230}
+#platformSocialSection input,#platformSocialSection textarea{width:100%;padding:12px;border-radius:10px;margin:6px 0;background:#f7fbff;color:#10212c;font-size:16px}
+#platformSocialSection label{display:block;font-weight:bold;margin-top:8px}
+#platformSocialSection .small{line-height:1.8}
+.socialMessageCard{padding:10px;margin:8px 0;border-radius:12px;background:#24485a;overflow-wrap:anywhere}
+.socialMessageCard.mine{background:#174f43;border:1px solid #27866b;margin-right:7%}
+.socialMessageCard.theirs{background:#29445e;border:1px solid #527da0;margin-left:7%}
+.socialMessageCard img,.socialMessageCard video{display:block;max-width:100%;max-height:300px;margin-top:8px;border-radius:9px}
+.socialDownload{display:inline-block;margin-top:9px;background:#087fbb;color:white;padding:8px 12px;border-radius:8px;text-decoration:none;font-weight:bold}
+.socialRemoteTile{background:#142b3a;border-radius:12px;padding:6px;text-align:center;min-width:0}
+.socialRemoteTile video{width:100%;max-height:38vh;object-fit:cover;border-radius:9px;background:#000}
+@media(max-width:520px){#socialCallOverlay{padding:7px!important}#socialCallOverlay h2{font-size:19px}#socialCallOverlay button{min-width:105px;padding:10px 7px}}
+
 </style>
 </head>
 
@@ -384,6 +398,7 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 
 <div class="row">
 <button id="refreshBtn" class="green">🔄 تحديث الاشتراكات</button>
+<button id="openPlatformSocialBtn" class="orange" type="button">💬 التواصل والمكالمات</button>
 <button id="adminOpenBtn" class="orange" type="button" onclick="window.openPlatformAdminPanel && window.openPlatformAdminPanel()">🔐 لوحة الإدارة</button>
 <button id="logoutBtn" class="gray">🚪 خروج</button>
 </div>
@@ -395,6 +410,77 @@ autocomplete="new-password"><button type="button" class="toggle-password" data-p
 <p class="small">رسائل الإدارة المرسلة لجميع المستخدمين.</p>
 <div class="row"><button id="broadcastCustomerTrash" class="gray" type="button">🗑️ سلة مهملات الإعلانات</button><button id="broadcastCustomerBack" class="green" type="button" style="display:none">↩️ العودة إلى الإعلانات</button></div><div id="broadcastFeed">جاري تحميل الرسائل...</div>
 </section>
+
+
+<section id="platformSocialSection" class="panel" style="display:none">
+ <h2>💬 مركز التواصل بين أعضاء المنصة</h2>
+ <p class="small">محادثات خاصة أو مجموعات، رسائل وصور وفيديوهات وملفات، ومكالمات صوت وصورة. لا يرى المحادثة إلا أعضاؤها.</p>
+ <div class="row">
+  <button id="socialReloadConversations" class="gray" type="button">🔄 تحديث المحادثات</button>
+  <button id="socialCloseSection" class="red" type="button">✖ إغلاق</button>
+ </div>
+ <div class="panel" style="background:#102b3b;border:1px solid #41677d">
+  <h3>➕ بدء محادثة أو إنشاء مجموعة</h3>
+  <label>بريد عضو المنصة (أو عدة عناوين مفصولة بفاصلة للمجموعة)</label>
+  <input id="socialInviteEmails" type="text" placeholder="example@email.com, friend@email.com" autocomplete="off">
+  <label>اسم المجموعة (اختياري)</label>
+  <input id="socialGroupTitle" type="text" maxlength="100" placeholder="مثال: أصدقاء المنصة">
+  <button id="socialCreateConversation" class="green" type="button">🚀 بدء المحادثة / إنشاء المجموعة</button>
+  <p class="small">يجب أن يكون المشاركون مسجلين بالفعل في المنصة. الحد الأقصى 4 أعضاء في المحادثة أو المكالمة.</p>
+ </div>
+ <div id="socialIncomingCall" class="panel" style="display:none;background:#254c32;border:2px solid #39d477">
+  <strong id="socialIncomingCallText">📞 مكالمة واردة</strong>
+  <div class="row"><button id="socialAcceptCall" class="green" type="button">📲 قبول المكالمة</button><button id="socialDismissCall" class="red" type="button">رفض / إخفاء</button></div>
+ </div>
+ <div class="panel" style="background:#102b3b">
+  <h3>📚 محادثاتي</h3>
+  <div id="socialConversationList" class="privateChatList">سجّل الدخول لعرض محادثاتك.</div>
+ </div>
+ <div id="socialThreadPanel" class="panel" style="display:none;background:#102b3b;border:1px solid #39718b">
+  <h3 id="socialThreadTitle">المحادثة</h3>
+  <div id="socialThreadMembers" class="small"></div>
+  <div class="row">
+   <button id="socialAudioCall" class="green" type="button">📞 اتصال صوتي</button>
+   <button id="socialVideoCall" class="orange" type="button">🎥 فيديو كول</button>
+   <button id="socialRefreshThread" class="gray" type="button">🔄 تحديث الرسائل</button>
+  </div>
+  <div id="socialMessages" class="privateChatThread" style="min-height:180px;max-height:48vh">اختر محادثة لعرض الرسائل.</div>
+  <label>اكتب رسالتك</label>
+  <textarea id="socialMessageText" rows="3" maxlength="5000" placeholder="اكتب رسالة إلى أعضاء المحادثة..."></textarea>
+  <div class="panel" style="background:#173548;border:1px dashed #6c9bb3">
+   <strong>📎 إرفاق من الهاتف أو التصوير</strong>
+   <label style="display:block;background:#1769aa;padding:10px;border-radius:10px;margin:8px 0;text-align:center">🖼️ اختيار صور وملفات<input id="socialFiles" type="file" multiple accept="image/*,application/pdf,text/plain,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.csv" style="display:block;width:100%;margin-top:7px"></label>
+   <label style="display:block;background:#6a1b9a;padding:10px;border-radius:10px;margin:8px 0;text-align:center">🎞️ اختيار فيديو من الهاتف<input id="socialVideos" type="file" multiple accept="video/*" style="display:block;width:100%;margin-top:7px"></label>
+   <label style="display:block;background:#ad1457;padding:10px;border-radius:10px;margin:8px 0;text-align:center">🎬 تصوير فيديو بالكاميرا<input id="socialVideoCapture" type="file" accept="video/*" capture="environment" style="display:block;width:100%;margin-top:7px"></label>
+   <label style="display:block;background:#2e7d32;padding:10px;border-radius:10px;margin:8px 0;text-align:center">📷 التقاط صورة بالكاميرا<input id="socialPhotoCapture" type="file" accept="image/*" capture="environment" style="display:block;width:100%;margin-top:7px"></label>
+   <div id="socialAttachmentStatus" class="small">لم يتم اختيار مرفق.</div>
+   <button id="socialClearAttachments" class="gray" type="button">✖ إلغاء المرفقات</button>
+  </div>
+  <button id="socialSendMessage" class="green" type="button">📨 إرسال الرسالة والمرفقات</button>
+  <p class="small">الحد الأقصى للملف الواحد 50 ميجابايت. ستظهر الملفات الواردة مع رابط تنزيل.</p>
+ </div>
+</section>
+
+<div id="socialCallOverlay" style="display:none;position:fixed;inset:0;z-index:2147483600;background:#07131d;padding:12px;overflow:auto;color:white">
+ <div style="max-width:900px;margin:auto">
+  <div class="row" style="align-items:center;justify-content:space-between">
+   <h2 id="socialCallTitle">🎥 مكالمة المنصة</h2>
+   <span id="socialCallStatus" class="status">جارٍ الاتصال...</span>
+  </div>
+  <div id="socialVideoGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;margin:12px 0">
+   <div id="socialLocalTile" style="background:#142b3a;border-radius:12px;padding:6px;text-align:center">
+    <video id="socialLocalVideo" autoplay playsinline muted style="width:100%;max-height:38vh;object-fit:cover;border-radius:9px;background:#000"></video>
+    <div>أنت</div>
+   </div>
+  </div>
+  <div class="row">
+   <button id="socialMuteMic" class="orange" type="button">🎙️ كتم الميكروفون</button>
+   <button id="socialToggleCamera" class="orange" type="button">📷 إيقاف الكاميرا</button>
+   <button id="socialEndCall" class="red" type="button">📵 إنهاء المكالمة</button>
+  </div>
+  <p class="small">تحتاج المكالمة إلى السماح باستخدام الميكروفون والكاميرا. جودة الاتصال تعتمد على سرعة الإنترنت والشبكة لدى المشاركين.</p>
+ </div>
+</div>
 
 <section id="privateChatCustomer" class="panel" style="display:none">
 <h2>💬 مراسلة الإدارة — محادثتك الخاصة</h2>
@@ -2734,6 +2820,252 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
  $("clockReset").addEventListener("click",function(){cfg={...defaults};save();});
  apply();
  setInterval(update,1000);
+})();
+</script>
+
+
+<script id="platformSocialCommunication">
+(function(){
+"use strict";
+const $id=(id)=>document.getElementById(id);
+const API="https://auptwgjiivhglxtdjlnd.supabase.co/functions/v1/platform-social";
+let currentConversation=null, currentCall=null, incomingCall=null;
+let localStream=null, peers=new Map(), pendingIce=new Map(), lastSignalId=0;
+let messageTimer=null, inviteTimer=null, signalTimer=null, peerSyncTimer=null;
+let currentMessages=[];
+const me=()=>typeof session!=="undefined"&&session&&session.user?session.user.id:null;
+const token=()=>typeof session!=="undefined"&&session?session.access_token:null;
+async function api(action,payload={}){
+ if(!token())throw new Error("سجّل الدخول أولًا.");
+ const r=await fetch(API,{method:"POST",headers:{"apikey":"sb_publishable_6dszOZKIdlA57hHf2E3V5Q_VO-ewwtM","Authorization":"Bearer "+token(),"Content-Type":"application/json"},body:JSON.stringify({action,...payload})});
+ const raw=await r.text();let d={};try{d=JSON.parse(raw)}catch(e){}
+ if(!r.ok||d.error)throw new Error(d.error||"تعذر تنفيذ الطلب ("+r.status+").");
+ return d;
+}
+async function upload(file){
+ const fd=new FormData();fd.append("action","upload");fd.append("conversation_id",currentConversation.id);fd.append("file",file);
+ const r=await fetch(API,{method:"POST",headers:{"apikey":"sb_publishable_6dszOZKIdlA57hHf2E3V5Q_VO-ewwtM","Authorization":"Bearer "+token()},body:fd});
+ const raw=await r.text();let d={};try{d=JSON.parse(raw)}catch(e){}
+ if(!r.ok||d.error)throw new Error(d.error||"تعذر رفع الملف ("+r.status+").");
+ return d;
+}
+function notice(t,good=false){if(typeof showMessage==="function")showMessage(t,good);else alert(t);}
+function setOpen(on){
+ const sec=$id("platformSocialSection");if(sec)sec.style.display=on?"block":"none";
+ if(on){loadConversations();pollInvites();}
+}
+function selectedFiles(){
+ return [...($id("socialFiles").files||[]),...($id("socialVideos").files||[]),...($id("socialVideoCapture").files||[]),...($id("socialPhotoCapture").files||[])];
+}
+function clearFiles(){
+ ["socialFiles","socialVideos","socialVideoCapture","socialPhotoCapture"].forEach(id=>{const x=$id(id);if(x)x.value="";});
+ $id("socialAttachmentStatus").textContent="لم يتم اختيار مرفق.";
+}
+function safeText(el,value){el.textContent=String(value||"");}
+async function loadConversations(){
+ if(!token())return;
+ const list=$id("socialConversationList");if(!list)return;
+ try{
+  const d=await api("list_conversations");list.textContent="";
+  if(!d.conversations.length){list.textContent="لا توجد محادثات بعد. ابدأ محادثة بالبريد الإلكتروني أعلاه.";return;}
+  d.conversations.forEach(c=>{
+   const b=document.createElement("button");b.type="button";b.className="privateChatConversation"+(currentConversation?.id===c.id?" selected":"");
+   const names=(c.participants||[]).map(x=>x.email).join("، ");
+   b.textContent=(c.conversation_type==="group"?"👥 ":"👤 ")+(c.title||names||"محادثة")+" — "+(c.last_message||"ابدأ الحديث");
+   b.onclick=()=>openConversation(c);list.appendChild(b);
+  });
+ }catch(e){list.textContent="تعذر تحميل المحادثات: "+e.message;}
+}
+function renderMessages(messages){
+ const box=$id("socialMessages");box.textContent="";
+ const emails={};(currentConversation?.participants||[]).forEach(p=>emails[p.id]=p.email);
+ messages.forEach(m=>{
+  const card=document.createElement("div");card.className="socialMessageCard "+(m.sender_id===me()?"mine":"theirs");
+  const who=document.createElement("strong");who.textContent=m.sender_id===me()?"أنت":(emails[m.sender_id]||"عضو");card.appendChild(who);
+  if(m.message_text){const p=document.createElement("div");p.style.whiteSpace="pre-wrap";p.style.marginTop="6px";p.textContent=m.message_text;card.appendChild(p);}
+  if(m.media_url){
+   if(m.media_type==="image"){const img=document.createElement("img");img.src=m.media_url;img.alt="صورة مرفقة";img.loading="lazy";card.appendChild(img);}
+   else if(m.media_type==="video"){const v=document.createElement("video");v.src=m.media_url;v.controls=true;v.playsInline=true;card.appendChild(v);}
+   const a=document.createElement("a");a.className="socialDownload";a.href="#";a.textContent="⬇️ تنزيل "+(m.file_name|| (m.media_type==="image"?"الصورة":m.media_type==="video"?"الفيديو":"الملف"));
+   a.onclick=(ev)=>{ev.preventDefault();downloadFile(m.media_url,m.file_name||"ملف-من-المنصة");};card.appendChild(a);
+  }
+  const meta=document.createElement("div");meta.className="privateChatMeta";meta.textContent=new Date(m.created_at).toLocaleString("ar-EG");card.appendChild(meta);
+  box.appendChild(card);
+ });
+ box.scrollTop=box.scrollHeight;
+ if(!messages.length)box.textContent="لا توجد رسائل بعد. اكتب أول رسالة أو أرسل صورة أو فيديو أو ملفًا.";
+}
+async function downloadFile(url,name){
+ try{const r=await fetch(url);if(!r.ok)throw new Error("تعذر تنزيل الملف");const blob=await r.blob();const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=name||"ملف";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);notice("بدأ تنزيل الملف. ستجده في مجلد التنزيلات.",true);}
+ catch(e){window.open(url,"_blank","noopener,noreferrer");notice("فتحنا الملف؛ استخدم قائمة الهاتف لحفظه.");}
+}
+async function openConversation(c){
+ currentConversation=c;$id("socialThreadPanel").style.display="block";
+ $id("socialThreadTitle").textContent=(c.conversation_type==="group"?"👥 ":"👤 ")+(c.title||"محادثة");
+ $id("socialThreadMembers").textContent="المشاركون: "+(c.participants||[]).map(x=>x.email).join("، ");
+ await loadMessages();await loadConversations();
+ if(messageTimer)clearInterval(messageTimer);
+ messageTimer=setInterval(()=>{if(currentConversation?.id===c.id&&$id("platformSocialSection").style.display!=="none")loadMessages();},5000);
+}
+async function loadMessages(){
+ if(!currentConversation)return;
+ try{const d=await api("messages",{conversation_id:currentConversation.id});currentMessages=d.messages||[];renderMessages(currentMessages);}
+ catch(e){$id("socialMessages").textContent="تعذر تحميل الرسائل: "+e.message;}
+}
+async function createConversation(){
+ const emails=$id("socialInviteEmails").value.split(/[;,\n]+/).map(x=>x.trim()).filter(Boolean);
+ if(!emails.length){notice("اكتب بريد عضو واحد أو أكثر.");return;}
+ if(emails.length>3){notice("الحد الأقصى ثلاثة مدعوين بالإضافة إليك.");return;}
+ const b=$id("socialCreateConversation");b.disabled=true;
+ try{
+  const d=await api("create_conversation",{emails,title:$id("socialGroupTitle").value.trim()});
+  $id("socialInviteEmails").value="";$id("socialGroupTitle").value="";
+  await loadConversations();await openConversation({...d.conversation,participants:d.participants||[]});
+  notice("تم إنشاء المحادثة. أرسل رسالة لبدء التواصل.",true);
+ }catch(e){notice(e.message);}finally{b.disabled=false;}
+}
+async function sendMessage(){
+ if(!currentConversation){notice("اختر محادثة أولًا.");return;}
+ const text=$id("socialMessageText").value.trim(),files=selectedFiles();
+ if(!text&&!files.length){notice("اكتب رسالة أو اختر مرفقًا.");return;}
+ const b=$id("socialSendMessage");b.disabled=true;
+ try{
+  if(files.length){
+   for(let i=0;i<files.length;i++){
+    const file=files[i];if(file.size>50*1024*1024)throw new Error("الملف "+file.name+" أكبر من 50 ميجابايت.");
+    const up=await upload(file);
+    await api("send",{conversation_id:currentConversation.id,message:i===0?text:"",media_path:up.media_path,media_type:up.media_type,file_name:up.file_name,file_size:up.file_size});
+   }
+  }else await api("send",{conversation_id:currentConversation.id,message:text});
+  $id("socialMessageText").value="";clearFiles();await loadMessages();await loadConversations();notice("تم إرسال الرسالة والمرفقات بنجاح.",true);
+ }catch(e){notice("تعذر الإرسال: "+e.message);}finally{b.disabled=false;}
+}
+async function pollInvites(){
+ if(!token())return;
+ try{
+  const d=await api("call_invites");const calls=d.calls||[];
+  if(calls.length){
+   incomingCall=calls[0];$id("socialIncomingCall").style.display="block";
+   $id("socialIncomingCallText").textContent="📞 مكالمة واردة من "+incomingCall.caller_email+" في "+incomingCall.conversation_title+" ("+(incomingCall.call_type==="video"?"فيديو":"صوت")+")";
+  }else{$id("socialIncomingCall").style.display="none";incomingCall=null;}
+ }catch(e){}
+}
+async function acceptIncoming(){
+ if(!incomingCall)return;
+ const call=incomingCall;incomingCall=null;$id("socialIncomingCall").style.display="none";
+ try{
+  const d=await api("list_conversations");const c=(d.conversations||[]).find(x=>x.id===call.conversation_id);
+  if(c){currentConversation=c;await openConversation(c);}
+  await enterCall(call.id,call.call_type,false);
+ }catch(e){notice("تعذر الانضمام للمكالمة: "+e.message);}
+}
+function addRemoteTile(peerId,stream){
+ let tile=$id("socialRemote_"+peerId);
+ if(!tile){tile=document.createElement("div");tile.id="socialRemote_"+peerId;tile.className="socialRemoteTile";const v=document.createElement("video");v.autoplay=true;v.playsInline=true;tile.appendChild(v);const cap=document.createElement("div");cap.textContent="مشارك";tile.appendChild(cap);$id("socialVideoGrid").appendChild(tile);}
+ const v=tile.querySelector("video");if(v.srcObject!==stream){v.srcObject=stream;v.play().catch(()=>{});}
+}
+function removePeer(id){const pc=peers.get(id);if(pc){try{pc.close();}catch(e){}peers.delete(id);}const tile=$id("socialRemote_"+id);if(tile)tile.remove();pendingIce.delete(id);}
+async function sendSignal(to,type,data){
+ if(!currentCall)return;
+ await api("signal",{call_id:currentCall.id,recipient_id:to,signal_type:type,signal_data:data||{}});
+}
+function ensurePeer(id,email){
+ if(peers.has(id))return peers.get(id);
+ const pc=new RTCPeerConnection({iceServers:[
+  {urls:"stun:stun.l.google.com:19302"},
+  {urls:"stun:stun1.l.google.com:19302"}
+ ]});
+ if(localStream)localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));
+ pc.onicecandidate=e=>{if(e.candidate)sendSignal(id,"ice",e.candidate.toJSON()).catch(()=>{});};
+ pc.ontrack=e=>addRemoteTile(id,e.streams[0]||new MediaStream([e.track]));
+ pc.onconnectionstatechange=()=>{if(pc.connectionState==="failed"||pc.connectionState==="closed")removePeer(id);};
+ peers.set(id,pc);return pc;
+}
+async function syncPeers(){
+ if(!currentCall)return;
+ try{
+  const d=await api("call_info",{call_id:currentCall.id});
+  if(d.call.status==="ended"){await stopCall(false);notice("انتهت المكالمة.");return;}
+  const participants=d.participants||[];const active=new Set(participants.map(p=>p.user_id));
+  for(const [id] of peers)if(!active.has(id))removePeer(id);
+  for(const p of participants){
+   if(p.user_id===me())continue;
+   if(!peers.has(p.user_id)&&String(me())<String(p.user_id)){
+    const pc=ensurePeer(p.user_id,p.email);
+    try{const offer=await pc.createOffer();await pc.setLocalDescription(offer);await sendSignal(p.user_id,"offer",pc.localDescription.toJSON());}catch(e){}
+   }
+  }
+  $id("socialCallStatus").textContent="متصلون: "+participants.length+" من 4";
+ }catch(e){if(/انتهت|غير موجود/.test(e.message))stopCall(false);}
+}
+async function handleSignal(sig){
+ const from=sig.sender_id;
+ if(sig.signal_type==="offer"){
+  const pc=ensurePeer(from,"مشارك");await pc.setRemoteDescription(new RTCSessionDescription(sig.signal_data));
+  const q=pendingIce.get(from)||[];for(const c of q){try{await pc.addIceCandidate(new RTCIceCandidate(c));}catch(e){}}pendingIce.delete(from);
+  const ans=await pc.createAnswer();await pc.setLocalDescription(ans);await sendSignal(from,"answer",pc.localDescription.toJSON());
+ }else if(sig.signal_type==="answer"){
+  const pc=ensurePeer(from,"مشارك");if(pc.signalingState!=="stable"){await pc.setRemoteDescription(new RTCSessionDescription(sig.signal_data));const q=pendingIce.get(from)||[];for(const c of q){try{await pc.addIceCandidate(new RTCIceCandidate(c));}catch(e){}}pendingIce.delete(from);}
+ }else if(sig.signal_type==="ice"){
+  const pc=peers.get(from);if(pc&&pc.remoteDescription){try{await pc.addIceCandidate(new RTCIceCandidate(sig.signal_data));}catch(e){}}
+  else{const q=pendingIce.get(from)||[];q.push(sig.signal_data);pendingIce.set(from,q);}
+ }else if(sig.signal_type==="hangup")removePeer(from);
+}
+async function pollSignals(){
+ if(!currentCall)return;
+ try{const d=await api("poll_signals",{call_id:currentCall.id,after_id:lastSignalId});for(const sig of d.signals||[]){lastSignalId=Math.max(lastSignalId,Number(sig.id)||0);await handleSignal(sig);}}
+ catch(e){}
+}
+async function enterCall(callId,type,create){
+ try{
+  if(!navigator.mediaDevices?.getUserMedia)throw new Error("المتصفح لا يدعم تشغيل الكاميرا والميكروفون. افتح المنصة من متصفح حديث.");
+  const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:type==="video"?{facingMode:"user"}:false});
+  localStream=stream;$id("socialLocalVideo").srcObject=stream;$id("socialLocalVideo").style.display=type==="video"?"block":"none";
+  if(type!=="video")$id("socialLocalTile").style.display="none";else $id("socialLocalTile").style.display="block";
+  let d;
+  if(create)d=await api("start_call",{conversation_id:currentConversation.id,call_type:type});
+  else d={call:{id:callId,call_type:type}};
+  currentCall=d.call;
+  await api("join_call",{call_id:currentCall.id});
+  lastSignalId=0;$id("socialCallTitle").textContent=type==="video"?"🎥 مكالمة فيديو":"📞 مكالمة صوتية";
+  $id("socialCallOverlay").style.display="block";
+  if(signalTimer)clearInterval(signalTimer);if(peerSyncTimer)clearInterval(peerSyncTimer);
+  signalTimer=setInterval(pollSignals,900);peerSyncTimer=setInterval(syncPeers,2500);
+  await syncPeers();
+ }catch(e){if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null;}notice("تعذر بدء المكالمة: "+e.message);}
+}
+async function startCall(type){if(!currentConversation){notice("افتح محادثة أولًا.");return;}await enterCall(null,type,true);}
+async function stopCall(notify=true){
+ const call=currentCall;
+ if(signalTimer)clearInterval(signalTimer);if(peerSyncTimer)clearInterval(peerSyncTimer);signalTimer=null;peerSyncTimer=null;
+ for(const [id] of peers)removePeer(id);
+ if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null;}
+ $id("socialLocalVideo").srcObject=null;$id("socialCallOverlay").style.display="none";$id("socialLocalTile").style.display="block";
+ currentCall=null;lastSignalId=0;
+ if(notify&&call){try{await api("leave_call",{call_id:call.id});}catch(e){}}
+}
+function bind(){
+ $id("openPlatformSocialBtn")?.addEventListener("click",()=>setOpen(true));
+ $id("socialCloseSection")?.addEventListener("click",()=>setOpen(false));
+ $id("socialReloadConversations")?.addEventListener("click",loadConversations);
+ $id("socialCreateConversation")?.addEventListener("click",createConversation);
+ $id("socialRefreshThread")?.addEventListener("click",loadMessages);
+ $id("socialSendMessage")?.addEventListener("click",sendMessage);
+ $id("socialAudioCall")?.addEventListener("click",()=>startCall("audio"));
+ $id("socialVideoCall")?.addEventListener("click",()=>startCall("video"));
+ $id("socialAcceptCall")?.addEventListener("click",acceptIncoming);
+ $id("socialDismissCall")?.addEventListener("click",()=>{$id("socialIncomingCall").style.display="none";incomingCall=null;});
+ $id("socialEndCall")?.addEventListener("click",()=>stopCall(true));
+ $id("socialMuteMic")?.addEventListener("click",()=>{if(!localStream)return;const t=localStream.getAudioTracks()[0];if(t){t.enabled=!t.enabled;$id("socialMuteMic").textContent=t.enabled?"🎙️ كتم الميكروفون":"🔇 تشغيل الميكروفون";}});
+ $id("socialToggleCamera")?.addEventListener("click",()=>{if(!localStream)return;const t=localStream.getVideoTracks()[0];if(t){t.enabled=!t.enabled;$id("socialToggleCamera").textContent=t.enabled?"📷 إيقاف الكاميرا":"📷 تشغيل الكاميرا";}});
+ $id("socialClearAttachments")?.addEventListener("click",clearFiles);
+ ["socialFiles","socialVideos","socialVideoCapture","socialPhotoCapture"].forEach(id=>$id(id)?.addEventListener("change",()=>{$id("socialAttachmentStatus").textContent=selectedFiles().map(f=>f.name+" ("+Math.ceil(f.size/1024)+" ك.ب)").join("، ")||"لم يتم اختيار مرفق.";}));
+ $id("logoutBtn")?.addEventListener("click",()=>{setOpen(false);stopCall(true);});
+}
+bind();
+if(token())pollInvites();
+inviteTimer=setInterval(()=>{if(token())pollInvites();},6000);
+window.addEventListener("beforeunload",()=>{if(localStream)localStream.getTracks().forEach(t=>t.stop());});
 })();
 </script>
 
