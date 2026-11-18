@@ -2158,8 +2158,9 @@ function communityRenderPost(post){
  if(post.body){const body=document.createElement("p");body.style.whiteSpace="pre-wrap";body.textContent=post.body;card.appendChild(body);}
  if(post.media_url){
   if(post.media_type==="video"){const video=document.createElement("video");video.src=post.media_url;video.controls=true;video.playsInline=true;video.preload="metadata";card.appendChild(video);}
-  else{const img=document.createElement("img");img.src=post.media_url;img.alt="صورة من منشور";img.loading="lazy";card.appendChild(img);}
-  const download=document.createElement("button");download.type="button";download.className="gray";download.textContent="⬇️ تنزيل المرفق";download.onclick=()=>downloadFile(post.media_url,post.media_name||"مرفق-من-المنصة");card.appendChild(download);
+  else if(post.media_type==="image"){const img=document.createElement("img");img.src=post.media_url;img.alt="صورة من منشور";img.loading="lazy";card.appendChild(img);}
+  else{const file=document.createElement("div");file.className="communityComment";file.textContent="📎 "+(post.media_name||"ملف مرفق");card.appendChild(file);}
+  const download=document.createElement("button");download.type="button";download.className="gray";download.textContent="⬇️ تنزيل "+(post.media_name||"المرفق");download.onclick=()=>downloadFile(post.media_url,post.media_name||"مرفق-من-المنصة");card.appendChild(download);
  }
  const actions=document.createElement("div");actions.className="communityPostActions";
  const like=document.createElement("button");like.type="button";like.className=post.liked?"green":"gray";like.textContent=(post.liked?"❤️ أعجبني":"🤍 إعجاب")+" · "+(post.likes_count||0);
